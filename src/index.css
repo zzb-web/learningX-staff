@@ -45,3 +45,9 @@ body {
   height:500px;
   float: right;
 }
+
+
+.downBtn{
+  display: inline-block;
+  cursor: pointer;
+}

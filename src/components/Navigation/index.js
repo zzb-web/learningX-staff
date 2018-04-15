@@ -3,17 +3,19 @@ import { Layout, Menu, Icon } from 'antd';
 import {Get, Post} from '../../fetch/data.js';
 import { withRouter } from 'react-router';
 // import UserMsgForm from '../UserMsg/index.js';
-// import {HomepageLoadable , 
+import {
+        // HomepageLoadable , 
 //         ErrorSumLoadable ,
 //         InfoInputLoadable ,
-//         PassWordFormLoadable,
+           PassWordFormLoadable,
 //         ReviewOfErrorLoadable,
 //         QuestionTestLoadable,
 //         ErrorDetectionLoadable,
 //         TestDetectionLoadable,
-//         StudentMsgLoadable,
+            ClassErrorTestLoadable,
 //         TestErrorMarkerLoadable,
-//         TestErrorDetectionLoadable} from '../Loadable/homepageaComponent.js';
+        // TestErrorDetectionLoadable
+      } from '../Loadable/homepageaComponent.js';
 import axios from 'axios';
 import './style.css';
 const { Header, Sider, Content} = Layout;
@@ -113,12 +115,12 @@ class Navigation extends Component {
             type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'}
             onClick={this.toggle}
           />
-          {/* <Menu theme="dark" mode="inline" onClick={this.clickHandle.bind(this)}>
-            <Menu.Item key="0">
-                <Icon type="rocket" />
-                <span>纠错本</span>
-            </Menu.Item>
+           <Menu theme="dark" mode="inline" onClick={this.clickHandle.bind(this)}>
             <Menu.Item key="1">
+                <Icon type="rocket" />
+                <span>班级错题测试</span>
+            </Menu.Item>
+            {/* <Menu.Item key="1">
               <Icon type="book" />
               <span>平时作业</span>
             </Menu.Item>
@@ -149,9 +151,9 @@ class Navigation extends Component {
             <Menu.Item key="6" style={hideMenu?{display:'block'}:{display:'none'}}>
               <Icon type="database" />
               <span>考题检验</span>
-            </Menu.Item>
+            </Menu.Item> */}
             
-          </Menu> */}
+          </Menu>
         </Sider>
         <Layout>
           <Header style={{ width: '100%', padding: 0 }}>
@@ -170,13 +172,13 @@ class Navigation extends Component {
           </div>
           </Header>
           <Content style={{ margin: '16px 16px', padding: 24, background: '#fff', minHeight:this.state.contentHeight,/*marginTop:80 */ }}>
-            {/* {
-                 this.state.key === '0' ? <HomepageLoadable/> : null
+            {
+                 this.state.key === '0' ? <div>xxxxx</div> : null
             }
             {
-                 this.state.key === '1' ? <InfoInputLoadable /> : null
+                 this.state.key === '1' ? <ClassErrorTestLoadable /> : null
             }
-            {
+            {/*{
                 this.state.key === '2' ? <ErrorSumLoadable /> : null
             }
             {
@@ -188,11 +190,11 @@ class Navigation extends Component {
                                                        phone={phone}
                                                        gender={gender}
                                                        modifyUserMsg={this.modifyUserMsg.bind(this)}/> : null
-            }
+            } */}
             {
                  this.state.key === '4' ? <PassWordFormLoadable/> : null
             }
-            {
+            {/* {
                 this.state.key === '5' ? <ReviewOfErrorLoadable/> : null
             }
             {
@@ -209,7 +211,7 @@ class Navigation extends Component {
             }
             {
               this.state.key === '10' ? <TestErrorDetectionLoadable/> : null
-            } */}
+            }  */}
           </Content>
           {/* <Footer style={{ textAlign: 'center' }}>
             Ant Design ©2016 Created by Ant UED
