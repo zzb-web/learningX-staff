@@ -10,6 +10,7 @@ class ClassErrorTest extends React.Component{
         grade : '',
         classNum : '',
         learnIDs : [],
+        learnIDName : {},
         showSelectStudent : true,
         showSelectContent : false,
         showDownContent : false,
@@ -32,7 +33,11 @@ class ClassErrorTest extends React.Component{
         showDetail : false,
         failMsg : '',
         allDetailData : {},
-        allFileData : {}
+        allFileData : {},
+        allAnswerData : {},
+        generateFlag : true,
+        pickDownURL : false,
+        haslearnIDs : []
     }
     componentWillMount(){
         Get('http://118.31.16.70/api/v3/staffs/schools/')
@@ -75,10 +80,13 @@ class ClassErrorTest extends React.Component{
         })
     }
     getStudentMsg(){
-        const {schoolID, grade, classNum} = this.state;
+        const {schoolID, grade, classNum,learnIDName} = this.state;
         Get(`http://118.31.16.70/api/v3/staffs/students/?schoolID=${schoolID}&grade=${grade}&class=${classNum}`)
         .then(resp=>{
             if(resp.status === 200){
+                resp.data.learnIDs.map((item,index)=>{
+                    learnIDName[item.learnID] = item.name
+                })
                 this.setState({
                     learnIDs : resp.data.learnIDs,
                     showSelectStudent : false,
@@ -136,7 +144,10 @@ class ClassErrorTest extends React.Component{
             showDetail : false,
             showSelectContent :false,
             showSelectStudent : true,
-            showDownContent : false
+            showDownContent : false,
+            schoolID : '',
+            grade : '',
+            classNum : '',
           })
     }
     addMaterials(){
@@ -260,31 +271,73 @@ class ClassErrorTest extends React.Component{
                   })
             setTimeout(()=>{
                 var fileDataArray = [];
+                var answerDataArray = [];
                 for(var key in allDetailData){
                     var obj = {}
                     obj.learnID = key
-                    obj.params = this._getFileData(allDetailData[key],key,paper)
-                    fileDataArray.push(obj)
+                    obj.params = this._getFileData(allDetailData[key],paper)
+                    fileDataArray.push(obj);
+
+                    var obj2 = {};
+                    obj2.learnID = key;
+                    obj2.params = this._getAnswerData(allDetailData[key],paper)
+                    answerDataArray.push(obj2)
                 }
-                const {allFileData} = this.state;
+                console.log(answerDataArray)
+                const {allFileData,allAnswerData} = this.state;
                 (async () => {
                     for(let i=0;i<fileDataArray.length;i++) {
-                        await Post(`http://118.31.16.70/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
-                        .then(resp=>{
-                            console.log(resp.data)
-                            allFileData[fileDataArray[i].learnID] = resp.data.pdfurl
-                        }).catch(err=>{
-                            console.log(err)
-                            allFileData[fileDataArray[i].learnID] = ''
-                        })
-                        this.setState({
-                            allFileData : allFileData
-                        })
-                        console.log('func'+(i+1)+' well done');
+                        const {generateFlag} = this.state;
+                        if(generateFlag){
+                            await Post(`http://118.31.16.70/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
+                            .then(resp=>{
+
+                                allFileData[fileDataArray[i].learnID] = resp.data.pdfurl;
+                                let haslearnIDs = [];
+                                for(var key in allFileData){
+                                    if(allFileData[key] !== undefined){
+                                        haslearnIDs.push(Number(key))
+                                    }
+                                }
+                                Post('http://118.31.16.70/api/v3/staffs/students/getProbsAnsFilesZip/',haslearnIDs)
+                                .then(resp=>{
+                                    this.setState({
+                                        pickDownURL : resp.data.URL,
+                                        haslearnIDs : haslearnIDs
+                                    })
+                                }).catch(err=>{
+                                   
+                                })
+                            }).catch(err=>{
+                                console.log(err)
+                                allFileData[fileDataArray[i].learnID] = ''
+                            })
+
+                            this.setState({
+                                allFileData : allFileData
+                            })
+                        }
                     }
-                    console.log('all well done');
-                })()
-                       
+                })();
+                
+                (async () => {
+                    for(let i=0;i<answerDataArray.length;i++) {
+                        const {generateFlag} = this.state;
+                        if(generateFlag){
+                            await Post(`http://118.31.16.70/api/v3/staffs/students/${answerDataArray[i].learnID}/getAnswersFile/`,answerDataArray[i].params)
+                            .then(resp=>{
+                                console.log(resp.data)
+                                allAnswerData[answerDataArray[i].learnID] = resp.data.pdfurl
+                            }).catch(err=>{
+                                console.log(err)
+                                allAnswerData[answerDataArray[i].learnID] = ''
+                            })
+                            this.setState({
+                                allAnswerData : allAnswerData
+                            })
+                        }
+                    }
+                })();
             },1000)
     }else{
         this.setState({
@@ -295,7 +348,64 @@ class ClassErrorTest extends React.Component{
     }
     }
     }
- _getFileData(currentData,learnID,paper){
+    pickDown(){
+        const {allReturnData,haslearnIDs} = this.state;
+        let postData = [];
+        var timestamp = Date.parse(new Date())/1000
+        haslearnIDs.map((item,index)=>{
+            postData.push({
+                time: timestamp,
+                type: 1,
+                learnID: item,
+                detail: JSON.stringify(allReturnData[item])
+            })
+        })
+        Post('http://118.31.16.70/api/v3/staffs/students/uploadTasks/',postData)
+    }
+    stopGenerate(){
+        this.setState({
+            generateFlag : false
+        })
+    }
+ _getAnswerData(currentData,paper){
+    var dataObj = {};
+    var dataParams = []
+    currentData.map((item,i)=>{
+        item.map((item2,i2)=>{
+            dataObj[item2.problemId+'_'] = item2.index
+        })
+    })
+    if(paper === ''){
+        var dataParams = []
+        for(var key in dataObj){
+            dataParams.push({
+                problemId: key.split('_')[0],
+                index: dataObj[key],
+            })
+        }
+    }else{
+        var problems = [];
+        // var paperString;
+        // if(paper === 1){
+        //     paperString = 'A3';
+        // }else{
+        //     paperString = 'A4';
+        // }
+        for(var key in dataObj){
+            problems.push({
+                problemId: key.split('_')[0],
+                index: dataObj[key],
+            })
+        }
+        // var dataParams = {
+        //     pageType : paperString,
+        //     problems : problems
+        // }
+    }
+    // return dataParams;
+        return problems;
+ }
+ _getFileData(currentData,paper){
         var dataObj = {};
         var dataParams = []
         currentData.map((item,i)=>{
@@ -375,9 +485,8 @@ class ClassErrorTest extends React.Component{
                 })
     }
     render(){
-        const {schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
-             requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData} = this.state;
-             console.log(allFileData)
+        const {learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
+             requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData,allAnswerData,pickDownURL} = this.state;
         const allGrage = ['一','二','三','四','五','六','七','八','九'];
         const columns = [
             {
@@ -401,24 +510,31 @@ class ClassErrorTest extends React.Component{
         ]
         const dataSource = [];
         for(var key in allFileData){
-            var download;
+            var fileDownload;
+            var answerDownload;
             if(allFileData[key] === undefined){
-                download =  <span>
-                                <span className='downBtn' style={{border:'none'}}>纠错本</span>
-                                <span className='downBtn' style={{border:'none',marginLeft:30}}>答案</span>
-                            </span>
+                fileDownload = <span className='downBtn' style={{border:'none'}}>纠错本</span>
             }else{
-                download =  <span>
-                                <span className='downBtn' style={{border:'none',color:'#49a9ee'}} onClick={this.getErrorToptic.bind(this,key)}>
+                fileDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee'}} onClick={this.getErrorToptic.bind(this,key)}>
                                     <a download={allFileData[key]} href={allFileData[key]} target="blank">纠错本</a>
                                 </span>
-                                <span className='downBtn' style={{border:'none',color:'#49a9ee',marginLeft:30}}>答案</span>
-                            </span>
             }
+            if(allAnswerData[key] === undefined){
+                answerDownload = <span className='downBtn' style={{border:'none',marginLeft:30}}>答案</span>
+            }else{
+                answerDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee',marginLeft:30}}>
+                                     <a download={allAnswerData[key]} href={allAnswerData[key]} target="blank">答案</a>
+                                </span>
+            }
+            var download =  <span>
+                                {fileDownload}
+                                {answerDownload}
+                            </span>
+    
             dataSource.push({
                 key : key,
                 learnID : key,
-                name : key,
+                name : learnIDName[key],
                 download : download
             })
         }
@@ -534,11 +650,26 @@ class ClassErrorTest extends React.Component{
                         }
                         {
                             showDownContent ? <div>
-                                                <Table columns={columns}
-                                                       bordered={true}
-                                                       pagination={false}
-                                                       dataSource={dataSource}
-                                                        />
+                                                    <div style={{height:370}}>
+                                                        <Table columns={columns}
+                                                            bordered={true}
+                                                            pagination={false}
+                                                            dataSource={dataSource}
+                                                            scroll={{x:false,y:300}}
+                                                                />
+                                                    </div>
+
+                                                    <div style={{textAlign:'center'}}>
+                                                         <a download={pickDownURL} href={pickDownURL} target="blank">
+                                                            <Button type='primary' size='large' style={{width:230,marginRight:10}}
+                                                                onClick={this.pickDown.bind(this)}>
+                                                                打包下载
+                                                        </Button>
+                                                        </a>
+                                                        <Button size='large' onClick={this.stopGenerate.bind(this)} 
+                                                                style={{width:230,marginLeft:10,background:'#FF0000',color:'#fff'}}>停止</Button>
+                                                    </div>
+                                                
                                               </div> : null
                         }
                         {/* <div className='category-detail'>
