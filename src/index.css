@@ -68,3 +68,16 @@ body {
   text-align: center;
   margin-top: 50px;
 }
+
+.save-success{
+  width: 240px;
+  /* text-align: center; */
+  margin-top: 65px;
+  margin-left: 95px;
+  border: 1px solid #d9d9d9;
+  height: 110px;
+  word-wrap:break-word;
+  border-radius: 5px;
+  overflow: hidden;
+  padding: 10px;
+}

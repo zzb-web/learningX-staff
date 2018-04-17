@@ -62,7 +62,7 @@ class Navigation extends Component {
     })
   }
   logoutHandle(){
-    var result =Post('http://118.31.16.70/api/v3/staffs/me/logout/');
+    var result =Post('http://118.31.16.70:8888/api/v3/staffs/me/logout/');
     result.then((response)=>{
       if(response.status === 200){
         this.props.history.push('/')
@@ -242,7 +242,7 @@ class Navigation extends Component {
         contentHeight :　allHeight-112
       })
     }
-    // var msg =Get('http://118.31.16.70/api/v3/students/me/profile/');
+    // var msg =Get('http://118.31.16.70:8888/api/v3/students/me/profile/');
     // msg.then((response)=>{
     //   if(response.status ===200){
     //     this.setState({

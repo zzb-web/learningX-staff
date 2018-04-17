@@ -23,24 +23,23 @@ class ClassErrorTest extends React.Component{
         showFail : false,
         showDetail : false,
         failMsg : '',
-        allNum : 0,
+        allStudentNum : 0,
         maxNum : 10,
         allReturnData : {},
         sort : 1,
         paper : 2,
         showSure: true,
-        showFail : true,
-        showDetail : false,
         failMsg : '',
         allDetailData : {},
         allFileData : {},
         allAnswerData : {},
         generateFlag : true,
         pickDownURL : false,
-        haslearnIDs : []
+        haslearnIDs : [],
+        schoolName : ''
     }
     componentWillMount(){
-        Get('http://118.31.16.70/api/v3/staffs/schools/')
+        Get('http://118.31.16.70:8888/api/v3/staffs/schools/')
         .then(resp=>{
            this.setState({
                schools : resp.data
@@ -65,8 +64,16 @@ class ClassErrorTest extends React.Component{
         })
     }
     schoolSelect(value){
+        const {schools} = this.state;
+        let schoolName;
+        schools.map((item,index)=>{
+            if(item.schoolID === value){
+                schoolName = item.name
+            }
+        })
         this.setState({
-            schoolID : value
+            schoolID : value,
+            schoolName : schoolName
         })
     }
     gradeSelect(value){
@@ -81,7 +88,23 @@ class ClassErrorTest extends React.Component{
     }
     getStudentMsg(){
         const {schoolID, grade, classNum,learnIDName} = this.state;
-        Get(`http://118.31.16.70/api/v3/staffs/students/?schoolID=${schoolID}&grade=${grade}&class=${classNum}`)
+        if(schoolID === ''){
+            this.setState({
+                showFail : true,
+                failMsg : '请选择学校'
+            })
+        }else if(grade === ''){
+            this.setState({
+                showFail : true,
+                failMsg : '请选择年级'
+            })
+        }else if(classNum === ''){
+            this.setState({
+                showFail : true,
+                failMsg : '请选择班级'
+            })
+        }else if(schoolID !=='' && grade !=='' && classNum !==''){
+        Get(`http://118.31.16.70:8888/api/v3/staffs/students/?schoolID=${schoolID}&grade=${grade}&class=${classNum}`)
         .then(resp=>{
             if(resp.status === 200){
                 resp.data.learnIDs.map((item,index)=>{
@@ -90,14 +113,15 @@ class ClassErrorTest extends React.Component{
                 this.setState({
                     learnIDs : resp.data.learnIDs,
                     showSelectStudent : false,
-                    showSelectContent : true
+                    showSelectContent : true,
+                    allStudentNum : resp.data.total
                 })
             }
         }).catch(err=>{
 
         })
 
-        Get(`http://118.31.16.70/api/v3/staffs/schools/${schoolID}/books/`)
+        Get(`http://118.31.16.70:8888/api/v3/staffs/schools/${schoolID}/books/`)
         .then(resp=>{
             if(resp.status === 200){
                 this.setState({
@@ -107,6 +131,7 @@ class ClassErrorTest extends React.Component{
         }).catch(err=>{
 
         })
+    }
     }
     changeCategory(value){
         var type;
@@ -148,6 +173,9 @@ class ClassErrorTest extends React.Component{
             schoolID : '',
             grade : '',
             classNum : '',
+            allAnswerData : {},
+            allFileData : {},
+            allDetailData : {}
           })
     }
     addMaterials(){
@@ -222,7 +250,7 @@ class ClassErrorTest extends React.Component{
         var allDetailData  = {};
         var allReturnData = {};
         learnIDs.map((item,idnex)=>{
-            var url = `http://118.31.16.70/api/v3/staffs/students/${item.learnID}/${category}/`;
+            var url = `http://118.31.16.70:8888/api/v3/staffs/students/${item.learnID}/${category}/`;
             Post(url,postMsg)
             .then((response)=>{
               if(response.status === 200){
@@ -253,7 +281,8 @@ class ClassErrorTest extends React.Component{
                 allDetailData[item.learnID] = detailData;
                 allReturnData[item.learnID] = response.data
                 this.setState({
-                    allReturnData : allReturnData
+                    allReturnData : allReturnData,
+                    showDetail : true
                 })
               }else if(response.status === 404){
                 allDetailData[item.learnID] = [];
@@ -289,7 +318,7 @@ class ClassErrorTest extends React.Component{
                     for(let i=0;i<fileDataArray.length;i++) {
                         const {generateFlag} = this.state;
                         if(generateFlag){
-                            await Post(`http://118.31.16.70/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
+                            await Post(`http://118.31.16.70:8888/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
                             .then(resp=>{
 
                                 allFileData[fileDataArray[i].learnID] = resp.data.pdfurl;
@@ -299,7 +328,7 @@ class ClassErrorTest extends React.Component{
                                         haslearnIDs.push(Number(key))
                                     }
                                 }
-                                Post('http://118.31.16.70/api/v3/staffs/students/getProbsAnsFilesZip/',haslearnIDs)
+                                Post('http://118.31.16.70:8888/api/v3/staffs/students/getProbsAnsFilesZip/',haslearnIDs)
                                 .then(resp=>{
                                     this.setState({
                                         pickDownURL : resp.data.URL,
@@ -324,7 +353,7 @@ class ClassErrorTest extends React.Component{
                     for(let i=0;i<answerDataArray.length;i++) {
                         const {generateFlag} = this.state;
                         if(generateFlag){
-                            await Post(`http://118.31.16.70/api/v3/staffs/students/${answerDataArray[i].learnID}/getAnswersFile/`,answerDataArray[i].params)
+                            await Post(`http://118.31.16.70:8888/api/v3/staffs/students/${answerDataArray[i].learnID}/getAnswersFile/`,answerDataArray[i].params)
                             .then(resp=>{
                                 console.log(resp.data)
                                 allAnswerData[answerDataArray[i].learnID] = resp.data.pdfurl
@@ -360,7 +389,7 @@ class ClassErrorTest extends React.Component{
                 detail: JSON.stringify(allReturnData[item])
             })
         })
-        Post('http://118.31.16.70/api/v3/staffs/students/uploadTasks/',postData)
+        Post('http://118.31.16.70:8888/api/v3/staffs/students/uploadTasks/',postData)
     }
     stopGenerate(){
         this.setState({
@@ -471,7 +500,7 @@ class ClassErrorTest extends React.Component{
             var detail = JSON.stringify(allReturnData[learnID]);
             var timestamp = Date.parse(new Date())/1000
             var type;
-            var url = 'http://118.31.16.70/api/v3/staffs/students/uploadTasks/';
+            var url = 'http://118.31.16.70:8888/api/v3/staffs/students/uploadTasks/';
             var postMsg =[{
                     time : timestamp,
                     type : 1,
@@ -485,7 +514,7 @@ class ClassErrorTest extends React.Component{
                 })
     }
     render(){
-        const {learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
+        const {schoolName,grade,classNum,allStudentNum ,showDetail,learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
              requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData,allAnswerData,pickDownURL} = this.state;
         const allGrage = ['一','二','三','四','五','六','七','八','九'];
         const columns = [
@@ -570,11 +599,11 @@ class ClassErrorTest extends React.Component{
                                             onClick={this.getStudentMsg.bind(this)}>确定</Button>
                                 </div>
                             </div>
-                            {/* {
+                            {
                                 this.state.showFail? <div className='save-success'>
                                                            <span style={{color:'red'}}>{this.state.failMsg}</span>
                                                         </div> : null
-                            } */}
+                            }
                         </div> : null
                         }
                         {
@@ -615,16 +644,15 @@ class ClassErrorTest extends React.Component{
                                     <Button type="primary" size='large' style={{width:240,height:35,marginLeft:'10px'}} onClick={this.chooseAgain.bind(this)}>重选题目</Button>
                                </div>
                             </div>
-                            {/* {
-                                showFail? <div className='save-success'>
-                                                           <span style={{color:'red'}}>{failMsg}</span>
-                                                        </div> : null
-                            } */}
-                            {/* {
+                            {
                                 showDetail ? <div className='save-success'>
-                                     <div>题目总量：<span style={{color:'#108ee9'}}>{allNum}</span></div>
+                                     <div>
+                                         学生：<span style={{color:'#108ee9'}}>
+                                                {`${schoolName} ${grade}(${classNum})班,${allStudentNum}人`}
+                                                </span>
+                                    </div>
                                  </div> : null
-                            } */}
+                            }
                         </div> : null
                         }
                     </Col>
