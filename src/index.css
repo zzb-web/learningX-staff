@@ -81,3 +81,17 @@ body {
   overflow: hidden;
   padding: 10px;
 }
+.mark-position{
+  position: absolute;
+  top: -30px;
+}
+.ant-btn:hover, .ant-btn:focus{
+  border: none;
+}
+
+.wrong-row {
+  background-color: #ffbf00;
+}
+.wrong-row:hover > td{
+  background-color:#ffbf00 !important;
+}

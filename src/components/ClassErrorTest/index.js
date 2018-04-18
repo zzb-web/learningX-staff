@@ -1,6 +1,6 @@
 import React from 'react';
 import { withRouter } from 'react-router';
-import {Row, Col, Select, Button, InputNumber,Table} from 'antd';
+import {Row, Col, Select, Button, InputNumber,Table,Popconfirm,Checkbox ,message} from 'antd';
 import {Get , Post} from '../../fetch/data.js';
 const {Option} = Select;
 class ClassErrorTest extends React.Component{
@@ -36,7 +36,9 @@ class ClassErrorTest extends React.Component{
         generateFlag : true,
         pickDownURL : false,
         haslearnIDs : [],
-        schoolName : ''
+        schoolName : '',
+        pickDownFlag : true,
+        markFlag : false
     }
     componentWillMount(){
         Get('http://118.31.16.70:8888/api/v3/staffs/schools/')
@@ -212,7 +214,7 @@ class ClassErrorTest extends React.Component{
             setTimeout(()=>{
                 this.setState({showSure:true})
         },500)
-      const {category , requestData, maxNum,sort,paper , learnIDs} = this.state;
+      const {category , requestData, maxNum,sort,paper , learnIDs, allStudentNum} = this.state;
       console.log(category , requestData, maxNum,sort,paper)
       if(maxNum === 0 || maxNum === undefined){
           this.setState({
@@ -282,7 +284,6 @@ class ClassErrorTest extends React.Component{
                 allReturnData[item.learnID] = response.data
                 this.setState({
                     allReturnData : allReturnData,
-                    showDetail : true
                 })
               }else if(response.status === 404){
                 allDetailData[item.learnID] = [];
@@ -297,6 +298,7 @@ class ClassErrorTest extends React.Component{
                       showMaterials : false,
                       chooseAgain : true,
                       showDownContent : true,
+                      showDetail : true
                   })
             setTimeout(()=>{
                 var fileDataArray = [];
@@ -318,6 +320,7 @@ class ClassErrorTest extends React.Component{
                     for(let i=0;i<fileDataArray.length;i++) {
                         const {generateFlag} = this.state;
                         if(generateFlag){
+                           
                             await Post(`http://118.31.16.70:8888/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
                             .then(resp=>{
 
@@ -338,29 +341,50 @@ class ClassErrorTest extends React.Component{
                                    
                                 })
                             }).catch(err=>{
-                                console.log(err)
                                 allFileData[fileDataArray[i].learnID] = ''
                             })
-
+                            
                             this.setState({
                                 allFileData : allFileData
                             })
                         }
                     }
                 })();
-                
+                var successArr = [];
+                var failArr =[];
                 (async () => {
                     for(let i=0;i<answerDataArray.length;i++) {
                         const {generateFlag} = this.state;
                         if(generateFlag){
                             await Post(`http://118.31.16.70:8888/api/v3/staffs/students/${answerDataArray[i].learnID}/getAnswersFile/`,answerDataArray[i].params)
                             .then(resp=>{
-                                console.log(resp.data)
                                 allAnswerData[answerDataArray[i].learnID] = resp.data.pdfurl
+                                if(resp.status === 200){
+                                    successArr.push(0)
+                                }else{
+                                    failArr.push(0)
+                                }
                             }).catch(err=>{
-                                console.log(err)
+                                
                                 allAnswerData[answerDataArray[i].learnID] = ''
                             })
+                            if(i=== allStudentNum-1){
+                                this.setState({
+                                    pickDownFlag : false
+                                })
+                                
+                            }else{
+                               this.setState({
+                                   pickDownFlag : true
+                               })
+                            }
+
+                            if(i=== allStudentNum-1){
+                                message.info(<span>
+                                                <span style={{color:'#49a9ee'}}>{successArr.length}个学生OK，</span>
+                                                <span style={{color:'red'}}>{failArr.length}个学生未成功</span>
+                                            </span>)
+                            }
                             this.setState({
                                 allAnswerData : allAnswerData
                             })
@@ -378,22 +402,31 @@ class ClassErrorTest extends React.Component{
     }
     }
     pickDown(){
-        const {allReturnData,haslearnIDs} = this.state;
-        let postData = [];
-        var timestamp = Date.parse(new Date())/1000
-        haslearnIDs.map((item,index)=>{
-            postData.push({
-                time: timestamp,
-                type: 1,
-                learnID: item,
-                detail: JSON.stringify(allReturnData[item])
+        const {markFlag} = this.state;
+        if(markFlag){
+            const {allReturnData,haslearnIDs} = this.state;
+            let postData = [];
+            var timestamp = Date.parse(new Date())/1000
+            haslearnIDs.map((item,index)=>{
+                postData.push({
+                    time: timestamp,
+                    type: 1,
+                    learnID: item,
+                    detail: JSON.stringify(allReturnData[item])
+                })
             })
+            Post('http://118.31.16.70:8888/api/v3/staffs/students/uploadTasks/',postData)
+            }
+    }
+    markChange(e){
+        this.setState({
+            markFlag : e.target.checked
         })
-        Post('http://118.31.16.70:8888/api/v3/staffs/students/uploadTasks/',postData)
     }
     stopGenerate(){
         this.setState({
-            generateFlag : false
+            generateFlag : false,
+            pickDownFlag : false
         })
     }
  _getAnswerData(currentData,paper){
@@ -514,7 +547,7 @@ class ClassErrorTest extends React.Component{
                 })
     }
     render(){
-        const {schoolName,grade,classNum,allStudentNum ,showDetail,learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
+        const {pickDownFlag,schoolName,grade,classNum,allStudentNum ,showDetail,learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
              requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData,allAnswerData,pickDownURL} = this.state;
         const allGrage = ['一','二','三','四','五','六','七','八','九'];
         const columns = [
@@ -559,12 +592,18 @@ class ClassErrorTest extends React.Component{
                                 {fileDownload}
                                 {answerDownload}
                             </span>
-    
+        var isCorrect;
+        if(allFileData[key] !== undefined && allAnswerData[key] !== undefined){
+            isCorrect = true
+        }else{
+            isCorrect = false
+        }
             dataSource.push({
                 key : key,
                 learnID : key,
                 name : learnIDName[key],
-                download : download
+                download : download,
+                isCorrect : isCorrect
             })
         }
         return(
@@ -648,7 +687,8 @@ class ClassErrorTest extends React.Component{
                                 showDetail ? <div className='save-success'>
                                      <div>
                                          学生：<span style={{color:'#108ee9'}}>
-                                                {`${schoolName} ${grade}(${classNum})班,${allStudentNum}人`}
+                                                {allStudentNum===0?<span style={{color:'red'}}>没有学生</span>:
+                                                        `${schoolName} ${grade}(${classNum})班,${allStudentNum}人`}
                                                 </span>
                                     </div>
                                  </div> : null
@@ -684,18 +724,34 @@ class ClassErrorTest extends React.Component{
                                                             pagination={false}
                                                             dataSource={dataSource}
                                                             scroll={{x:false,y:300}}
+                                                            rowClassName={(record, index)=>{
+                                                                  if(record.isCorrect){
+                                                                    return ''
+                                                                  }else{
+                                                                    return 'wrong-row'
+                                                                  }  
+                                                              }}
                                                                 />
                                                     </div>
 
                                                     <div style={{textAlign:'center'}}>
-                                                         <a download={pickDownURL} href={pickDownURL} target="blank">
-                                                            <Button type='primary' size='large' style={{width:230,marginRight:10}}
-                                                                onClick={this.pickDown.bind(this)}>
-                                                                打包下载
-                                                        </Button>
-                                                        </a>
-                                                        <Button size='large' onClick={this.stopGenerate.bind(this)} 
+                                                        
+                                                    <span style={{position:'relative',display:'inline-block'}}>
+                                                        <div className='mark-position'><Checkbox onChange={this.markChange.bind(this)}>生成标记</Checkbox></div>
+                                                        <a download={pickDownURL} href={pickDownURL} target="blank">
+                                                            {/* <Popconfirm title="你确定吗？" onConfirm={this.pickDown.bind(this)} okText="确认" cancelText="取消"> */}
+                                                                <Button type='primary' size='large' style={{width:230,marginRight:10}}
+                                                                    onClick = {this.pickDown.bind(this)}
+                                                                    disabled={pickDownFlag}>
+                                                                    打包下载
+                                                                </Button>
+                                                            {/* </Popconfirm> */}
+                                                            </a>
+                                                        </span>
+                                                        <Popconfirm title="你确定吗？" onConfirm={this.stopGenerate.bind(this)} okText="确认" cancelText="取消">
+                                                            <Button size='large'
                                                                 style={{width:230,marginLeft:10,background:'#FF0000',color:'#fff'}}>停止</Button>
+                                                        </Popconfirm>
                                                     </div>
                                                 
                                               </div> : null
