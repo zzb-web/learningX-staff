@@ -21,7 +21,7 @@ class RegistrationForm extends Component {
                     password : values.password
                 }
                 console.log(params);
-                var result = Put('http://118.31.16.70:8888/api/v3/staffs/me/password/',params)
+                var result = Put('http://staff.learningx.cn/api/v3/staffs/me/password/',params)
                 result.then((response)=>{
                     if(response.status ===200){
                         message.success('操作成功',1.5);
