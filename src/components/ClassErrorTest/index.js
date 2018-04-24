@@ -41,7 +41,7 @@ class ClassErrorTest extends React.Component{
         markFlag : false
     }
     componentWillMount(){
-        Get('http://staff.learningx.cn/api/v3/staffs/schools/')
+        Get('/api/v3/staffs/schools/')
         .then(resp=>{
            this.setState({
                schools : resp.data
@@ -106,7 +106,7 @@ class ClassErrorTest extends React.Component{
                 failMsg : '请选择班级'
             })
         }else if(schoolID !=='' && grade !=='' && classNum !==''){
-        Get(`http://staff.learningx.cn/api/v3/staffs/students/?schoolID=${schoolID}&grade=${grade}&class=${classNum}`)
+        Get(`/api/v3/staffs/students/?schoolID=${schoolID}&grade=${grade}&class=${classNum}`)
         .then(resp=>{
             if(resp.status === 200){
                 resp.data.learnIDs.map((item,index)=>{
@@ -123,7 +123,7 @@ class ClassErrorTest extends React.Component{
 
         })
 
-        Get(`http://staff.learningx.cn/api/v3/staffs/schools/${schoolID}/books/`)
+        Get(`/api/v3/staffs/schools/${schoolID}/books/`)
         .then(resp=>{
             if(resp.status === 200){
                 this.setState({
@@ -252,7 +252,7 @@ class ClassErrorTest extends React.Component{
         var allDetailData  = {};
         var allReturnData = {};
         learnIDs.map((item,idnex)=>{
-            var url = `http://staff.learningx.cn/api/v3/staffs/students/${item.learnID}/${category}/`;
+            var url = `/api/v3/staffs/students/${item.learnID}/${category}/`;
             Post(url,postMsg)
             .then((response)=>{
               if(response.status === 200){
@@ -321,7 +321,7 @@ class ClassErrorTest extends React.Component{
                         const {generateFlag} = this.state;
                         if(generateFlag){
                            
-                            await Post(`http://staff.learningx.cn/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
+                            await Post(`/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
                             .then(resp=>{
 
                                 allFileData[fileDataArray[i].learnID] = resp.data.pdfurl;
@@ -331,7 +331,7 @@ class ClassErrorTest extends React.Component{
                                         haslearnIDs.push(Number(key))
                                     }
                                 }
-                                Post('http://staff.learningx.cn/api/v3/staffs/students/getProbsAnsFilesZip/',haslearnIDs)
+                                Post('/api/v3/staffs/students/getProbsAnsFilesZip/',haslearnIDs)
                                 .then(resp=>{
                                     this.setState({
                                         pickDownURL : resp.data.URL,
@@ -356,7 +356,7 @@ class ClassErrorTest extends React.Component{
                     for(let i=0;i<answerDataArray.length;i++) {
                         const {generateFlag} = this.state;
                         if(generateFlag){
-                            await Post(`http://staff.learningx.cn/api/v3/staffs/students/${answerDataArray[i].learnID}/getAnswersFile/`,answerDataArray[i].params)
+                            await Post(`/api/v3/staffs/students/${answerDataArray[i].learnID}/getAnswersFile/`,answerDataArray[i].params)
                             .then(resp=>{
                                 allAnswerData[answerDataArray[i].learnID] = resp.data.pdfurl
                                 if(resp.status === 200){
@@ -415,7 +415,7 @@ class ClassErrorTest extends React.Component{
                     detail: JSON.stringify(allReturnData[item])
                 })
             })
-            Post('http://staff.learningx.cn/api/v3/staffs/students/uploadTasks/',postData)
+            Post('/api/v3/staffs/students/uploadTasks/',postData)
             }
     }
     markChange(e){
@@ -430,11 +430,12 @@ class ClassErrorTest extends React.Component{
         })
     }
  _getAnswerData(currentData,paper){
+     console.log(currentData)
     var dataObj = {};
     var dataParams = []
     currentData.map((item,i)=>{
         item.map((item2,i2)=>{
-            dataObj[item2.problemId+'_'] = item2.index
+            dataObj[item2.problemId+'_'] = item2
         })
     })
     if(paper === ''){
@@ -447,25 +448,27 @@ class ClassErrorTest extends React.Component{
         }
     }else{
         var problems = [];
-        // var paperString;
-        // if(paper === 1){
-        //     paperString = 'A3';
-        // }else{
-        //     paperString = 'A4';
-        // }
+        var paperString;
+        if(paper === 1){
+            paperString = 'A3';
+        }else{
+            paperString = 'A4';
+        }
+        console.log(dataObj)
         for(var key in dataObj){
             problems.push({
-                problemId: key.split('_')[0],
-                index: dataObj[key],
+                problemId: dataObj[key].problemId,
+                index: dataObj[key].index,
+                location : dataObj[key].type
             })
         }
-        // var dataParams = {
-        //     pageType : paperString,
-        //     problems : problems
-        // }
+        var dataParams = {
+            pageType : paperString,
+            problems : problems
+        }
     }
-    // return dataParams;
-        return problems;
+    console.log(dataParams)
+    return dataParams;
  }
  _getFileData(currentData,paper){
         var dataObj = {};
@@ -533,7 +536,7 @@ class ClassErrorTest extends React.Component{
             var detail = JSON.stringify(allReturnData[learnID]);
             var timestamp = Date.parse(new Date())/1000
             var type;
-            var url = 'http://staff.learningx.cn/api/v3/staffs/students/uploadTasks/';
+            var url = '/api/v3/staffs/students/uploadTasks/';
             var postMsg =[{
                     time : timestamp,
                     type : 1,

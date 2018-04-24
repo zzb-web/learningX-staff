@@ -62,7 +62,7 @@ class Navigation extends Component {
     })
   }
   logoutHandle(){
-    var result =Post('http://staff.learningx.cn/api/v3/staffs/me/logout/');
+    var result =Post('/api/v3/staffs/me/logout/');
     result.then((response)=>{
       if(response.status === 200){
         this.props.history.push('/')
@@ -242,7 +242,7 @@ class Navigation extends Component {
         contentHeight :　allHeight-112
       })
     }
-    // var msg =Get('http://staff.learningx.cn/api/v3/students/me/profile/');
+    // var msg =Get('/api/v3/students/me/profile/');
     // msg.then((response)=>{
     //   if(response.status ===200){
     //     this.setState({
