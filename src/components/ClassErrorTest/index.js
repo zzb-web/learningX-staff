@@ -14,7 +14,7 @@ class ClassErrorTest extends React.Component{
         showSelectStudent : true,
         showSelectContent : false,
         showDownContent : false,
-        category : 'onceWrongProblems',
+        category : 'newestWrongProblems',
         materials : [],
         chooseAgain : false,
         requestData : [],
@@ -177,7 +177,8 @@ class ClassErrorTest extends React.Component{
             classNum : '',
             allAnswerData : {},
             allFileData : {},
-            allDetailData : {}
+            allDetailData : {},
+            generateFlag: true
           })
     }
     addMaterials(){
@@ -304,6 +305,7 @@ class ClassErrorTest extends React.Component{
                 var fileDataArray = [];
                 var answerDataArray = [];
                 for(var key in allDetailData){
+                    console.log(key)
                     var obj = {}
                     obj.learnID = key
                     obj.params = this._getFileData(allDetailData[key],paper)
@@ -314,16 +316,16 @@ class ClassErrorTest extends React.Component{
                     obj2.params = this._getAnswerData(allDetailData[key],paper)
                     answerDataArray.push(obj2)
                 }
-                console.log(answerDataArray)
+                console.log(allDetailData,fileDataArray.length)
                 const {allFileData,allAnswerData} = this.state;
+                
                 (async () => {
                     for(let i=0;i<fileDataArray.length;i++) {
                         const {generateFlag} = this.state;
+                        console.log(generateFlag)
                         if(generateFlag){
-                           
                             await Post(`/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
                             .then(resp=>{
-
                                 allFileData[fileDataArray[i].learnID] = resp.data.pdfurl;
                                 let haslearnIDs = [];
                                 for(var key in allFileData){
@@ -350,6 +352,7 @@ class ClassErrorTest extends React.Component{
                         }
                     }
                 })();
+
                 var successArr = [];
                 var failArr =[];
                 (async () => {
@@ -391,7 +394,7 @@ class ClassErrorTest extends React.Component{
                         }
                     }
                 })();
-            },1000)
+            },5000)
     }else{
         this.setState({
             showFail : true,
@@ -574,6 +577,7 @@ class ClassErrorTest extends React.Component{
             }
         ]
         const dataSource = [];
+        console.log(allFileData)
         for(var key in allFileData){
             var fileDownload;
             var answerDownload;
