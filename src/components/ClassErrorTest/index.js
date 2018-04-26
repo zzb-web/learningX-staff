@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import { withRouter } from 'react-router';
 import {Row, Col, Select, Button, InputNumber,Table,Popconfirm,Checkbox ,message} from 'antd';
 import {Get , Post} from '../../fetch/data.js';
@@ -38,7 +39,8 @@ class ClassErrorTest extends React.Component{
         haslearnIDs : [],
         schoolName : '',
         pickDownFlag : true,
-        markFlag : false
+        markFlag : false,
+        addDataFlag : true
     }
     componentWillMount(){
         Get('/api/v3/staffs/schools/')
@@ -322,26 +324,22 @@ class ClassErrorTest extends React.Component{
                 (async () => {
                     for(let i=0;i<fileDataArray.length;i++) {
                         const {generateFlag} = this.state;
-                        console.log(generateFlag)
                         if(generateFlag){
                             await Post(`/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
                             .then(resp=>{
-                                allFileData[fileDataArray[i].learnID] = resp.data.pdfurl;
-                                let haslearnIDs = [];
-                                for(var key in allFileData){
-                                    if(allFileData[key] !== undefined){
-                                        haslearnIDs.push(Number(key))
+                                const {addDataFlag} = this.state;
+                                if(addDataFlag){
+                                    allFileData[fileDataArray[i].learnID] = resp.data.pdfurl;
+                                    let haslearnIDs = [];
+                                    for(var key in allFileData){
+                                        if(allFileData[key] !== undefined){
+                                            haslearnIDs.push(Number(key))
+                                        }
                                     }
-                                }
-                                Post('/api/v3/staffs/students/getProbsAnsFilesZip/',haslearnIDs)
-                                .then(resp=>{
                                     this.setState({
-                                        pickDownURL : resp.data.URL,
                                         haslearnIDs : haslearnIDs
                                     })
-                                }).catch(err=>{
-                                   
-                                })
+                                }
                             }).catch(err=>{
                                 allFileData[fileDataArray[i].learnID] = ''
                             })
@@ -355,39 +353,42 @@ class ClassErrorTest extends React.Component{
 
                 var successArr = [];
                 var failArr =[];
+
                 (async () => {
                     for(let i=0;i<answerDataArray.length;i++) {
-                        const {generateFlag} = this.state;
+                        const {generateFlag,pickDownFlag} = this.state;
                         if(generateFlag){
                             await Post(`/api/v3/staffs/students/${answerDataArray[i].learnID}/getAnswersFile/`,answerDataArray[i].params)
                             .then(resp=>{
-                                allAnswerData[answerDataArray[i].learnID] = resp.data.pdfurl
-                                if(resp.status === 200){
-                                    successArr.push(0)
-                                }else{
-                                    failArr.push(0)
+                                const {addDataFlag} = this.state;
+                                if(addDataFlag){
+                                    if(resp.status === 200){
+                                        successArr.push(0)
+                                    }else{
+                                        failArr.push(0)
+                                    }
+                                    allAnswerData[answerDataArray[i].learnID] = resp.data.pdfurl;
+                                    if(i=== allStudentNum-1){
+                                        this.setState({
+                                            pickDownFlag : false
+                                        })  
+                                    }else{
+                                       this.setState({
+                                           pickDownFlag : true
+                                       })
+                                    }
+                                    if(i=== allStudentNum-1){
+                                        message.info(<span>
+                                            <span style={{color:'#49a9ee'}}>{successArr.length}个学生OK，</span>
+                                            <span style={{color:'red'}}>{failArr.length}个学生未成功</span>
+                                        </span>)
+                                    }
                                 }
+                                
                             }).catch(err=>{
                                 
                                 allAnswerData[answerDataArray[i].learnID] = ''
-                            })
-                            if(i=== allStudentNum-1){
-                                this.setState({
-                                    pickDownFlag : false
-                                })
-                                
-                            }else{
-                               this.setState({
-                                   pickDownFlag : true
-                               })
-                            }
-
-                            if(i=== allStudentNum-1){
-                                message.info(<span>
-                                                <span style={{color:'#49a9ee'}}>{successArr.length}个学生OK，</span>
-                                                <span style={{color:'red'}}>{failArr.length}个学生未成功</span>
-                                            </span>)
-                            }
+                            })    
                             this.setState({
                                 allAnswerData : allAnswerData
                             })
@@ -405,9 +406,9 @@ class ClassErrorTest extends React.Component{
     }
     }
     pickDown(){
-        const {markFlag} = this.state;
+        const {markFlag,haslearnIDs} = this.state;
         if(markFlag){
-            const {allReturnData,haslearnIDs} = this.state;
+            const {allReturnData} = this.state;
             let postData = [];
             var timestamp = Date.parse(new Date())/1000
             haslearnIDs.map((item,index)=>{
@@ -420,6 +421,14 @@ class ClassErrorTest extends React.Component{
             })
             Post('/api/v3/staffs/students/uploadTasks/',postData)
             }
+
+        Post('/api/v3/staffs/students/getProbsAnsFilesZip/',haslearnIDs)
+                                .then(resp=>{
+                                    console.log(resp.data.URL)
+                                    window.open(resp.data.URL);
+                                }).catch(err=>{
+                                   
+                                })
     }
     markChange(e){
         this.setState({
@@ -429,7 +438,8 @@ class ClassErrorTest extends React.Component{
     stopGenerate(){
         this.setState({
             generateFlag : false,
-            pickDownFlag : false
+            pickDownFlag : false,
+            addDataFlag : false
         })
     }
  _getAnswerData(currentData,paper){
@@ -745,15 +755,14 @@ class ClassErrorTest extends React.Component{
                                                         
                                                     <span style={{position:'relative',display:'inline-block'}}>
                                                         <div className='mark-position'><Checkbox onChange={this.markChange.bind(this)}>生成标记</Checkbox></div>
-                                                        <a download={pickDownURL} href={pickDownURL} target="blank">
-                                                            {/* <Popconfirm title="你确定吗？" onConfirm={this.pickDown.bind(this)} okText="确认" cancelText="取消"> */}
+                                                        {/* <a download={pickDownURL} href={pickDownURL} target="blank"> */}
+                                                            <Popconfirm title="你确定吗？" onConfirm={this.pickDown.bind(this)} okText="确认" cancelText="取消">
                                                                 <Button type='primary' size='large' style={{width:230,marginRight:10}}
-                                                                    onClick = {this.pickDown.bind(this)}
                                                                     disabled={pickDownFlag}>
                                                                     打包下载
                                                                 </Button>
-                                                            {/* </Popconfirm> */}
-                                                            </a>
+                                                            </Popconfirm>
+                                                            {/* </a> */}
                                                         </span>
                                                         <Popconfirm title="你确定吗？" onConfirm={this.stopGenerate.bind(this)} okText="确认" cancelText="取消">
                                                             <Button size='large'
