@@ -180,7 +180,7 @@ class ClassErrorTest extends React.Component{
             allAnswerData : {},
             allFileData : {},
             allDetailData : {},
-            generateFlag: true
+            pickDownFlag : true,
           })
     }
     addMaterials(){
@@ -301,8 +301,17 @@ class ClassErrorTest extends React.Component{
                       showMaterials : false,
                       chooseAgain : true,
                       showDownContent : true,
-                      showDetail : true
+                      showDetail : true,
+                      allAnswerData : {},
+                       allFileData : {},
+                       generateFlag: true,
+                       addDataFlag : true,
+                       pickDownFlag : true,
                   })
+                  const {allStudentNum} = this.state;
+                  console.log(allStudentNum)
+                  var times = allStudentNum*100;
+                  console.log(times)
             setTimeout(()=>{
                 var fileDataArray = [];
                 var answerDataArray = [];
@@ -324,6 +333,7 @@ class ClassErrorTest extends React.Component{
                 (async () => {
                     for(let i=0;i<fileDataArray.length;i++) {
                         const {generateFlag} = this.state;
+                        console.log(generateFlag)
                         if(generateFlag){
                             await Post(`/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
                             .then(resp=>{
@@ -395,7 +405,7 @@ class ClassErrorTest extends React.Component{
                         }
                     }
                 })();
-            },5000)
+            },times)
     }else{
         this.setState({
             showFail : true,
@@ -751,7 +761,7 @@ class ClassErrorTest extends React.Component{
                                                                 />
                                                     </div>
 
-                                                    <div style={{textAlign:'center'}}>
+                                                    <div style={{textAlign:'center',marginTop:50}}>
                                                         
                                                     <span style={{position:'relative',display:'inline-block'}}>
                                                         <div className='mark-position'><Checkbox onChange={this.markChange.bind(this)}>生成标记</Checkbox></div>
