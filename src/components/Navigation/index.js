@@ -4,17 +4,10 @@ import {Get, Post} from '../../fetch/data.js';
 import { withRouter } from 'react-router';
 // import UserMsgForm from '../UserMsg/index.js';
 import {
-        // HomepageLoadable , 
-//         ErrorSumLoadable ,
-//         InfoInputLoadable ,
            PassWordFormLoadable,
-//         ReviewOfErrorLoadable,
-//         QuestionTestLoadable,
-//         ErrorDetectionLoadable,
-//         TestDetectionLoadable,
             ClassErrorTestLoadable,
-//         TestErrorMarkerLoadable,
-        // TestErrorDetectionLoadable
+            ClassInfoEntryLoadable,
+            ClassStudyMaterialLoadable
       } from '../Loadable/homepageaComponent.js';
 import axios from 'axios';
 import './style.css';
@@ -22,7 +15,7 @@ const { Header, Sider, Content} = Layout;
 class Navigation extends Component {
   state = {
     collapsed: false,
-    key: '1',
+    key: '2',
     showUser : 'none',
     contentHeight :　0,
     userMsg : {},
@@ -120,15 +113,17 @@ class Navigation extends Component {
                 <Icon type="rocket" />
                 <span>班级错题测试</span>
             </Menu.Item>
-            {/* <Menu.Item key="1">
+            <Menu.Item key="2">
               <Icon type="book" />
-              <span>平时作业</span>
+              <span>班级基本信息录入</span>
             </Menu.Item>
-            <Menu.Item key="9" style={hideMenu?{display:'block'}:{display:'none'}}>
+            
+            <Menu.Item key="3">
               <Icon type="line-chart" />
-              <span>试卷错题标记</span>
+              <span>班级与学习材料对应</span>
             </Menu.Item>
-            <Menu.Item key="2"  style={hideMenu?{display:'block'}:{display:'none'}}>
+
+            {/*<Menu.Item key="2"  style={hideMenu?{display:'block'}:{display:'none'}}>
               <Icon type="appstore" />
               <span>错题归类</span>
             </Menu.Item>
@@ -178,10 +173,10 @@ class Navigation extends Component {
             {
                  this.state.key === '1' ? <ClassErrorTestLoadable /> : null
             }
-            {/*{
-                this.state.key === '2' ? <ErrorSumLoadable /> : null
-            }
             {
+                this.state.key === '2' ? <ClassInfoEntryLoadable /> : null
+            }
+            {/*
                  this.state.key === '3' ? <UserMsgForm userMsg={userMsg}
                                                        school={school}
                                                        classId={classId}
@@ -192,7 +187,7 @@ class Navigation extends Component {
                                                        modifyUserMsg={this.modifyUserMsg.bind(this)}/> : null
             } */}
             {
-                 this.state.key === '4' ? <PassWordFormLoadable/> : null
+                 this.state.key === '3' ? <ClassStudyMaterialLoadable/> : null
             }
             {/* {
                 this.state.key === '5' ? <ReviewOfErrorLoadable/> : null

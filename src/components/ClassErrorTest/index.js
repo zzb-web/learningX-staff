@@ -45,11 +45,19 @@ class ClassErrorTest extends React.Component{
     componentWillMount(){
         Get('/api/v3/staffs/schools/')
         .then(resp=>{
-           this.setState({
-               schools : resp.data
-           })
+          if(resp.status === 200){
+            this.setState({
+                schools : resp.data
+            })
+          }else{
+            this.setState({
+                schools : []
+            })
+          }
         }).catch(err=>{
-            
+            this.setState({
+                schools : []
+            })
         })
         var requestData = [
             {
@@ -436,9 +444,23 @@ class ClassErrorTest extends React.Component{
                                 .then(resp=>{
                                     console.log(resp.data.URL)
                                     window.open(resp.data.URL);
+                                    // this._downloadFile(resp.data.URL)
                                 }).catch(err=>{
                                    
                                 })
+    }
+    _downloadFile(url){
+        var form= document.createElement('form');
+       
+        form.setAttribute("style","display:none");
+        form.setAttribute("target","")
+        form.setAttribute("method","get")
+        form.setAttribute("action",url)
+        console.log(form)
+        console.log(document.getElementsByTagName('body'))
+        document.getElementsByTagName('body').appendChild(form)
+        document.getElementsByName('form').submit();
+        // form.submit();
     }
     markChange(e){
         this.setState({

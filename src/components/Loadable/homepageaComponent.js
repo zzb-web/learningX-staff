@@ -104,25 +104,25 @@ const ClassErrorTestComponent = Loadable({
 }
 
 
-// const TestErrorMarkerComponent = Loadable({
-//   loader: () => import('../TestErrorMarker/index.js'),
-//   loading: MyLoadingComponent,
-// });
-//  class TestErrorMarkerLoadable extends React.Component {
-//   render() {
-//     return <TestErrorMarkerComponent/>;
-//   }
-// }
+const ClassInfoEntryComponent = Loadable({
+  loader: () => import('../ClassInfoEntry/index.js'),
+  loading: MyLoadingComponent,
+});
+ class ClassInfoEntryLoadable extends React.Component {
+  render() {
+    return <ClassInfoEntryComponent/>;
+  }
+}
 
-// const TestErrorDetectionComponent = Loadable({
-//   loader: () => import('../TestErrorDetection/index.js'),
-//   loading: MyLoadingComponent,
-// });
-//  class TestErrorDetectionLoadable extends React.Component {
-//   render() {
-//     return <TestErrorDetectionComponent/>;
-//   }
-// }
+const ClassStudyMaterialComponent = Loadable({
+  loader: () => import('../ClassStudyMaterial/index.js'),
+  loading: MyLoadingComponent,
+});
+ class ClassStudyMaterialLoadable extends React.Component {
+  render() {
+    return <ClassStudyMaterialComponent/>;
+  }
+}
 
 export {
         // HomepageLoadable,
@@ -134,6 +134,6 @@ export {
         // ErrorDetectionLoadable,
         // TestDetectionLoadable,
         ClassErrorTestLoadable,
-        // TestErrorMarkerLoadable,
-        // TestErrorDetectionLoadable
+        ClassInfoEntryLoadable,
+        ClassStudyMaterialLoadable
       }
