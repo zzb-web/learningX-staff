@@ -1,7 +1,7 @@
 import React from 'react';
 import {Row ,Col, Input,Button, Icon ,Upload, Select ,InputNumber, Table} from 'antd';
 import { withRouter } from 'react-router';
-import {Get ,Post} from '../../fetch/data.js'
+import {Get ,Post ,Delete} from '../../fetch/data.js'
 const {Option} = Select;
 class ClassInfoEntry extends React.Component{
     constructor(){
@@ -18,24 +18,26 @@ class ClassInfoEntry extends React.Component{
             columns : [],
             data : [],
             uid : '',
-            showTable : false
+            showTable : false,
+            url : '',
+            downloadFlag : true
         }
     }
     componentWillMount(){
         Get('/api/v3/staffs/schools/').then(resp=>{
             var schoolsNames = [];
-            var schoolID_name = {}
+            const {name_schoolID} = this.state;
             resp.data.map((item,index)=>{
                 schoolsNames.push(item.name)
-                schoolID_name[item.name] = item.schoolID
+                name_schoolID[item.name] = item.schoolID
             })
            this.setState({
                schools : resp.data,
                schoolsNames : schoolsNames,
-               schoolID_name : schoolID_name
+               name_schoolID : name_schoolID
            })
         }).catch(err=>{
-
+            
         })
     }
    
@@ -47,7 +49,6 @@ class ClassInfoEntry extends React.Component{
         })
     }
     schoolNameInput(index,value){
-        console.log(value)
         const {schoolMsg} = this.state;
         schoolMsg[index] = value[0];
         this.setState({
@@ -56,16 +57,29 @@ class ClassInfoEntry extends React.Component{
     }
     showClassHandle(){
         const {schoolMsg,schoolsNames} = this.state;
-        if(schoolMsg[1] === ''){
-            this.setState({
-                cityWarning : true
-            })
-            
-        }else{
+        // if(schoolMsg[1] === ''){
+        //     this.setState({
+        //         cityWarning : true
+        //     })
+        // }else{
             const schoolName = schoolMsg[4];
             if(schoolsNames.indexOf(schoolName) === -1){
+                var newSchool = {
+                    province: schoolMsg[0],
+                    city: schoolMsg[1],
+                    district: schoolMsg[2],
+                    county: schoolMsg[3],
+                    name: schoolMsg[4]
+                }
                 Post('/api/v3/staffs/schools/',newSchool).then(resp=>{
-                    
+                    if(resp.status === 200){
+                        const {name_schoolID} = this.state;
+                        name_schoolID[schoolName] = resp.data.schoolID
+                        console.log(name_schoolID)
+                        this.setState({
+                            name_schoolID
+                        })
+                    }
                 }).catch(err=>{
     
                 })
@@ -76,15 +90,7 @@ class ClassInfoEntry extends React.Component{
                 showClass : true,
                 cityWarning : false
             })
-        }
-        var newSchool = {
-            province: schoolMsg[0],
-            city: schoolMsg[1],
-            district: schoolMsg[2],
-            county: schoolMsg[3],
-            name: schoolMsg[4]
-        }
-      
+        // } 
     }
 
     classMsgInput(index,value){
@@ -118,10 +124,13 @@ class ClassInfoEntry extends React.Component{
                 // this.setState({ fileList })
                 break
             case 'removed':
+                const {uid} = this.state;
+                Delete(`/api/v3/staffs/studentFile/${uid}/`)
                 this.setState({
                     columns :[],
                     data : [],
-                    showTable : false
+                    showTable : false,
+                    uid : ''
                 })
                 break;
             case 'error':
@@ -134,13 +143,36 @@ class ClassInfoEntry extends React.Component{
             default:
         }
     }
+    saveHandle(){
+        const {name_schoolID,schoolMsg,uid,classMsg} = this.state;
+        let postMsg = {
+            schoolID:name_schoolID[schoolMsg[4]],
+            grade: classMsg[0],
+            class: classMsg[1],
+            studentFile: uid,
+        }
+        console.log(postMsg)
+        Post('/api/v3/staffs/students/',postMsg).then(resp=>{
+            this.setState({
+                url : resp.data.URL,
+                downloadFlag : false
+            })
+        }).catch(err=>{
+
+        })
+    }
+    cancelHandle(){
+        const {uid} = this.state;
+        Delete(`/api/v3/staffs/studentFile/${uid}/`)
+        this.setState({
+            columns :[],
+            data : [],
+            showTable : false,
+            uid : ''
+        })
+    }
     render(){
-        
-        const {showClass , showStudent ,schools, cityWarning, columns, data ,showTable} = this.state;
-        console.log(columns)
-
-
-
+        const {showClass , showStudent ,schools, cityWarning, columns, data ,showTable,url,downloadFlag} = this.state;
         const children = [];
         for (let i = 0; i < schools.length; i++) {
             children.push(<Option key={i} value={schools[i].name}>{schools[i].name}</Option>);
@@ -236,8 +268,14 @@ class ClassInfoEntry extends React.Component{
                                             <Icon type="upload" />点击上传文件
                                             </Button>
                                         </Upload>
-                                        <Button style={{position:'absolute',top:0,left:'50%',width:130}}>取消</Button>
-                                        <Button type='primary' style={{position:'absolute',top:0,left:'70%',width:196}}>学生账户列表下载</Button>
+                                        <Button style={{position:'absolute',top:0,left:'50%',width:130}}
+                                            onClick={this.cancelHandle.bind(this)}>取消</Button>
+                                        <a href={url} download={url} target="blank">
+                                        <Button type='primary' 
+                                                style={{position:'absolute',top:0,left:'70%',width:196}}
+                                                disabled={downloadFlag}
+                                                >学生账户列表下载</Button>
+                                        </a>
                                    
                                 </Col>
                             </Row>
@@ -247,7 +285,9 @@ class ClassInfoEntry extends React.Component{
                                         <Table columns={columns}
                                                 dataSource={data}/>
                                         <div style={{textAlign:'center'}}>
-                                            <Button style={{width:332}} type='primary'>保存</Button>
+                                            <Button style={{width:332}} 
+                                                    type='primary'
+                                                    onClick={this.saveHandle.bind(this)}>保存</Button>
                                         </div>
                                         </div> : null}
                     </Col>
