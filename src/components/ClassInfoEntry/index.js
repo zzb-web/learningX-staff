@@ -211,7 +211,7 @@ class ClassInfoEntry extends React.Component{
         const calss = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','F',]
         return(
             <div>
-                <Row>f
+                <Row>
                     <Col span={4}></Col>
                     <Col span={16}>
                         <div style={{width:'100%',paddingTop:20,paddingBottom:30}}>

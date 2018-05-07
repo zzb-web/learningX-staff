@@ -305,7 +305,7 @@ class Book extends React.Component{
         })
         return(
             <div style={{padding:'20px 0 0 30px'}}>
-                <div>
+                <div className='ISBNInput'>
                     <span className='book-title'><span style={{color:'red'}}> * </span> ISBN : </span>
                     <InputNumber onChange={this.ISBNSInput.bind(this,0)} style={{width:50,marginLeft:20}}/><span className='span-style'>-</span>
                     <InputNumber onChange={this.ISBNSInput.bind(this,1)} style={{width:50}}/><span className='span-style'>-</span>

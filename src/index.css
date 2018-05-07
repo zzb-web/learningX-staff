@@ -138,3 +138,6 @@ body {
   vertical-align: middle;
   top: 0;
 }
+.ISBNInput .ant-input-number-handler-wrap{
+  display: none
+}
