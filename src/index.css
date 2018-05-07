@@ -85,7 +85,7 @@ body {
   position: absolute;
   top: -30px;
 }
-.ant-btn:hover, .ant-btn:focus{
+.studentTable .ant-btn:hover, .studentTable .ant-btn:focus{
   border: none;
 }
 

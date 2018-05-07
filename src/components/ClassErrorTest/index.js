@@ -766,7 +766,7 @@ class ClassErrorTest extends React.Component{
                                                 </div> : null
                         }
                         {
-                            showDownContent ? <div>
+                            showDownContent ? <div className=''>
                                                     <div style={{height:370}}>
                                                         <Table columns={columns}
                                                             bordered={true}

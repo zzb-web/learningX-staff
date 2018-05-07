@@ -12,9 +12,12 @@ class ClassInfoEntry extends React.Component{
             name_schoolID : {},
             showClass : false,
             showStudent : false,
+            gradeWarning : false,
+            classWarning : false,
             schoolMsg :['','','','',''],
             classMsg : ['',''],
             cityWarning : false,
+            schoolWarning : false,
             columns : [],
             data : [],
             uid : '',
@@ -44,24 +47,38 @@ class ClassInfoEntry extends React.Component{
     dataMsgInput(index,e){
         const {schoolMsg} = this.state;
         schoolMsg[index] = e.target.value;
+        if(index === 1 && e.target.value !== ''){
+            this.setState({
+                cityWarning : false
+            })
+        }
         this.setState({
             schoolMsg : schoolMsg
         })
     }
     schoolNameInput(index,value){
         const {schoolMsg} = this.state;
-        schoolMsg[index] = value[0];
+        schoolMsg[index] = value;
+        if(value !== ''){
+            this.setState({
+                schoolWarning :false
+            })
+        }
         this.setState({
             schoolMsg : schoolMsg
         })
     }
     showClassHandle(){
         const {schoolMsg,schoolsNames} = this.state;
-        // if(schoolMsg[1] === ''){
-        //     this.setState({
-        //         cityWarning : true
-        //     })
-        // }else{
+        if(schoolMsg[1] === ''){
+            this.setState({
+                cityWarning : true
+            })
+        }else if(schoolMsg[4] === ''){
+            this.setState({
+                schoolWarning : true
+            })
+        }else{
             const schoolName = schoolMsg[4];
             if(schoolsNames.indexOf(schoolName) === -1){
                 var newSchool = {
@@ -77,7 +94,9 @@ class ClassInfoEntry extends React.Component{
                         name_schoolID[schoolName] = resp.data.schoolID
                         console.log(name_schoolID)
                         this.setState({
-                            name_schoolID
+                            name_schoolID,
+                            cityWarning : false,
+                            schoolWarning : false
                         })
                     }
                 }).catch(err=>{
@@ -90,12 +109,22 @@ class ClassInfoEntry extends React.Component{
                 showClass : true,
                 cityWarning : false
             })
-        // } 
+        } 
     }
 
     classMsgInput(index,value){
         const {classMsg} = this.state;
         classMsg[index] = value
+        if(index === 0 && value !== ''){
+            this.setState({
+                gradeWarning : false
+            })
+        }
+        if(index === 1 && value !== ''){
+            this.setState({
+                classWarning : false
+            })
+        }
         console.log(classMsg)
         this.setState({
             classMsg : classMsg
@@ -103,9 +132,20 @@ class ClassInfoEntry extends React.Component{
     }
 
     showStudentHandle(){
-        this.setState({
-            showStudent : true
-        })
+        const {classMsg} = this.state;
+        if(classMsg[0] === ''){
+            this.setState({
+                gradeWarning : true
+            })
+        }else if(classMsg[1] === ''){
+            this.setState({
+                classWarning : true
+            })
+        }else{
+            this.setState({
+                showStudent : true
+            })
+        }  
     }
     onChange = ({ event, file, fileList }) => {
         console.log(file.status)
@@ -161,18 +201,9 @@ class ClassInfoEntry extends React.Component{
 
         })
     }
-    cancelHandle(){
-        const {uid} = this.state;
-        Delete(`/api/v3/staffs/studentFile/${uid}/`)
-        this.setState({
-            columns :[],
-            data : [],
-            showTable : false,
-            uid : ''
-        })
-    }
     render(){
-        const {showClass , showStudent ,schools, cityWarning, columns, data ,showTable,url,downloadFlag} = this.state;
+        const {showClass , showStudent ,schools, cityWarning,schoolWarning, columns, 
+            data ,showTable,url,downloadFlag,gradeWarning,classWarning} = this.state;
         const children = [];
         for (let i = 0; i < schools.length; i++) {
             children.push(<Option key={i} value={schools[i].name}>{schools[i].name}</Option>);
@@ -180,7 +211,7 @@ class ClassInfoEntry extends React.Component{
         const calss = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','F',]
         return(
             <div>
-                <Row>
+                <Row>f
                     <Col span={4}></Col>
                     <Col span={16}>
                         <div style={{width:'100%',paddingTop:20,paddingBottom:30}}>
@@ -201,12 +232,12 @@ class ClassInfoEntry extends React.Component{
                                     </div>
                                     <div style={{marginTop:30}}>
                                         <span>学校全称:</span>
-                                        {/* <Input style={{width:360,marginLeft:30}} onChange={this.dataMsgInput.bind(this,4)}/> */}
                                         <Select
-                                            mode="tags"
-                                            style={{ width:360,marginLeft:30}}
+                                            combobox
+                                            style={schoolWarning ? {width:360,marginLeft:30,border:'1px solid red'}:{width:360,marginLeft:30}}
                                             placeholder="填写学校的规范全称"
                                             onChange={this.schoolNameInput.bind(this,4)}
+                                            tabIndex={0}
                                         >
                                             {children}
                                         </Select>
@@ -230,14 +261,15 @@ class ClassInfoEntry extends React.Component{
                                 <Col span={16}>
                                     <div>
                                         <span><span style={{visibility:'hidden'}}>隐藏</span>年级:</span>
-                                        {/* <Input style={{width:360,marginLeft:30}} onChange={this.classMsgInput.bind(this,0)}/> */}
-                                        <Select style={{width:360,marginLeft:30}} onChange={this.classMsgInput.bind(this,0)}>
+                                        <Select style={gradeWarning ? {width:360,marginLeft:30,border:'1px solid red'}:{width:360,marginLeft:30}} 
+                                            onChange={this.classMsgInput.bind(this,0)}>
                                             {calss.map((item,index)=><Option key={index} value={item}>{item}</Option>)}
                                         </Select>
                                     </div>
                                     <div style={{marginTop:30}}>
                                         <span><span style={{visibility:'hidden'}}>隐藏</span>班级:</span>
-                                        <InputNumber max={1000} min={1} style={{width:360,marginLeft:30}} onChange={this.classMsgInput.bind(this,1)}/>
+                                        <InputNumber max={1000} min={1} style={classWarning ?{width:360,marginLeft:30,borderColor:'red'}:{width:360,marginLeft:30}}
+                                                 onChange={this.classMsgInput.bind(this,1)}/>
                                     </div>
                                     <div style={{marginTop:30}}>
                                         <span style={{visibility:'hidden'}}>隐藏隐藏:</span>
@@ -268,8 +300,7 @@ class ClassInfoEntry extends React.Component{
                                             <Icon type="upload" />点击上传文件
                                             </Button>
                                         </Upload>
-                                        <Button style={{position:'absolute',top:0,left:'50%',width:130}}
-                                            onClick={this.cancelHandle.bind(this)}>取消</Button>
+
                                         <a href={url} download={url} target="blank">
                                         <Button type='primary' 
                                                 style={{position:'absolute',top:0,left:'70%',width:196}}
