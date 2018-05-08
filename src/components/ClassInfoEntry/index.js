@@ -55,6 +55,23 @@ class ClassInfoEntry extends React.Component{
         this.setState({
             schoolMsg : schoolMsg
         })
+        const msg = `rovince=${schoolMsg[0]}&city=${schoolMsg[1]}&district=${schoolMsg[2]}&county=${schoolMsg[3]}`;
+        Get(`/api/v3/staffs/schools/?${msg}`)
+            .then(resp=>{
+                        var schoolsNames = [];
+                        const {name_schoolID} = this.state;
+                        resp.data.map((item,index)=>{
+                            schoolsNames.push(item.name)
+                            name_schoolID[item.name] = item.schoolID
+                        })
+                    this.setState({
+                        schools : resp.data,
+                        schoolsNames : schoolsNames,
+                        name_schoolID : name_schoolID
+                    })
+                }).catch(err=>{
+        
+                })
     }
     schoolNameInput(index,value){
         const {schoolMsg} = this.state;
