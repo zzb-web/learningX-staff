@@ -221,6 +221,7 @@ class ClassInfoEntry extends React.Component{
     render(){
         const {showClass , showStudent ,schools, cityWarning,schoolWarning, columns, 
             data ,showTable,url,downloadFlag,gradeWarning,classWarning} = this.state;
+            const downLoadURL = url.split('xlsx/')[1];
         const children = [];
         for (let i = 0; i < schools.length; i++) {
             children.push(<Option key={i} value={schools[i].name}>{schools[i].name}</Option>);
@@ -318,7 +319,7 @@ class ClassInfoEntry extends React.Component{
                                             </Button>
                                         </Upload>
 
-                                        <a href={url} download={url} target="blank">
+                                        <a href={url} download={downLoadURL} target="blank">
                                         <Button type='primary' 
                                                 style={{position:'absolute',top:0,left:'70%',width:196}}
                                                 disabled={downloadFlag}
