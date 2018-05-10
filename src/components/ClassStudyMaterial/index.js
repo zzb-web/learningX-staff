@@ -1,6 +1,7 @@
 import React from 'react';
 import {Input ,InputNumber, Select ,Row , Col,Radio ,Button, Table, Modal,message} from 'antd';
 import {Get, Post} from '../../fetch/data.js';
+import CityCommon from '../Common/cityCommon.js';
 const {Option} = Select;
 class ClassStudyMaterial extends React.Component {
     state={
@@ -40,7 +41,7 @@ class ClassStudyMaterial extends React.Component {
         this.setState({
             citylMsg : citylMsg
         })
-            const msg = `rovince=${citylMsg[0]}&city=${citylMsg[1]}&district=${citylMsg[2]}&county=${citylMsg[3]}`;
+            const msg = `province=${citylMsg[0]}&city=${citylMsg[1]}&district=${citylMsg[2]}&county=${citylMsg[3]}`;
             Get(`/api/v3/staffs/schools/?${msg}`)
             .then(resp=>{
                     var schoolsNames = [];
@@ -78,28 +79,7 @@ class ClassStudyMaterial extends React.Component {
                 <Row>
                     <Col span={9}>
                     <div style={{padding:'30px 0 0 20px'}}>
-                        <div>
-                        <span><span style={{visibility:'hidden'}}>隐藏</span>省市:</span>
-                            <Input style={{width:100,marginLeft:30}}
-                                   onChange={this.dataMsgInput.bind(this,0)}
-                                />
-                                <span style={{marginLeft:30}}>省</span>
-                            <Input style={cityWarning?{width:100,marginLeft:30,borderColor:'red'}:{width:100,marginLeft:30}} 
-                                   onChange={this.dataMsgInput.bind(this,1)}
-                                />
-                                <span style={{marginLeft:30}}>市</span>
-                        </div>
-                        <div style={{marginTop:30}}>
-                            <span><span style={{visibility:'hidden'}}>隐藏</span>区县:</span>
-                            <Input style={{width:100,marginLeft:30}} 
-                                    onChange={this.dataMsgInput.bind(this,2)}
-                                    />
-                            <span style={{marginLeft:30}}>区</span>
-                            <Input style={{width:100,marginLeft:30}} 
-                                    onChange={this.dataMsgInput.bind(this,3)}
-                                    />
-                            <span style={{marginLeft:30}}>县</span>
-                        </div>
+                        <CityCommon dataMsgInput={this.dataMsgInput.bind(this)} cityWarning={cityWarning}/>
                         <div style={{marginTop:30}}>
                             <span>学校全称:</span>
                             <Select
