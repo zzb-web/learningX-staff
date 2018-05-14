@@ -2,16 +2,20 @@ import React from 'react';
 import {Input ,InputNumber, Select ,Row , Col,Radio ,Button, Table, Modal,message} from 'antd';
 import {Get, Post} from '../../fetch/data.js';
 import CityCommon from '../Common/cityCommon.js';
+import GradeClassCommon from '../Common/gradeclassCommon.js';
 const {Option} = Select;
 class ClassStudyMaterial extends React.Component {
     state={
         cityWarning : false,
         mode : 'book',
         citylMsg : ['','','',''],
-        schoolMsg :['','',''],
+        schoolMsg : '',
+        classMsg : ['',''],
         schools : [],
         schoolsNames : [],
         name_schoolID : {},
+        gradeWarning : false,
+        classWarning : false
     }
     componentWillMount(){
         // Get('/api/v3/staffs/schools/').then(resp=>{
@@ -35,74 +39,84 @@ class ClassStudyMaterial extends React.Component {
             mode : e.target.value
         })
     }
-    dataMsgInput(index,e){
-        const {citylMsg} = this.state;
-        citylMsg[index] = e.target.value;
+    dataMsgInput(cityMsg){
+        console.log(cityMsg)
+        if(cityMsg[1]!== ''){
+            this.setState({
+                cityWarning : false
+            })
+        }
         this.setState({
-            citylMsg : citylMsg
+            cityMsg : cityMsg
         })
-            const msg = `province=${citylMsg[0]}&city=${citylMsg[1]}&district=${citylMsg[2]}&county=${citylMsg[3]}`;
-            Get(`/api/v3/staffs/schools/?${msg}`)
-            .then(resp=>{
-                    var schoolsNames = [];
-                    var schoolID_name = {}
-                    resp.data.map((item,index)=>{
-                        schoolsNames.push(item.name)
-                        schoolID_name[item.name] = item.schoolID
-                    })
-                   this.setState({
-                       schools : resp.data,
-                       schoolsNames : schoolsNames,
-                       schoolID_name : schoolID_name
-                   })
-                }).catch(err=>{
-        
+    }
+    cityWarningHandle(value){
+        this.setState({
+            cityWarning : value
+        })
+    }
+    gradeWarningHandle(value){
+        this.setState({
+            gradeWarning : value
+        })
+    }
+    classWarningHandle(value){
+        this.setState({
+            classWarning : value
+        })
+    }
+    schoolMsg(schools ,schoolsNames, name_schoolID){
+        console.log(schools ,schoolsNames, name_schoolID)
+        this.setState({
+                    schools : schools,
+                    schoolsNames : schoolsNames,
+                    name_schoolID : name_schoolID
                 })
     }
-    schoolMsgInput(index,value){
-        const {schoolMsg} = this.state;
-        schoolMsg[index] = value;
+
+    schoolMsgInput(value){
+        console.log(value)
         this.setState({
-            schoolMsg : schoolMsg
+            schoolMsg : value
         })
     }
 
+    classMsgInput(classMsg){
+        console.log(classMsg)
+        this.setState({
+            classMsg : classMsg
+        })
+    }
     render(){
-        const {cityWarning, mode,schools,schoolMsg} = this.state;
+        const {cityWarning, mode,schools,schoolMsg,classMsg,gradeWarning,classWarning} = this.state;
         const children = [];
         for (let i = 0; i < schools.length; i++) {
             children.push(<Option key={i} value={schools[i].schoolID}>{schools[i].name}</Option>);
         }
-        const calss = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','F',]
         return(
             <div>
                 <Row>
                     <Col span={9}>
                     <div style={{padding:'30px 0 0 20px'}}>
-                        <CityCommon dataMsgInput={this.dataMsgInput.bind(this)} cityWarning={cityWarning}/>
+                        <CityCommon dataMsgInput={this.dataMsgInput.bind(this)}
+                                        schoolMsg={this.schoolMsg.bind(this)}
+                                        cityWarning={cityWarning}
+                                        cityWarningHandle={this.cityWarningHandle.bind(this)}/>
                         <div style={{marginTop:30}}>
                             <span>学校全称:</span>
                             <Select
                                 style={{ width:320,marginLeft:30}}
-                                onChange={this.schoolMsgInput.bind(this,0)}
+                                onChange={this.schoolMsgInput.bind(this)}
                             >
                                 {children}
                             </Select>
                         </div>
                         <div style={{marginTop:30}}>
-                            <span><span style={{visibility:'hidden'}}>隐藏</span>年级:</span>
-                            <Select style={{width:320,marginLeft:30}} 
-                            onChange={this.schoolMsgInput.bind(this,1)}
-                            >
-                                {calss.map((item,index)=><Option key={index} value={item}>{item}</Option>)}
-                            </Select>
-                        </div>
-                        <div style={{marginTop:30}}>
-                            <span><span style={{visibility:'hidden'}}>隐藏</span>班级:</span>
-                            <InputNumber max={1000} min={1} 
-                                        style={{width:320,marginLeft:30}} 
-                                        onChange={this.schoolMsgInput.bind(this,2)}
-                                        />
+                            <GradeClassCommon classMsgInput={this.classMsgInput.bind(this)}
+                                            gradeWarning = {gradeWarning}
+                                            classWarning = {classWarning}
+                                            gradeWarningHandle = {this.gradeWarningHandle.bind(this)}
+                                            classWarningHandle = {this.classWarningHandle.bind(this)}/>
                         </div>
                     </div>
                     </Col>
@@ -117,7 +131,7 @@ class ClassStudyMaterial extends React.Component {
                             </Radio.Group>
                         </div>
                         <div>
-                            {mode === 'book' ? <Book schoolMsg={schoolMsg}/> : <TestPaper schoolMsg={schoolMsg}/>}
+                            {mode === 'book' ? <Book schoolMsg={schoolMsg} classMsg={classMsg}/> : <TestPaper schoolMsg={schoolMsg} classMsg={classMsg}/>}
                         </div>
                     </Col>
                 </Row>
@@ -140,12 +154,14 @@ class Book extends React.Component{
             showModal : false,
             title : '',
             imgURL : '',
-            schoolMsg : props.schoolMsg
+            schoolMsg : props.schoolMsg,
+            classMsg : props.classMsg
         }
     }
     componentWillReceiveProps(nextProps){
         this.setState({
-            schoolMsg : nextProps.schoolMsg
+            schoolMsg : nextProps.schoolMsg,
+            classMsg : nextProps.classMsg
         })
     }
     ISBNSInput(index,value){
@@ -206,11 +222,11 @@ class Book extends React.Component{
         })
     }
     okHandle(data){
-        const{schoolMsg} = this.state;
+        const{schoolMsg ,classMsg} = this.state;
         let postMsg = {
-            schoolID : schoolMsg[0],
-            grade : schoolMsg[1],
-            class : schoolMsg[2],
+            schoolID : schoolMsg,
+            grade : classMsg[0],
+            class : classMsg[1],
             bookID : data
         }
         Post('/api/v3/staffs/classes/addBook/',postMsg).then(resp=>{
@@ -342,12 +358,14 @@ class TestPaper extends React.Component{
             showTable : false,
             showModal : false,
             imgURL : '',
-            schoolMsg : props.schoolMsg
+            schoolMsg : props.schoolMsg,
+            classMsg : props.classMsg
         }
     }
     componentWillReceiveProps(nextProps){
         this.setState({
-            schoolMsg : nextProps.schoolMsg
+            schoolMsg : nextProps.schoolMsg,
+            classMsg : nextProps.classMsg
         })
     }
     testPaperInput(index,e){
@@ -376,11 +394,11 @@ class TestPaper extends React.Component{
         })
     }
     okHandle(data){
-        const{schoolMsg} = this.state;
+        const{schoolMsg,classMsg} = this.state;
         let postMsg = {
-            schoolID : schoolMsg[0],
-            grade : schoolMsg[1],
-            class : schoolMsg[2],
+            schoolID : schoolMsg,
+            grade : classMsg[0],
+            class : classMsg[1],
             paperID : data
         }
         Post('/api/v3/staffs/classes/addPaper/',postMsg).then(resp=>{

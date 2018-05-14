@@ -7,35 +7,6 @@ function MyLoadingComponent({ error }) {
       return <div>Loading...</div>;
     }
   }
-// const HomepageComponent = Loadable({
-//   loader: () => import('../Homepage/index.js'),
-//   loading: MyLoadingComponent,
-// });
-//  class HomepageLoadable extends React.Component {
-//   render() {
-//     return <HomepageComponent/>;
-//   }
-// }
-
-// const ErrorSumComponent = Loadable({
-//   loader: () => import('../ErrorSum/index.js'),
-//   loading: MyLoadingComponent,
-// });
-//  class ErrorSumLoadable extends React.Component {
-//   render() {
-//     return <ErrorSumComponent/>;
-//   }
-// }
-
-// const InfoInputComponent = Loadable({
-//   loader: () => import('../InfoInput/index.js'),
-//   loading: MyLoadingComponent,
-// });
-//  class InfoInputLoadable extends React.Component {
-//   render() {
-//     return <InfoInputComponent/>;
-//   }
-// }
 
 
 const PassWordFormComponent = Loadable({
@@ -47,51 +18,6 @@ const PassWordFormComponent = Loadable({
     return <PassWordFormComponent/>;
   }
 }
-
-
-// const ReviewOfErrorComponent = Loadable({
-//   loader: () => import('../ReviewOfError/index.js'),
-//   loading: MyLoadingComponent,
-// });
-//  class ReviewOfErrorLoadable extends React.Component {
-//   render() {
-//     return <ReviewOfErrorComponent/>;
-//   }
-// }
-
-
-// const QuestionTestComponent = Loadable({
-//   loader: () => import('../QuestionTest/index.js'),
-//   loading: MyLoadingComponent,
-// });
-//  class QuestionTestLoadable extends React.Component {
-//   render() {
-//     return <QuestionTestComponent/>;
-//   }
-// }
-
-
-// const ErrorDetectionComponent = Loadable({
-//   loader: () => import('../ErrorDetection/index.js'),
-//   loading: MyLoadingComponent,
-// });
-//  class ErrorDetectionLoadable extends React.Component {
-//   render() {
-//     return <ErrorDetectionComponent/>;
-//   }
-// }
-
-
-// const TestDetectionComponent = Loadable({
-//   loader: () => import('../TestDetection/index.js'),
-//   loading: MyLoadingComponent,
-// });
-//  class TestDetectionLoadable extends React.Component {
-//   render() {
-//     return <TestDetectionComponent/>;
-//   }
-// }
-
 
 const ClassErrorTestComponent = Loadable({
   loader: () => import('../ClassErrorTest/index.js'),
@@ -124,6 +50,16 @@ const ClassStudyMaterialComponent = Loadable({
   }
 }
 
+const StudentMsgSummaryComponent = Loadable({
+  loader: () => import('../StudentMsgSummary/index.js'),
+  loading: MyLoadingComponent,
+});
+ class StudentMsgSummaryLoadable extends React.Component {
+  render() {
+    return <StudentMsgSummaryComponent/>;
+  }
+}
+
 export {
         // HomepageLoadable,
         // ErrorSumLoadable , 
@@ -135,5 +71,6 @@ export {
         // TestDetectionLoadable,
         ClassErrorTestLoadable,
         ClassInfoEntryLoadable,
-        ClassStudyMaterialLoadable
+        ClassStudyMaterialLoadable,
+        StudentMsgSummaryLoadable
       }

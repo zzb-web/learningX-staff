@@ -3,6 +3,7 @@ import {Row ,Col, Input,Button, Icon ,Upload, Select ,InputNumber, Table} from '
 import { withRouter } from 'react-router';
 import {Get ,Post ,Delete} from '../../fetch/data.js'
 import CityCommon from '../Common/cityCommon.js';
+import GradeClassCommon from '../Common/gradeclassCommon.js';
 const {Option} = Select;
 class ClassInfoEntry extends React.Component{
     constructor(){
@@ -15,7 +16,8 @@ class ClassInfoEntry extends React.Component{
             showStudent : false,
             gradeWarning : false,
             classWarning : false,
-            schoolMsg :['','','','',''],
+            cityMsg :['','','',''],
+            schoolMsg : '',
             classMsg : ['',''],
             cityWarning : false,
             schoolWarning : false,
@@ -44,68 +46,59 @@ class ClassInfoEntry extends React.Component{
             
         })
     }
-   
-    dataMsgInput(index,e){
-        const {schoolMsg} = this.state;
-        schoolMsg[index] = e.target.value;
-        console.log(schoolMsg)
-        if(index === 1 && e.target.value !== ''){
+    dataMsgInput(cityMsg){
+        console.log(cityMsg)
+        if(cityMsg[1]!== ''){
             this.setState({
                 cityWarning : false
             })
         }
         this.setState({
-            schoolMsg : schoolMsg
+            cityMsg : cityMsg
         })
-        const msg = `province=${schoolMsg[0]}&city=${schoolMsg[1]}&district=${schoolMsg[2]}&county=${schoolMsg[3]}`;
-        Get(`/api/v3/staffs/schools/?${msg}`)
-            .then(resp=>{
-                        var schoolsNames = [];
-                        const {name_schoolID} = this.state;
-                        resp.data.map((item,index)=>{
-                            schoolsNames.push(item.name)
-                            name_schoolID[item.name] = item.schoolID
-                        })
-                    this.setState({
-                        schools : resp.data,
-                        schoolsNames : schoolsNames,
-                        name_schoolID : name_schoolID
-                    })
-                }).catch(err=>{
-        
+    }
+    cityWarningHandle(value){
+        this.setState({
+            cityWarning : value
+        })
+    }
+    schoolMsg(schools ,schoolsNames, name_schoolID){
+        console.log(schools ,schoolsNames, name_schoolID)
+        this.setState({
+                    schools : schools,
+                    schoolsNames : schoolsNames,
+                    name_schoolID : name_schoolID
                 })
     }
     schoolNameInput(index,value){
-        const {schoolMsg} = this.state;
-        schoolMsg[index] = value;
         if(value !== ''){
             this.setState({
                 schoolWarning :false
             })
         }
         this.setState({
-            schoolMsg : schoolMsg
+            schoolMsg : value
         })
     }
     showClassHandle(){
-        const {schoolMsg,schoolsNames} = this.state;
-        if(schoolMsg[1] === ''){
+        const {schoolMsg,schoolsNames,cityMsg} = this.state;
+        if(cityMsg[1] === ''){
             this.setState({
                 cityWarning : true
             })
-        }else if(schoolMsg[4] === ''){
+        }else if(schoolMsg === ''){
             this.setState({
                 schoolWarning : true
             })
         }else{
-            const schoolName = schoolMsg[4];
+            const schoolName = schoolMsg;
             if(schoolsNames.indexOf(schoolName) === -1){
                 var newSchool = {
-                    province: schoolMsg[0],
-                    city: schoolMsg[1],
-                    district: schoolMsg[2],
-                    county: schoolMsg[3],
-                    name: schoolMsg[4]
+                    province: cityMsg[0],
+                    city: cityMsg[1],
+                    district: cityMsg[2],
+                    county: cityMsg[3],
+                    name: schoolMsg
                 }
                 Post('/api/v3/staffs/schools/',newSchool).then(resp=>{
                     if(resp.status === 200){
@@ -131,25 +124,21 @@ class ClassInfoEntry extends React.Component{
         } 
     }
 
-    classMsgInput(index,value){
-        const {classMsg} = this.state;
-        classMsg[index] = value
-        if(index === 0 && value !== ''){
-            this.setState({
-                gradeWarning : false
-            })
-        }
-        if(index === 1 && value !== ''){
-            this.setState({
-                classWarning : false
-            })
-        }
-        console.log(classMsg)
-        this.setState({
+    classMsgInput(classMsg){
+       this.setState({
             classMsg : classMsg
         })
     }
-
+    gradeWarningHandle(value){
+        this.setState({
+            gradeWarning : value
+        })
+    }
+    classWarningHandle(value){
+        this.setState({
+            classWarning : value
+        })
+    }
     showStudentHandle(){
         const {classMsg} = this.state;
         if(classMsg[0] === ''){
@@ -205,7 +194,7 @@ class ClassInfoEntry extends React.Component{
     saveHandle(){
         const {name_schoolID,schoolMsg,uid,classMsg} = this.state;
         let postMsg = {
-            schoolID:name_schoolID[schoolMsg[4]],
+            schoolID:name_schoolID[schoolMsg],
             grade: classMsg[0],
             class: classMsg[1],
             studentFile: uid,
@@ -240,14 +229,17 @@ class ClassInfoEntry extends React.Component{
                                     <h2 className='title-font'>学校</h2>
                                 </Col>
                                 <Col span={16}>
-                                    <CityCommon dataMsgInput={this.dataMsgInput.bind(this)} cityWarning={cityWarning}/>
+                                    <CityCommon dataMsgInput={this.dataMsgInput.bind(this)}
+                                        schoolMsg={this.schoolMsg.bind(this)}
+                                        cityWarning={cityWarning}
+                                        cityWarningHandle={this.cityWarningHandle.bind(this)}/>
                                     <div style={{marginTop:30}}>
                                         <span>学校全称:</span>
                                         <Select
                                             combobox
                                             style={schoolWarning ? {width:360,marginLeft:30,border:'1px solid red'}:{width:360,marginLeft:30}}
                                             placeholder="填写学校的规范全称"
-                                            onChange={this.schoolNameInput.bind(this,4)}
+                                            onChange={this.schoolNameInput.bind(this)}
                                             tabIndex={0}
                                         >
                                             {children}
@@ -270,18 +262,12 @@ class ClassInfoEntry extends React.Component{
                                     <h2 className='title-font'>班级</h2>
                                 </Col>
                                 <Col span={16}>
-                                    <div>
-                                        <span><span style={{visibility:'hidden'}}>隐藏</span>年级:</span>
-                                        <Select style={gradeWarning ? {width:360,marginLeft:30,border:'1px solid red'}:{width:360,marginLeft:30}} 
-                                            onChange={this.classMsgInput.bind(this,0)}>
-                                            {calss.map((item,index)=><Option key={index} value={item}>{item}</Option>)}
-                                        </Select>
-                                    </div>
-                                    <div style={{marginTop:30}}>
-                                        <span><span style={{visibility:'hidden'}}>隐藏</span>班级:</span>
-                                        <InputNumber max={1000} min={1} style={classWarning ?{width:360,marginLeft:30,borderColor:'red'}:{width:360,marginLeft:30}}
-                                                 onChange={this.classMsgInput.bind(this,1)}/>
-                                    </div>
+                                    <GradeClassCommon classMsgInput={this.classMsgInput.bind(this)}
+                                                    gradeWarning={gradeWarning}
+                                                    classWarning={classWarning}
+                                                    gradeWarningHandle = {this.gradeWarningHandle.bind(this)}
+                                                    classWarningHandle = {this.classWarningHandle.bind(this)}
+                                                    />
                                     <div style={{marginTop:30}}>
                                         <span style={{visibility:'hidden'}}>隐藏隐藏:</span>
                                         <Button style={{width:360,marginLeft:30}} onClick={this.showStudentHandle.bind(this)}>

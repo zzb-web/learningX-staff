@@ -7,10 +7,12 @@ import {
            PassWordFormLoadable,
             ClassErrorTestLoadable,
             ClassInfoEntryLoadable,
-            ClassStudyMaterialLoadable
+            ClassStudyMaterialLoadable,
+            StudentMsgSummaryLoadable
       } from '../Loadable/homepageaComponent.js';
 import axios from 'axios';
 import './style.css';
+import GradeClassCommon from '../Common/gradeclassCommon.js';
 const { Header, Sider, Content} = Layout;
 class Navigation extends Component {
   state = {
@@ -123,11 +125,12 @@ class Navigation extends Component {
               <span>班级与学习材料对应</span>
             </Menu.Item>
 
-            {/*<Menu.Item key="2"  style={hideMenu?{display:'block'}:{display:'none'}}>
+            <Menu.Item key="4">
               <Icon type="appstore" />
-              <span>错题归类</span>
+              <span>学生基本信息汇总列表</span>
             </Menu.Item>
-            <Menu.Item key="7" style={hideMenu?{display:'block'}:{display:'none'}}>
+
+            {/*<Menu.Item key="7" style={hideMenu?{display:'block'}:{display:'none'}}>
               <Icon type="bar-chart" />
               <span>错题测试</span>
             </Menu.Item>
@@ -189,9 +192,10 @@ class Navigation extends Component {
             {
                  this.state.key === '3' ? <ClassStudyMaterialLoadable/> : null
             }
-            {/* {
-                this.state.key === '5' ? <ReviewOfErrorLoadable/> : null
+            {
+                this.state.key === '4' ? <StudentMsgSummaryLoadable/> : null
             }
+            {/*
             {
                 this.state.key === '6' ? <QuestionTestLoadable/> : null
             }

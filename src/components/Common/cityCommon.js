@@ -1,11 +1,55 @@
 import React from 'react';
 import {Input} from 'antd';
+import {Get} from '../../fetch/data.js';
 class CityCommon extends React.Component{
+    constructor(props){
+        super();
+        this.state={
+            schools : [],
+            schoolsNames : [],
+            name_schoolID : {},
+            gradeWarning : false,
+            classWarning : false,
+            cityMsg :['','','','',''],
+            classMsg : ['',''],
+            cityWarning : props.cityWarning
+        }
+    }
+    componentWillReceiveProps(nextProps){
+        this.setState({
+            cityWarning : nextProps.cityWarning
+        })
+    }
     dataMsgInput(index,e){
-        this.props.dataMsgInput(index,e)
+        const {cityMsg} = this.state;
+        cityMsg[index] = e.target.value;
+        if(index === 1 && e.target.value !== ''){
+            this.setState({
+                cityWarning : false
+            })
+            this.props.cityWarningHandle(false)
+        }
+        this.setState({
+            cityMsg
+        })
+        this.props.dataMsgInput(cityMsg)
+        const msg = `province=${cityMsg[0]}&city=${cityMsg[1]}&district=${cityMsg[2]}&county=${cityMsg[3]}`;
+        Get(`/api/v3/staffs/schools/?${msg}`)
+            .then(resp=>{
+                        var schoolsNames = [];
+                        const {name_schoolID} = this.state;
+                        resp.data.map((item,index)=>{
+                            schoolsNames.push(item.name)
+                            name_schoolID[item.name] = item.schoolID
+                        })
+                        this.props.schoolMsg(resp.data,schoolsNames,name_schoolID)
+                }).catch(err=>{
+        
+                })
     }
     render(){
-        const {cityWarning} = this.props;
+        const {cityWarning} = this.state;
+        console.log(cityWarning)
         return(
             <div>
                 <div>

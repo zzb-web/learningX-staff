@@ -141,3 +141,14 @@ body {
 .ISBNInput .ant-input-number-handler-wrap{
   display: none
 }
+
+.search-btn-content{
+  width: 100%;
+  position: relative;
+  height: 150px;
+}
+.search-btn{
+  width: 100%;
+  position: absolute !important;
+  bottom: 10px;
+}
