@@ -145,7 +145,7 @@ class ClassInfoEntry extends React.Component{
             this.setState({
                 gradeWarning : true
             })
-        }else if(classMsg[1] === ''){
+        }else if(classMsg[1] === '' || classMsg[1] === undefined){
             this.setState({
                 classWarning : true
             })
