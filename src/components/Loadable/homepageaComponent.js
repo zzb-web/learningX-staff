@@ -50,13 +50,13 @@ const ClassStudyMaterialComponent = Loadable({
   }
 }
 
-const StudentMsgSummaryComponent = Loadable({
-  loader: () => import('../StudentMsgSummary/index.js'),
+const StudyMaterialSummaryComponent = Loadable({
+  loader: () => import('../StudyMaterialSummary/index.js'),
   loading: MyLoadingComponent,
 });
- class StudentMsgSummaryLoadable extends React.Component {
+ class StudyMaterialSummaryLoadable extends React.Component {
   render() {
-    return <StudentMsgSummaryComponent/>;
+    return <StudyMaterialSummaryComponent/>;
   }
 }
 
@@ -72,5 +72,5 @@ export {
         ClassErrorTestLoadable,
         ClassInfoEntryLoadable,
         ClassStudyMaterialLoadable,
-        StudentMsgSummaryLoadable
+        StudyMaterialSummaryLoadable
       }

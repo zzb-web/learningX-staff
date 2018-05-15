@@ -70,7 +70,8 @@ class ClassInfoEntry extends React.Component{
                     name_schoolID : name_schoolID
                 })
     }
-    schoolNameInput(index,value){
+    schoolNameInput(value){
+        console.log(value)
         if(value !== ''){
             this.setState({
                 schoolWarning :false
@@ -92,6 +93,7 @@ class ClassInfoEntry extends React.Component{
             })
         }else{
             const schoolName = schoolMsg;
+            console.log(schoolMsg)
             if(schoolsNames.indexOf(schoolName) === -1){
                 var newSchool = {
                     province: cityMsg[0],

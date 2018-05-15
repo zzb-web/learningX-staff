@@ -103,7 +103,6 @@ body {
   width: 120%;
   border: 1px solid #c9c9c9;
   margin-left: -10%;
-
 }
 
 .book-title{
@@ -151,4 +150,14 @@ body {
   width: 100%;
   position: absolute !important;
   bottom: 10px;
+}
+.picName{
+  cursor: pointer;
+  color: #108ee9;
+}
+.underline-hr{
+  width: 96%;
+  border: 1px solid #c9c9c9;
+  margin: 0 auto;
+  margin-top: 20px;
 }
