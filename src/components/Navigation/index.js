@@ -8,7 +8,8 @@ import {
             ClassErrorTestLoadable,
             ClassInfoEntryLoadable,
             ClassStudyMaterialLoadable,
-            StudyMaterialSummaryLoadable
+            StudyMaterialSummaryLoadable,
+            StudentInfoEntryLoadable
       } from '../Loadable/homepageaComponent.js';
 import axios from 'axios';
 import './style.css';
@@ -129,11 +130,11 @@ class Navigation extends Component {
               <Icon type="appstore" />
               <span>班级与学习材料汇总</span>
             </Menu.Item>
-
-            {/*<Menu.Item key="7" style={hideMenu?{display:'block'}:{display:'none'}}>
+            <Menu.Item key="5">
               <Icon type="bar-chart" />
-              <span>错题测试</span>
+              <span>学生基本信息汇总列表</span>
             </Menu.Item>
+          {/*
             <Menu.Item key="10" style={hideMenu?{display:'block'}:{display:'none'}}>
               <Icon type="exception" />
               <span>试卷错题测试</span>
@@ -195,10 +196,10 @@ class Navigation extends Component {
             {
                 this.state.key === '4' ? <StudyMaterialSummaryLoadable/> : null
             }
-            {/*
             {
-                this.state.key === '6' ? <QuestionTestLoadable/> : null
+                this.state.key === '5' ? < StudentInfoEntryLoadable/> : null
             }
+            {/*
             {
                 this.state.key === '7' ? <ErrorDetectionLoadable/> : null
             }

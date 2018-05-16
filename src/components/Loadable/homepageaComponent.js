@@ -60,6 +60,16 @@ const StudyMaterialSummaryComponent = Loadable({
   }
 }
 
+const StudentInfoEntryComponent = Loadable({
+  loader: () => import('../StudentInfoEntry/index.js'),
+  loading: MyLoadingComponent,
+});
+ class StudentInfoEntryLoadable extends React.Component {
+  render() {
+    return <StudentInfoEntryComponent/>;
+  }
+}
+
 export {
         // HomepageLoadable,
         // ErrorSumLoadable , 
@@ -72,5 +82,6 @@ export {
         ClassErrorTestLoadable,
         ClassInfoEntryLoadable,
         ClassStudyMaterialLoadable,
-        StudyMaterialSummaryLoadable
+        StudyMaterialSummaryLoadable,
+        StudentInfoEntryLoadable
       }
