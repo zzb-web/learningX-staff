@@ -142,6 +142,14 @@ class StudentInfoEntry extends React.Component{
     }
     cancel(){
     }
+    _add(m){return m<10?'0'+m:m }  
+    _getDate(timeStamp) {   
+      var time = new Date(timeStamp*1000);  
+      var y = time.getFullYear();  
+      var m = time.getMonth()+1;  
+      var d = time.getDate();  
+      return y +'-'+this._add(m)+'-'+this._add(d); 
+    }
     render(){
         const {mode,showModal,imgURL, title,data,dataPaper ,showTable ,schools ,schoolWarning,cityWarning,gradeWarning,classWarning} = this.state;
         const children = [];
@@ -214,7 +222,7 @@ class StudentInfoEntry extends React.Component{
         data.map((item,index)=>{
             dataSource.push({
                 keyc : index,
-                createTime : item.createTime,
+                createTime : this._getDate(item.createTime),
                 learnID : item.learnID,
                 grade : item.grade,
                 class : item.class,
