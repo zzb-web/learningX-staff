@@ -37,14 +37,14 @@ class GradeClassCommon extends React.Component{
            <div>
                <div>
                     <span className='book-title'><span style={{color:'red'}}>*</span>年级:</span>
-                    <Select style={gradeWarning ? {width:360,marginLeft:30,border:'1px solid red'}:{width:360,marginLeft:30}} 
+                    <Select style={gradeWarning ? {width:300,marginLeft:20,border:'1px solid red'}:{width:300,marginLeft:20}} 
                                             onChange={this.classMsgInput.bind(this,0)}>
                         {calss.map((item,index)=><Option key={index} value={item}>{item}</Option>)}
                     </Select>
                 </div>
                 <div style={{marginTop:30}}>
                     <span className='book-title'><span style={{color:'red'}}>*</span>班级:</span>
-                    <InputNumber max={1000} min={1} style={classWarning ?{width:360,marginLeft:30,borderColor:'red'}:{width:360,marginLeft:30}}
+                    <InputNumber max={1000} min={1} style={classWarning ?{width:300,marginLeft:20,borderColor:'red'}:{width:300,marginLeft:20}}
                                                  onChange={this.classMsgInput.bind(this,1)}/>
                 </div>
            </div>

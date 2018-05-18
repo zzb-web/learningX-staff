@@ -18,7 +18,7 @@ const { Header, Sider, Content} = Layout;
 class Navigation extends Component {
   state = {
     collapsed: false,
-    key: '2',
+    key: '1',
     showUser : 'none',
     contentHeight :　0,
     userMsg : {},
@@ -39,12 +39,12 @@ class Navigation extends Component {
   }
   usermsgHandle(){
     this.setState({
-      key : '3'
+      key : ''
     })
   }
   passwordHandle(){
     this.setState({
-      key : '4'
+      key : ''
     })
   }
   userMouseEnter(e){
@@ -89,6 +89,7 @@ class Navigation extends Component {
   }
   render() {
     const {userMsg,userName,phone,gender,school,classId,grade,hideMenu} = this.state;
+    const {staffId} = sessionStorage
     return (
       <Layout>
         <Sider
@@ -161,7 +162,7 @@ class Navigation extends Component {
               <div className='user-icon-content'>
                 <Icon type="user" className='user-icon'/>
               </div>
-              <div className='user-name'>{userName ||userMsg.learnId}</div>
+              <div className='user-name'>{userName ||staffId}</div>
             </div>
             <ul className='user-content' onMouseLeave={this.userMouseLeave.bind(this)} style={{display:this.state.showUser}}>
               <li onClick={this.usermsgHandle.bind(this)}>个人信息</li>

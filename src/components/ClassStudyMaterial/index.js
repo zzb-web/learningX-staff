@@ -103,9 +103,9 @@ class ClassStudyMaterial extends React.Component {
                                         cityWarning={cityWarning}
                                         cityWarningHandle={this.cityWarningHandle.bind(this)}/>
                         <div style={{marginTop:30}}>
-                            <span>学校全称:</span>
+                            <span className='book-title'>学校全称:</span>
                             <Select
-                                style={{ width:320,marginLeft:30}}
+                                style={{ width:300,marginLeft:20}}
                                 onChange={this.schoolMsgInput.bind(this)}
                             >
                                 {children}
@@ -321,7 +321,7 @@ class Book extends React.Component{
                     <Select onChange={this.printingInput.bind(this,1)} style={{width:90}}>{month}</Select><span className='span-style'>月</span>
                     <span className='span-style'>第</span><Select onChange={this.printingInput.bind(this,2)} style={{width:90}}>{version}</Select><span className='span-style' style={{width:60}}>次印刷</span>
 
-                    <Button type='primary' style={{width:150,marginLeft:40}} onClick={this.searchHandle.bind(this)}>搜索</Button>
+                    <Button type='primary' style={{width:150,marginLeft:30}} onClick={this.searchHandle.bind(this)}>搜索</Button>
                 </div>
                 {
                    showTable ? <div style={{marginTop:30}}>
@@ -340,7 +340,7 @@ class Book extends React.Component{
                         onCancel={this.modalCancel.bind(this)}
                         wrapClassName="vertical-center-modal"
                         >
-                    <div>
+                    <div style={{overflowX:'auto'}}>
                         <img src={imgURL}/>
                     </div>
                 </Modal>

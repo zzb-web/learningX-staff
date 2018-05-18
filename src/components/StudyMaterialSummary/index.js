@@ -393,10 +393,10 @@ class StudyMaterialSummary extends React.Component{
                                         cityWarning={cityWarning}
                                         cityWarningHandle={this.cityWarningHandle.bind(this)}/>
                             <div style={{marginTop:30}}>
-                                <span><span style={{color:'red'}}>*</span>学校全称:</span>
+                                <span className='book-title'><span style={{color:'red'}}>*</span>学校全称:</span>
                                 <Select
                                     combobox
-                                    style={schoolWarning ? {width:360,marginLeft:30,border:'1px solid red'}:{width:360,marginLeft:30}}
+                                    style={schoolWarning ? {width:300,marginLeft:20,border:'1px solid red'}:{width:300,marginLeft:20}}
                                     placeholder="填写学校的规范全称"
                                     onChange={this.schoolNameInput.bind(this)}
                                     tabIndex={0}

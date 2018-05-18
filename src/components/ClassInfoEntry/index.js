@@ -236,10 +236,10 @@ class ClassInfoEntry extends React.Component{
                                         cityWarning={cityWarning}
                                         cityWarningHandle={this.cityWarningHandle.bind(this)}/>
                                     <div style={{marginTop:30}}>
-                                        <span>学校全称:</span>
+                                        <span className='book-title'>学校全称:</span>
                                         <Select
                                             combobox
-                                            style={schoolWarning ? {width:360,marginLeft:30,border:'1px solid red'}:{width:360,marginLeft:30}}
+                                            style={schoolWarning ? {width:300,marginLeft:20,border:'1px solid red'}:{width:300,marginLeft:20}}
                                             placeholder="填写学校的规范全称"
                                             onChange={this.schoolNameInput.bind(this)}
                                             tabIndex={0}
@@ -248,8 +248,8 @@ class ClassInfoEntry extends React.Component{
                                         </Select>
                                     </div>
                                     <div style={{marginTop:30}}>
-                                        <span style={{visibility:'hidden'}}>隐藏隐藏:</span>
-                                        <Button style={{width:360,marginLeft:30}} onClick={this.showClassHandle.bind(this)}>
+                                        <span className='book-title'></span>
+                                        <Button style={{width:300,marginLeft:20}} onClick={this.showClassHandle.bind(this)}>
                                             <Icon type="plus" />添加班级
                                         </Button>
                                     </div>
@@ -271,8 +271,8 @@ class ClassInfoEntry extends React.Component{
                                                     classWarningHandle = {this.classWarningHandle.bind(this)}
                                                     />
                                     <div style={{marginTop:30}}>
-                                        <span style={{visibility:'hidden'}}>隐藏隐藏:</span>
-                                        <Button style={{width:360,marginLeft:30}} onClick={this.showStudentHandle.bind(this)}>
+                                        <span className='book-title'></span>
+                                        <Button style={{width:300,marginLeft:20}} onClick={this.showStudentHandle.bind(this)}>
                                             <Icon type="plus" />添加学生
                                         </Button>
                                     </div>
@@ -289,7 +289,7 @@ class ClassInfoEntry extends React.Component{
                                 <Col span={20}>
                                     
                                         <span>学生名单:</span>
-                                        <Upload style={{marginLeft:30}}
+                                        <Upload style={{marginLeft:20}}
                                                 accept=".xlsx"
                                                 action="/api/v3/staffs/studentFile/"
                                                 // beforeUpload={(info)=>this.beforeUpload(info,index)}
