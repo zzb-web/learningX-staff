@@ -114,6 +114,10 @@ class StudyMaterialSummary extends React.Component{
                     this.setState({
                         data : resp.data,
                     })
+                }else{
+                    this.setState({
+                        data : [],
+                    })
                 }
             }).catch(err=>{
                 
@@ -122,6 +126,11 @@ class StudyMaterialSummary extends React.Component{
                 if(resp.status === 200){
                     this.setState({
                         dataPaper : resp.data,
+                        showTable : true
+                    })
+                }else{
+                    this.setState({
+                        dataPaper :[],
                         showTable : true
                     })
                 }
@@ -162,6 +171,10 @@ class StudyMaterialSummary extends React.Component{
                             this.setState({
                                 data : resp.data,
                             })
+                        }else{
+                            this.setState({
+                                data : []
+                            })
                         }
                     }).catch(err=>{
                         
@@ -184,6 +197,10 @@ class StudyMaterialSummary extends React.Component{
                         if(resp.status === 200){
                             this.setState({
                                 dataPaper : resp.data,
+                            })
+                        }else{
+                            this.setState({
+                                dataPaper : []
                             })
                         }
                     }).catch(err=>{
