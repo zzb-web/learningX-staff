@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { withRouter } from 'react-router';
-import {Row, Col, Select, Button, InputNumber,Table,Popconfirm,Checkbox ,message} from 'antd';
+import {Row, Col, Select, Button, InputNumber,Table,Popconfirm,Checkbox ,message,Switch} from 'antd';
 import {Get , Post} from '../../fetch/data.js';
 const {Option} = Select;
 class ClassErrorTest extends React.Component{
@@ -15,10 +15,13 @@ class ClassErrorTest extends React.Component{
         showSelectStudent : true,
         showSelectContent : false,
         showDownContent : false,
+        showStudentDetail : false,
         category : 'newestWrongProblems',
         materials : [],
+        papers : [],
         chooseAgain : false,
         requestData : [],
+        paperData : [],
         showMaterials : true,
         detailData : [],
         showFail : false,
@@ -40,7 +43,9 @@ class ClassErrorTest extends React.Component{
         schoolName : '',
         pickDownFlag : true,
         markFlag : false,
-        addDataFlag : true
+        addDataFlag : true,
+        selectAllStundent : true,
+        selectedLearnIDs : []
     }
     componentWillMount(){
         Get('/api/v3/staffs/schools/')
@@ -65,14 +70,18 @@ class ClassErrorTest extends React.Component{
                 startPage: 0,
                  endPage: 0
             },
-            {
-                bookID : '',
-                startPage: 0,
-                endPage: 0
-            }
+            // {
+            //     bookID : '',
+            //     startPage: 0,
+            //     endPage: 0
+            // }
         ]
+        var paperData = [{
+            paperID : ''
+        }]
         this.setState({
-            requestData : requestData
+            requestData : requestData,
+            paperData : paperData
         })
     }
     schoolSelect(value){
@@ -123,10 +132,15 @@ class ClassErrorTest extends React.Component{
                 resp.data.learnIDs.map((item,index)=>{
                     learnIDName[item.learnID] = item.name
                 })
+                let learnIDsHandle = resp.data.learnIDs;
+                learnIDsHandle.map((item,index)=>{
+                    item.status = true;
+                })
+                
                 this.setState({
-                    learnIDs : resp.data.learnIDs,
-                    showSelectStudent : false,
-                    showSelectContent : true,
+                    learnIDs : learnIDsHandle,
+                    showFail : false,
+                    showStudentDetail : true,
                     allStudentNum : resp.data.total
                 })
             }
@@ -137,9 +151,21 @@ class ClassErrorTest extends React.Component{
         Get(`/api/v3/staffs/classes/books/?${msg}`)
         .then(resp=>{
             if(resp.status === 200){
-                console.log(resp.data)
+                // console.log(resp.data)
                 this.setState({
                     materials:resp.data,
+                })
+            }
+        }).catch(err=>{
+
+        })
+
+        Get(`/api/v3/staffs/classes/papers/?${msg}`)
+        .then(resp=>{
+            if(resp.status === 200){
+                // console.log(resp.data)
+                this.setState({
+                    papers:resp.data,
                 })
             }
         }).catch(err=>{
@@ -204,6 +230,15 @@ class ClassErrorTest extends React.Component{
                 requestData : requestData
             })
     }
+    addPapers(){
+        var {paperData} = this.state;
+        paperData.push({
+                paperID : ''
+            })
+            this.setState({
+                paperData
+            })
+    }
     maxNumChange(value){
         this.setState({
             maxNum : value
@@ -227,8 +262,8 @@ class ClassErrorTest extends React.Component{
             setTimeout(()=>{
                 this.setState({showSure:true})
         },500)
-      const {category , requestData, maxNum,sort,paper , learnIDs, allStudentNum} = this.state;
-      console.log(category , requestData, maxNum,sort,paper)
+      const {category , requestData, maxNum,sort,paper , selectedLearnIDs, allStudentNum,paperData} = this.state;
+    //   console.log(category , requestData, maxNum,sort,paper)
       if(maxNum === 0 || maxNum === undefined){
           this.setState({
             showFail : true,
@@ -255,16 +290,24 @@ class ClassErrorTest extends React.Component{
             thisRequestData.push(item)
         }
       })
+      let hasSelectPaperIds = [];
+      paperData.map((item,index)=>{
+          if(item.paperID !== ''){
+              hasSelectPaperIds.push(item.paperID)
+          }
+      })
       var postMsg = {
         sort : sort,
         paper :paper,
         max: maxNum,
-        bookPage:thisRequestData
+        bookPage:thisRequestData,
+        paperIDs : hasSelectPaperIds
         }
+        // console.log(selectedLearnIDs,allStudentNum)
       if(requestFlag){
         var allDetailData  = {};
         var allReturnData = {};
-        learnIDs.map((item,idnex)=>{
+        selectedLearnIDs.map((item,idnex)=>{
             var url = `/api/v3/staffs/students/${item.learnID}/${category}/`;
             Post(url,postMsg)
             .then((response)=>{
@@ -303,7 +346,7 @@ class ClassErrorTest extends React.Component{
               }
             })
             .catch(function (error) {
-              console.log(error);
+            //   console.log(error);
             });
         })
         
@@ -319,14 +362,14 @@ class ClassErrorTest extends React.Component{
                        pickDownFlag : true,
                   })
                   const {allStudentNum} = this.state;
-                  console.log(allStudentNum)
-                  var times = allStudentNum*100;
-                  console.log(times)
+                //   console.log(allStudentNum)
+                  var times = (allStudentNum+10)*100;
+                //   console.log(times)
             setTimeout(()=>{
                 var fileDataArray = [];
                 var answerDataArray = [];
                 for(var key in allDetailData){
-                    console.log(key)
+                    // console.log(key)
                     var obj = {}
                     obj.learnID = key
                     obj.params = this._getFileData(allDetailData[key],paper)
@@ -337,13 +380,13 @@ class ClassErrorTest extends React.Component{
                     obj2.params = this._getAnswerData(allDetailData[key],paper)
                     answerDataArray.push(obj2)
                 }
-                console.log(allDetailData,fileDataArray.length)
+                // console.log(allDetailData,fileDataArray.length)
                 const {allFileData,allAnswerData} = this.state;
                 
                 (async () => {
                     for(let i=0;i<fileDataArray.length;i++) {
                         const {generateFlag} = this.state;
-                        console.log(generateFlag)
+                        // console.log(generateFlag)
                         if(generateFlag){
                             await Post(`/api/v3/staffs/students/${fileDataArray[i].learnID}/getProblemsFile/`,fileDataArray[i].params)
                             .then(resp=>{
@@ -444,7 +487,7 @@ class ClassErrorTest extends React.Component{
 
         Post('/api/v3/staffs/students/getProbsAnsFilesZip/',haslearnIDs)
                                 .then(resp=>{
-                                    console.log(resp.data.URL)
+                                    // console.log(resp.data.URL)
                                     window.open(resp.data.URL);
                                     // this._downloadFile(resp.data.URL)
                                 }).catch(err=>{
@@ -458,8 +501,8 @@ class ClassErrorTest extends React.Component{
         form.setAttribute("target","")
         form.setAttribute("method","get")
         form.setAttribute("action",url)
-        console.log(form)
-        console.log(document.getElementsByTagName('body'))
+        // console.log(form)
+        // console.log(document.getElementsByTagName('body'))
         document.getElementsByTagName('body').appendChild(form)
         document.getElementsByName('form').submit();
         // form.submit();
@@ -477,7 +520,7 @@ class ClassErrorTest extends React.Component{
         })
     }
  _getAnswerData(currentData,paper){
-     console.log(currentData)
+    //  console.log(currentData)
     var dataObj = {};
     var dataParams = []
     currentData.map((item,i)=>{
@@ -501,7 +544,7 @@ class ClassErrorTest extends React.Component{
         }else{
             paperString = 'A4';
         }
-        console.log(dataObj)
+        // console.log(dataObj)
         for(var key in dataObj){
             problems.push({
                 problemId: dataObj[key].problemId,
@@ -514,7 +557,7 @@ class ClassErrorTest extends React.Component{
             problems : problems
         }
     }
-    console.log(dataParams)
+    // console.log(dataParams)
     return dataParams;
  }
  _getFileData(currentData,paper){
@@ -579,7 +622,7 @@ class ClassErrorTest extends React.Component{
     }
  getErrorToptic(learnID){
             const {allFileData,allReturnData} = this.state;
-            console.log(allReturnData)
+            // console.log(allReturnData)
             var detail = JSON.stringify(allReturnData[learnID]);
             var timestamp = Date.parse(new Date())/1000
             var type;
@@ -591,14 +634,103 @@ class ClassErrorTest extends React.Component{
                     detail : detail
                 }]
                 Post(url,postMsg).then(resp=>{
-                    console.log(resp)
+                    // console.log(resp)
                 }).catch(err=>{
-                    console.log(err)
+                    // console.log(err)
                 })
     }
+    paperPageChange(index,value){
+        const {paperData} = this.state;
+        paperData[index].paperID = value;
+        this.setState({
+            paperData
+        })
+    }
+    chooseAllStudent(value){
+        const {learnIDs} = this.state;
+            learnIDs.map((item,index)=>{
+                item.status = value
+            })
+            // console.log(learnIDs)
+        this.setState({
+            learnIDs:learnIDs ,
+            selectAllStundent : value
+        })
+    }
+    chooseStudent(index,value){
+        const {learnIDs} = this.state;
+        learnIDs[index].status = value;
+        this.setState({
+            learnIDs
+        })
+    }
+    selectStudentSure(){
+        const {learnIDs} = this.state;
+        let selectedLearnIDs = [];
+        learnIDs.map((item,index)=>{
+            if(item.status){
+                selectedLearnIDs.push(item)
+            }
+        })
+        this.setState({
+            selectedLearnIDs : selectedLearnIDs,
+            allStudentNum : selectedLearnIDs.length,
+            showSelectStudent : false,
+            showStudentDetail : false,
+            showSelectContent : true,
+        })
+    }
     render(){
-        const {pickDownFlag,schoolName,grade,classNum,allStudentNum ,showDetail,learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
-             requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData,allAnswerData,pickDownURL} = this.state;
+        const {papers,paperData,pickDownFlag,schoolName,grade,classNum,allStudentNum ,showDetail,learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
+             requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData,allAnswerData,pickDownURL,
+             showStudentDetail,selectAllStundent} = this.state;   
+        let papersHandle =[];
+        let hasSelectPaperIds = [];
+        paperData.map((item,index)=>{
+            if(item.paperID !== ''){
+                hasSelectPaperIds.push(item.paperID)
+            }
+        })
+        if(hasSelectPaperIds.length === 0){
+            papersHandle = papers;
+        }else{
+            papers.map((item,index)=>{
+                if(hasSelectPaperIds.indexOf(item.paperID) === -1){
+                    papersHandle.push(item)
+                }
+            })
+        }
+        const columns_student = [
+            {
+                title : '学习号',
+                dataIndex : 'learnID',
+                key : 'learnID',
+                width:'30%'
+            },
+            {
+                title : '姓名',
+                dataIndex : 'name',
+                key : 'name',
+                width:'30%'
+            },
+            {
+                title : <Switch checkedChildren="全 选" unCheckedChildren="全不选" onChange={this.chooseAllStudent.bind(this)} checked={selectAllStundent}/>,
+                dataIndex : 'status',
+                key : 'status',
+                width:'40%'
+            },
+        ]
+        let dataSource_student = [];
+        learnIDs.map((item,index)=>{
+            dataSource_student.push({
+                key : index,
+                learnID : item.learnID,
+                name : item.name,
+                status : <Switch checkedChildren="√" unCheckedChildren="" onChange={this.chooseStudent.bind(this,index)} checked={item.status}/>,
+            })
+        })
+
+
         const allGrage = ['一','二','三','四','五','六','七','八','九'];
         const columns = [
             {
@@ -621,7 +753,7 @@ class ClassErrorTest extends React.Component{
             }
         ]
         const dataSource = [];
-        console.log(allFileData)
+        // console.log(allFileData)
         for(var key in allFileData){
             var fileDownload;
             var answerDownload;
@@ -686,7 +818,7 @@ class ClassErrorTest extends React.Component{
                                     <Button type="primary" 
                                             size='large' 
                                             style={{width:240,height:35,marginLeft:'10px'}} 
-                                            onClick={this.getStudentMsg.bind(this)}>确定</Button>
+                                            onClick={this.getStudentMsg.bind(this)}>选择学生</Button>
                                 </div>
                             </div>
                             {
@@ -750,12 +882,34 @@ class ClassErrorTest extends React.Component{
                     <Col span={2}></Col>
                     <Col span={13}>
                         {
+                            showStudentDetail ? <div>
+                                <Table columns={columns_student}
+                                                bordered={true}
+                                                pagination={false}
+                                                dataSource={dataSource_student}
+                                                scroll={{x:false,y:300}}/>
+                                <div className='addBtn'>
+                                    <Button type="primary" 
+                                            size='large' 
+                                            style={{width:240,height:35,marginLeft:'10px'}}
+                                            onClick={this.selectStudentSure.bind(this)}>确定</Button>
+                                </div>
+                                
+                            </div> : null
+                        }
+                        {
                             showSelectContent ? <div className='category-detail' style={showMaterials?{display:'block'}:{display:'none'}}>
                                                     <div className='materials-content'>
                                                         {
                                                         requestData.map((item,index)=><AddLearningMaterials key={index} materials={materials} pageChange={this.pageChange.bind(this, index)}/>)
                                                         }
                                                         <div className='addBtn'><Button icon="plus" style={{width:200}} onClick={this.addMaterials.bind(this)}>添加</Button></div>
+                                                    </div>
+                                                    <div className='papers-content'>
+                                                        {
+                                                        paperData.map((item,index)=><AddPapers key={index} papers={papersHandle} paperPageChange={this.paperPageChange.bind(this,index)}/>)
+                                                        }
+                                                        <div className='addBtn'><Button icon="plus" style={{width:200}} onClick={this.addPapers.bind(this)}>添加</Button></div>
                                                     </div>
                                                     <div className='addBtn'>
                                                         <Button type="primary" 
@@ -840,6 +994,23 @@ class AddLearningMaterials extends React.Component{
                                                                   </Select></span>
                 <span className='subsection'><span>开始页码:</span><InputNumber onChange={this.startChage.bind(this)}/></span>
                 <span className='subsection'><span>结束页码:</span><InputNumber onChange={this.endChange.bind(this)}/></span>
+            </div>
+        )
+    }
+}
+
+class AddPapers extends React.Component{
+    selectPapers(value){
+        this.props.paperPageChange(value)
+    }
+    render(){
+        const {name,papers} = this.props;
+        // console.log(papers)
+        return(
+            <div style={{marginTop:20}}>
+                <span className='subsection'><span><span style={{visibility:'hidden'}}>试卷</span>试卷:</span><Select onChange={this.selectPapers.bind(this)} style={{width:'30%'}}>
+                                                                    {papers.map((item,index)=><Option value={item.paperID} key={index}>{item.name}</Option>)}
+                                                                  </Select></span>
             </div>
         )
     }

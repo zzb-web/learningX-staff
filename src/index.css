@@ -58,11 +58,13 @@ body {
 .subsection>span {
   margin-right: 10px;
 }
-.materials-content{
-  height: 400px;
+.materials-content,.papers-content{
+  height: 200px;
   width: 100%;
   overflow-y: auto;
+  margin-bottom: 10px;
 }
+
 .addBtn{
   width: 100%;
   text-align: center;
