@@ -6,6 +6,7 @@ import {Get , Post} from '../../fetch/data.js';
 const {Option} = Select;
 class ClassErrorTest extends React.Component{
     state={
+        contentHeight : 0,
         schools : [],
         schoolID : '',
         grade : '',
@@ -16,6 +17,7 @@ class ClassErrorTest extends React.Component{
         showSelectContent : false,
         showDownContent : false,
         showStudentDetail : false,
+        showLeftLine : false,
         category : 'newestWrongProblems',
         materials : [],
         papers : [],
@@ -141,6 +143,7 @@ class ClassErrorTest extends React.Component{
                     learnIDs : learnIDsHandle,
                     showFail : false,
                     showStudentDetail : true,
+                    showLeftLine : true,
                     allStudentNum : resp.data.total
                 })
             }
@@ -680,10 +683,23 @@ class ClassErrorTest extends React.Component{
             showSelectContent : true,
         })
     }
+    componentDidMount(){
+        let that = this;
+        let allHeight = document.documentElement.clientHeight;
+        this.setState({
+          contentHeight :　allHeight-150
+        })
+        window.onresize = function(){
+          let allHeight = document.documentElement.clientHeight;
+          that.setState({
+            contentHeight :　allHeight-150
+          })
+        }
+      }
     render(){
         const {papers,paperData,pickDownFlag,schoolName,grade,classNum,allStudentNum ,showDetail,learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
              requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData,allAnswerData,pickDownURL,
-             showStudentDetail,selectAllStundent} = this.state;   
+             showStudentDetail,selectAllStundent,contentHeight,showLeftLine} = this.state;   
         let papersHandle =[];
         let hasSelectPaperIds = [];
         paperData.map((item,index)=>{
@@ -705,7 +721,8 @@ class ClassErrorTest extends React.Component{
                 title : '学习号',
                 dataIndex : 'learnID',
                 key : 'learnID',
-                width:'30%'
+                width:'30%',
+                sorter: (a, b) => a.learnID - b.learnID
             },
             {
                 title : '姓名',
@@ -714,7 +731,7 @@ class ClassErrorTest extends React.Component{
                 width:'30%'
             },
             {
-                title : <Switch checkedChildren="全 选" unCheckedChildren="全不选" onChange={this.chooseAllStudent.bind(this)} checked={selectAllStundent}/>,
+                title : <Switch style={{width:60}} checkedChildren="全 选" unCheckedChildren="全不选" onChange={this.chooseAllStudent.bind(this)} checked={selectAllStundent}/>,
                 dataIndex : 'status',
                 key : 'status',
                 width:'40%'
@@ -726,7 +743,7 @@ class ClassErrorTest extends React.Component{
                 key : index,
                 learnID : item.learnID,
                 name : item.name,
-                status : <Switch checkedChildren="√" unCheckedChildren="" onChange={this.chooseStudent.bind(this,index)} checked={item.status}/>,
+                status : <Switch style={{width:60}} checkedChildren="√" unCheckedChildren="" onChange={this.chooseStudent.bind(this,index)} checked={item.status}/>,
             })
         })
 
@@ -879,7 +896,9 @@ class ClassErrorTest extends React.Component{
                         </div> : null
                         }
                     </Col>
-                    <Col span={2}></Col>
+                    <Col span={2}>
+                        {showLeftLine ? <div className='left-line' style={{height:contentHeight}}></div> : null}
+                    </Col>
                     <Col span={13}>
                         {
                             showStudentDetail ? <div>
@@ -888,7 +907,7 @@ class ClassErrorTest extends React.Component{
                                                 pagination={false}
                                                 dataSource={dataSource_student}
                                                 scroll={{x:false,y:300}}/>
-                                <div className='addBtn'>
+                                <div className='sureBtn'>
                                     <Button type="primary" 
                                             size='large' 
                                             style={{width:240,height:35,marginLeft:'10px'}}
@@ -903,15 +922,16 @@ class ClassErrorTest extends React.Component{
                                                         {
                                                         requestData.map((item,index)=><AddLearningMaterials key={index} materials={materials} pageChange={this.pageChange.bind(this, index)}/>)
                                                         }
-                                                        <div className='addBtn'><Button icon="plus" style={{width:200}} onClick={this.addMaterials.bind(this)}>添加</Button></div>
+                                                        <div className='addBtn'><Button icon="plus" style={{width:'34%'}} onClick={this.addMaterials.bind(this)}>添加</Button></div>
                                                     </div>
+                                                    <div className='under-line'></div>
                                                     <div className='papers-content'>
                                                         {
                                                         paperData.map((item,index)=><AddPapers key={index} papers={papersHandle} paperPageChange={this.paperPageChange.bind(this,index)}/>)
                                                         }
-                                                        <div className='addBtn'><Button icon="plus" style={{width:200}} onClick={this.addPapers.bind(this)}>添加</Button></div>
+                                                        <div className='addBtn'><Button icon="plus" style={{width:'34%'}} onClick={this.addPapers.bind(this)}>添加</Button></div>
                                                     </div>
-                                                    <div className='addBtn'>
+                                                    <div className='sureBtn'>
                                                         <Button type="primary" 
                                                                 size='large' 
                                                                 style={{width:240,height:35,marginLeft:'10px'}} 
