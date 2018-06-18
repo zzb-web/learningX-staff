@@ -70,18 +70,23 @@ const StudentInfoEntryComponent = Loadable({
   }
 }
 
+const BatchInputComponent = Loadable({
+  loader: () => import('../BatchInput/index.js'),
+  loading: MyLoadingComponent,
+});
+ class BatchInputLoadable extends React.Component {
+  render() {
+    return <BatchInputComponent/>;
+  }
+}
+
+
 export {
-        // HomepageLoadable,
-        // ErrorSumLoadable , 
-        // InfoInputLoadable ,
         PassWordFormLoadable,
-        // ReviewOfErrorLoadable,
-        // QuestionTestLoadable,
-        // ErrorDetectionLoadable,
-        // TestDetectionLoadable,
         ClassErrorTestLoadable,
         ClassInfoEntryLoadable,
         ClassStudyMaterialLoadable,
         StudyMaterialSummaryLoadable,
-        StudentInfoEntryLoadable
+        StudentInfoEntryLoadable,
+        BatchInputLoadable
       }
