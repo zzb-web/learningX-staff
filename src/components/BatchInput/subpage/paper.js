@@ -8,13 +8,16 @@ class Paper extends React.Component{
         this.state={
             papers : props.papers,
             learnID : props.learnID,
-            paperID : '',
+            paperID : props.paperID,
+            paperDate : props.paperDate
         }
     }
     componentWillReceiveProps(nextProps){
       this.setState({
         papers : nextProps.papers,
-        learnID : nextProps.learnID
+        learnID : nextProps.learnID,
+        paperID : nextProps.paperID,
+        paperDate : nextProps.paperDate
       })
     }
     dateChange(date,dateString){
@@ -23,22 +26,31 @@ class Paper extends React.Component{
         this.props.getPaperDate(time);
     }
     paperChange(value){
-        this.setState({
-            paperID : value
-        })
+        // this.setState({
+        //     paperID : value
+        // })
+        this.props.getPaperID(value)
     }
     sureHandle(){
-        const {paperID ,time,learnID} = this.state;
-        const msg = `paperID=${paperID}`;
-        Get(`/api/v3/staffs/students/${learnID}/paperProblems/?${msg}`).then(resp=>{
-            this.props.getPaperData(resp.data)
-        }).catch(err=>{
+        const {paperID ,paperDate,learnID} = this.state;
+        console.log(paperID , paperDate)
+        if(paperDate !== '' && paperDate !==undefined && paperID !== '' && paperID !== undefined){
+            const msg = `paperID=${paperID}`;
+            Get(`/api/v3/staffs/students/${learnID}/paperProblems/?${msg}`).then(resp=>{
+                if(resp.status === 200){
+                    this.props.getPaperData(resp.data,true);
+                    this.props.showWarningHandle(10);
+                }
+            }).catch(err=>{
 
-        })
+            })
+        }else{
+            this.props.showWarningHandle(2)
+        }
+        
     }
     render(){
-        const {papers} = this.state;
-        console.log(papers)
+        const {papers,paperID,paperDate} = this.state;
         let children = [];
         papers.map((item,index)=>{
             children.push(
@@ -51,11 +63,12 @@ class Paper extends React.Component{
                     <span className='common-title'>做题时间:</span>
                     <DatePicker placeholder='大概什么时候做的卷子？'
                                 style={{width:240,marginLeft:10}}
-                                onChange={this.dateChange.bind(this)}/>
+                                onChange={this.dateChange.bind(this)}
+                                />
                 </div>
                 <div style={{marginTop:30}}>
                     <span className='common-title'>试卷名称:</span>
-                    <Select style={{width:240,marginLeft:10}} onChange={this.paperChange.bind(this)}>
+                    <Select style={{width:240,marginLeft:10}} onChange={this.paperChange.bind(this)} value={paperID}>
                         {children}
                     </Select>
                 </div>

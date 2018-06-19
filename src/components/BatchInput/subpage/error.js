@@ -8,12 +8,13 @@ class Error extends React.Component{
         this.state={
             errorQues : props.errorQues,
             learnID : props.learnID,
-            errDate :'',
+            errDate :props.errDate,
         }
     }
     componentWillReceiveProps(nextProps){
         this.setState({
-            errorQues : nextProps.errorQues
+            errorQues : nextProps.errorQues,
+            errDate : nextProps.errDate
         })
     }
     _timestampToTime(timestamp) {
@@ -35,17 +36,22 @@ class Error extends React.Component{
     }
     errorSure(){
         const {errDate,learnID} = this.state;
-        Get(`/api/v3/staffs/students/${learnID}/uploadTasks/${errDate}/`).then(resp=>{
-            if(resp.status ===200){
-                let wrongProblems = resp.data.wrongProblems;
-                this.props.getWrongProblems(wrongProblems)
-            }
-        }).catch(err=>{
-            
-        })
+        if(errDate !== '' && errDate !== undefined && errDate !== null){
+            Get(`/api/v3/staffs/students/${learnID}/uploadTasks/${errDate}/`).then(resp=>{
+                if(resp.status ===200){
+                    let wrongProblems = resp.data.wrongProblems;
+                    this.props.getWrongProblems(wrongProblems,true)
+                    this.props.showWarningHandle(10)
+                }
+            }).catch(err=>{
+                
+            })
+        }else{
+            this.props.showWarningHandle(0)
+        }
     }
     render(){
-        const {errorQues} = this.state;
+        const {errorQues,errDate} = this.state;
         let children = [];
         errorQues.map((item,index)=>{
             children.push(
@@ -56,7 +62,10 @@ class Error extends React.Component{
             <div style={{marginTop:40}}>
                 <div>
                     <span className='common-title'>纠错本日期:</span>
-                    <Select style={{width:240,marginLeft:10}} onChange={this.errDateChange.bind(this)}>
+                    <Select style={{width:240,marginLeft:10}} 
+                            placeholder='选择纠错本的日期'
+                            onChange={this.errDateChange.bind(this)}
+                            value={errDate}>
                         {children}
                     </Select>
                 </div>

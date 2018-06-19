@@ -33,12 +33,18 @@ class BatchInput extends React.Component{
             errorQues : [],
             showMarkMsg : false,
             wrongProblems :[],
-            errDate : 0,
+            errDate : '',
             materials : [],
             homeworkData : [],
             papers : [],
             paperData : [],
-            paperDate : ''
+            paperDate : '',
+            showErrorTable : false,
+            showHomeworkTable : false,
+            showPaperTable : false,
+            bookID : '',
+            page : '',
+            paperID : ''
         }
     }
     componentWillMount(){
@@ -199,7 +205,10 @@ class BatchInput extends React.Component{
     }
     handleModeChange(e){
         const mode = e.target.value;
-        this.setState({ mode });
+        this.setState({ 
+            mode,
+            showWarning : false
+         });
       }
     toMark(){
         const {learnID ,schoolID, grade , classNum} = this.state;
@@ -255,9 +264,10 @@ class BatchInput extends React.Component{
         })
 
     }
-    getWrongProblems(data){
+    getWrongProblems(data,flag){
         this.setState({
-            wrongProblems : data
+            wrongProblems : data,
+            showErrorTable : flag
         })
     }
     getDate(time){
@@ -265,25 +275,91 @@ class BatchInput extends React.Component{
             errDate : time
         })
     }
-    getHomeworkData(data){
+    getHomeworkData(data,flag){
         this.setState({
-            homeworkData : data
+            homeworkData : data,
+            showHomeworkTable : flag
         })
     }
-    getPaperData(data){
+    getPaperData(data,flag){
         this.setState({
-            paperData : data
+            paperData : data,
+            showPaperTable : flag
         })
     }
     getPaperDate(data){
         this.setState({
-            paperDate : data
+            paperDate : data,
         })
+    }
+    getBookID(value){
+        this.setState({
+            bookID : value
+        })
+    }
+    getPage(value){
+        this.setState({
+            page : value
+        })
+    }
+    getPaperID(value){
+        this.setState({
+            paperID : value
+        })
+    }
+    tableSave(data){
+        if(data === 0){
+            this.setState({
+                errDate : '',
+                showErrorTable : false
+            })
+        }else if(data === 1){
+            this.setState({
+                bookID : '',
+                page : '',
+                showHomeworkTable : false
+            })
+        }else if(data === 2){
+            this.setState({
+                showPaperTable : false,
+                paperDate : '',
+                paperID : ''
+            })
+        }
+    }
+    showWarningHandle(data){
+        console.log(data)
+        let msg = ''
+        if(data === 0){
+            msg = '请选择纠错本日期'
+            this.setState({
+                showWarning : true,
+            })
+        }else if(data === 1){
+            msg = '请选择学习资料和页码'
+            this.setState({
+                showWarning : true,
+            })
+        }else if(data === 2){
+            msg = '请选择日期和试卷'
+            this.setState({
+                showWarning : true,
+            })
+        }else if(data === 10){
+            this.setState({
+                showWarning : false,
+            })
+        }
+        this.setState({
+            warningMsg : msg
+        })
+        
     }
     render(){
         const {schools,learnIDs,showStudentDetail,selectAllStundent,showFirstPage,showSecondPage,mode,
                 errorQues,name,learnID,showMarkMsg,wrongProblems,errDate,materials,homeworkData,
-                papers,paperData,showWarning,warningMsg,paperDate} = this.state;
+                papers,paperData,showWarning,warningMsg,paperDate,showErrorTable,showHomeworkTable,
+            bookID,page,showPaperTable,paperID} = this.state;
         const allGrage = ['一','二','三','四','五','六','七','八','九'];
         const columns_student = [
             {
@@ -382,11 +458,11 @@ class BatchInput extends React.Component{
                         <Col span={11}>
                         <div>
                             <span>学习号:</span>
-                            <InputNumber style={{width:160,marginLeft:10}} value={learnID} onChange={this.markLearnId.bind(this)}/> 
-                            <span style={{marginLeft:40}}>姓名:</span>
-                            <Input style={{width:160,marginLeft:10}} value={name} onChange={this.markName.bind(this)}/> 
+                            <InputNumber style={{width:120,marginLeft:10}} value={learnID} onChange={this.markLearnId.bind(this)}/> 
+                            <span style={{marginLeft:20}}>姓名:</span>
+                            <Input style={{width:120,marginLeft:10}} value={name} onChange={this.markName.bind(this)}/> 
                             <Button type='primary' 
-                                    style={{width:120,marginLeft:20}}
+                                    style={{width:120,marginLeft:10}}
                                     onClick={this.toMark.bind(this)}>去标记</Button>
                         </div>
                         {
@@ -402,17 +478,28 @@ class BatchInput extends React.Component{
                                                 <div style={mode === 'error'?{display:'block'}:{display:'none'}}>
                                                     <Error errorQues={errorQues} 
                                                             learnID={learnID}
+                                                            errDate={errDate}
+                                                            showWarningHandle={this.showWarningHandle.bind(this)}
                                                             getWrongProblems={this.getWrongProblems.bind(this)}
                                                             getDate={this.getDate.bind(this)} />
                                                 </div>
                                                 <div style={mode === 'homework'?{display:'block'}:{display:'none'}}>
                                                     <HomeWork materials={materials} 
                                                                 learnID={learnID}
+                                                                bookID={bookID}
+                                                                page={page}
+                                                                getBookID={this.getBookID.bind(this)}
+                                                                getPage={this.getPage.bind(this)}
+                                                                showWarningHandle={this.showWarningHandle.bind(this)}
                                                                 getHomeworkData={this.getHomeworkData.bind(this)}/>
                                                 </div>
                                                 <div style={mode === 'testPaper'?{display:'block'}:{display:'none'}}>
                                                     <Paper learnID={learnID}
                                                             papers={papers}
+                                                            paperID={paperID}
+                                                            paperDate={paperDate}
+                                                            showWarningHandle={this.showWarningHandle.bind(this)}
+                                                            getPaperID={this.getPaperID.bind(this)}
                                                             getPaperData={this.getPaperData.bind(this)}
                                                             getPaperDate={this.getPaperDate.bind(this)}/>
                                                 </div>
@@ -430,18 +517,21 @@ class BatchInput extends React.Component{
                             {
                                 showMarkMsg ? <div className='markMsgContent'>
                                                     <div style={mode === 'error'?{display:'block'}:{display:'none'}}>
-                                                        <WrongProblemTable wrongProblems={wrongProblems} 
+                                                        {showErrorTable ? <WrongProblemTable wrongProblems={wrongProblems} 
                                                                             learnID={learnID}
-                                                                            errDate={errDate}/>
+                                                                            errDate={errDate}
+                                                                            tableSave={this.tableSave.bind(this)}/> : null}
                                                     </div>
                                                     <div style={mode === 'homework'?{display:'block'}:{display:'none'}}>
-                                                        <HomeworkTable homeworkData={homeworkData}
-                                                                        learnID={learnID}/>
+                                                        {showHomeworkTable ?<HomeworkTable homeworkData={homeworkData}
+                                                                                            learnID={learnID}
+                                                                                            tableSave={this.tableSave.bind(this)}/>:null}
                                                     </div>
                                                     <div style={mode === 'testPaper'?{display:'block'}:{display:'none'}}>
-                                                        <PaperTable paperData={paperData}
+                                                    {showPaperTable ? <PaperTable paperData={paperData}
                                                                     learnID={learnID}
-                                                                    paperDate={paperDate}/>
+                                                                    paperDate={paperDate}
+                                                                    tableSave={this.tableSave.bind(this)}/> : null}
                                                     </div>
                                                 </div> : null
                             }

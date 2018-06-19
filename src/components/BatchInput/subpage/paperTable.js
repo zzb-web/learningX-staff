@@ -1,5 +1,5 @@
 import React from 'react';
-import {Table,Switch,Button} from 'antd';
+import {Table,Switch,Button,message} from 'antd';
 import {Post} from '../../../fetch/data.js';
 class PaperTable extends React.Component{
     constructor(props){
@@ -77,7 +77,10 @@ class PaperTable extends React.Component{
             problems : data
         }
         Post(`/api/v3/staffs/students/${learnID}/problems/`,saveMsg).then(resp=>{
-
+            if(resp.status === 200){
+                message.success('保存成功');
+                this.props.tableSave(2);
+            }
         }).catch(err=>{
 
         })
