@@ -37,8 +37,12 @@ class HomeWork extends React.Component{
         if(bookID !== '' && bookID !==undefined && page !== '' && page !== undefined){
             const msg = `book=${bookID}&page=${page}`;
             Get(`/api/v3/staffs/students/${learnID}/bookProblems/?${msg}`).then(resp=>{
-                this.props.getHomeworkData(resp.data,true);
-                this.props.showWarningHandle(10);
+                if(resp.data.length ===0){
+                    this.props.getHomeworkData(resp.data,false);
+                }else{
+                    this.props.getHomeworkData(resp.data,true);
+                    this.props.showWarningHandle(10);
+                }
             }).catch(err=>{
                 
             })
@@ -68,6 +72,7 @@ class HomeWork extends React.Component{
                 <div style={{marginTop:30}}>
                     <span className='common-title'>页码:</span>
                     <InputNumber style={{width:240,marginLeft:10}} 
+                                min={1}
                                 onChange={this.pageChange.bind(this)}
                                 value={page}/>
                 </div>

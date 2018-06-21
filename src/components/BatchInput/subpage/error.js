@@ -40,8 +40,13 @@ class Error extends React.Component{
             Get(`/api/v3/staffs/students/${learnID}/uploadTasks/${errDate}/`).then(resp=>{
                 if(resp.status ===200){
                     let wrongProblems = resp.data.wrongProblems;
-                    this.props.getWrongProblems(wrongProblems,true)
-                    this.props.showWarningHandle(10)
+                    if(resp.data.length ===0){
+                        this.props.getWrongProblems(wrongProblems,true)
+                    }else{
+                        this.props.getWrongProblems(wrongProblems,true)
+                        this.props.showWarningHandle(10)
+                    }
+
                 }
             }).catch(err=>{
                 

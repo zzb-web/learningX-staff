@@ -1,6 +1,6 @@
 import React from 'react';
 import {Table,Switch,Button,message} from 'antd';
-import {Post} from '../../../fetch/data.js';
+import {Post,Delete} from '../../../fetch/data.js';
 class WrongProblemTable extends React.Component{
     constructor(props){
         super();
@@ -84,7 +84,10 @@ class WrongProblemTable extends React.Component{
         Post(`/api/v3/staffs/students/${learnID}/problemsRevised/`,saveMsg).then(resp=>{
             if(resp.status === 200){
                 message.success('保存成功');
+                Delete(`/api/v3/staffs/students/${learnID}/uploadTasks/${errDate}/`)
                 this.props.tableSave(0);
+            }else{
+                message.error('操作失败');
             }
         }).catch(err=>{
 
@@ -112,13 +115,13 @@ class WrongProblemTable extends React.Component{
                 if(item2.subIdx === -1){
                     dataSource.push({
                         key : `${index}${index2}`,
-                        position : item2.idx,
+                        position : item2.index,
                         result : <Switch style={{width:60}} checkedChildren="√" unCheckedChildren="×" onChange={this.chooseRight.bind(this,[index,index2])} checked={item2.isCorrect}/>,
                     })
                 }else{
                     dataSource.push({
                         key :`${index}${index2}`,
-                        position : `${item2.idx}/(${item2.subIdx})`,
+                        position : `${item2.index}/(${item2.subIdx})`,
                         result : <Switch style={{width:60}} checkedChildren="√" unCheckedChildren="×" onChange={this.chooseRight.bind(this,[index,index2])} checked={item2.isCorrect}/>,
                     })
                 }
@@ -132,7 +135,7 @@ class WrongProblemTable extends React.Component{
                             bordered={true}
                             pagination={false}
                             dataSource={dataSource}
-                            scroll={{x:false,y:300}}
+                            scroll={{x:false,y:275}}
                             rowClassName={(record, index)=>{
                                 if(record.result.props.checked){
                                 return ''

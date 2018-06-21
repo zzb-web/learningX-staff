@@ -170,7 +170,8 @@ class BatchInput extends React.Component{
     markLearnId(learnID){
         const {selectedLearnIDs} = this.state;
         this.setState({
-            learnID : learnID
+            learnID : learnID,
+            showMarkMsg : false
         })
         let name;
         for(var i=0;i<=selectedLearnIDs.length;i++){
@@ -211,10 +212,10 @@ class BatchInput extends React.Component{
          });
       }
     toMark(){
-        const {learnID ,schoolID, grade , classNum} = this.state;
-        if(learnID === undefined || learnID === ''){
+        const {learnID ,name ,schoolID, grade , classNum} = this.state;
+        if(learnID === undefined || learnID === '' || name ===undefined || name ===''){
             this.setState({
-                warningMsg : '请输入学习号或者姓名',
+                warningMsg : '请输入正确的学习号或者姓名',
                 showWarning : true
             })
         }else{
@@ -233,38 +234,47 @@ class BatchInput extends React.Component{
             }).catch(err=>{
                 console.log(err)
             })
+                //获取学习资料
+                const msg = `schoolID=${schoolID}&grade=${grade}&class=${classNum}`;
+                Get(`/api/v3/staffs/classes/books/?${msg}`)
+                .then(resp=>{
+                    if(resp.status === 200){
+                        console.log(resp.data)
+                        this.setState({
+                            materials:resp.data,
+                        })
+                    }
+                }).catch(err=>{
+                })
+                //获取试卷
+                Get(`/api/v3/staffs/classes/papers/?${msg}`)
+                .then(resp=>{
+                    if(resp.status === 200){
+                        this.setState({
+                            papers:resp.data,
+                        })
+                    }
+                }).catch(err=>{
+
+                })
         }
-       
-
-        //获取学习资料
-        const msg = `schoolID=${schoolID}&grade=${grade}&class=${classNum}`;
-
-        Get(`/api/v3/staffs/classes/books/?${msg}`)
-        .then(resp=>{
-            if(resp.status === 200){
-                console.log(resp.data)
-                this.setState({
-                    materials:resp.data,
-                })
-            }
-        }).catch(err=>{
-
+        this.setState({
+            showErrorTable : false,
+            showHomeworkTable : false,
+            showPaperTable : false,
+            errDate : '',
+            bookID : '',
+            page : '',
+            paperID : ''
         })
-
-        //获取试卷
-        Get(`/api/v3/staffs/classes/papers/?${msg}`)
-        .then(resp=>{
-            if(resp.status === 200){
-                this.setState({
-                    papers:resp.data,
-                })
-            }
-        }).catch(err=>{
-
-        })
-
     }
     getWrongProblems(data,flag){
+        if(data.length === 0){
+            this.setState({
+                showWarning : true,
+                warningMsg : '没有数据'
+            })
+        }
         this.setState({
             wrongProblems : data,
             showErrorTable : flag
@@ -276,12 +286,24 @@ class BatchInput extends React.Component{
         })
     }
     getHomeworkData(data,flag){
+        if(data.length === 0){
+            this.setState({
+                showWarning : true,
+                warningMsg : '没有数据'
+            })
+        }
         this.setState({
             homeworkData : data,
             showHomeworkTable : flag
         })
     }
     getPaperData(data,flag){
+        if(data.length === 0){
+            this.setState({
+                showWarning : true,
+                warningMsg : '没有数据'
+            })
+        }
         this.setState({
             paperData : data,
             showPaperTable : flag
@@ -308,15 +330,30 @@ class BatchInput extends React.Component{
         })
     }
     tableSave(data){
+        const {learnID} = this.state;
         if(data === 0){
+            Get(`/api/v3/staffs/students/${learnID}/uploadTasks/`).then(resp=>{
+                let errorQues = []
+                resp.data.map((item,index)=>{
+                   if(item.type === 1){
+                       errorQues.push(item)
+                   }
+                })
+                this.setState({
+                    errorQues : errorQues,
+                })
+            }).catch(err=>{
+                console.log(err)
+            })
+            
             this.setState({
                 errDate : '',
                 showErrorTable : false
             })
         }else if(data === 1){
             this.setState({
-                bookID : '',
-                page : '',
+                // bookID : '',
+                // page : '',
                 showHomeworkTable : false
             })
         }else if(data === 2){
