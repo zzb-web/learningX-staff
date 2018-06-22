@@ -34,18 +34,22 @@ class Paper extends React.Component{
     sureHandle(){
         const {paperID ,paperDate,learnID} = this.state;
         console.log(paperID , paperDate)
-        if(paperDate !== '' && paperDate !==undefined && paperID !== '' && paperID !== undefined){
+        //paperDate !== '' && paperDate !==undefined &&
+        if( paperID !== '' && paperID !== undefined){
             const msg = `paperID=${paperID}`;
             Get(`/api/v3/staffs/students/${learnID}/paperProblems/?${msg}`).then(resp=>{
-                if(resp.data.length ===0){
-                    this.props.getPaperData(resp.data,false);
-                }else{
-                    this.props.getPaperData(resp.data,true);
-                    this.props.showWarningHandle(10);
-                }
+               if(resp.status === 200){
+                    if(resp.data.length ===0){
+                        this.props.getPaperData(true,resp.data,false);
+                    }else{
+                        this.props.getPaperData(true,resp.data,true);
+                        this.props.showWarningHandle(10);
+                    }
+               }else{
+                this.props.getPaperData(false,[],false);
+               }
 
             }).catch(err=>{
-
             })
         }else{
             this.props.showWarningHandle(2)

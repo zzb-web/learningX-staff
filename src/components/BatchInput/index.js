@@ -268,65 +268,100 @@ class BatchInput extends React.Component{
             paperID : ''
         })
     }
-    getWrongProblems(data,flag){
-        if(data.length === 0){
-            this.setState({
-                showWarning : true,
-                warningMsg : '没有数据'
-            })
+    getWrongProblems(haSuc,data,flag){
+        let warningMsg ='';
+        let showWarning = false;
+        if(haSuc){
+            if(data.length === 0){
+                warningMsg = '已经标记过'
+                showWarning = true;
+            }else{
+                showWarning = false;
+            }
+        }else{
+            warningMsg = '没有数据'
+            showWarning = true
         }
         this.setState({
             wrongProblems : data,
-            showErrorTable : flag
+            showErrorTable : flag,
+            warningMsg : warningMsg,
+            showWarning : showWarning
         })
     }
     getDate(time){
         this.setState({
-            errDate : time
+            errDate : time,
+            showWarning : false
         })
     }
-    getHomeworkData(data,flag){
-        if(data.length === 0){
-            this.setState({
-                showWarning : true,
-                warningMsg : '没有数据'
-            })
+    getHomeworkData(hasSuc,data,flag){
+        let warningMsg = '';
+        let showWarning = false;
+        if(hasSuc){
+            if(data.length === 0){
+                warningMsg = '已经标记过'
+                showWarning = true
+            }else{
+                showWarning = false
+            }
+        }else{
+            warningMsg = '没有数据';
+            showWarning = true
         }
+        
         this.setState({
             homeworkData : data,
-            showHomeworkTable : flag
+            showHomeworkTable : flag,
+            warningMsg : warningMsg,
+            showWarning : showWarning
         })
     }
-    getPaperData(data,flag){
-        if(data.length === 0){
-            this.setState({
-                showWarning : true,
-                warningMsg : '没有数据'
-            })
+    getPaperData(hasSuc,data,flag){
+        let warningMsg = '';
+        let showWarning = false;
+        if(hasSuc){
+            if(data.length === 0){
+                showWarning = true;
+                warningMsg = '已经标记过';
+            }else{
+                showWarning = false;
+            }
+        }else{
+            showWarning = true;
+                warningMsg = '没有数据';
+                showWarning = true;
         }
+        
         this.setState({
             paperData : data,
-            showPaperTable : flag
+            showPaperTable : flag,
+            showWarning : showWarning,
+            warningMsg : warningMsg
         })
     }
     getPaperDate(data){
         this.setState({
             paperDate : data,
+            showWarning :false
         })
     }
     getBookID(value){
         this.setState({
-            bookID : value
+            bookID : value,
+            showWarning : false
         })
     }
     getPage(value){
         this.setState({
-            page : value
+            page : value,
+            showWarning : false
         })
     }
     getPaperID(value){
         this.setState({
-            paperID : value
+            paperID : value,
+            showWarning : false
         })
     }
     tableSave(data){
@@ -357,10 +392,28 @@ class BatchInput extends React.Component{
                 showHomeworkTable : false
             })
         }else if(data === 2){
+            const {schoolID,grade,classNum} = this.state;
+            const msg = `schoolID=${schoolID}&grade=${grade}&class=${classNum}`;
+            Get(`/api/v3/staffs/classes/papers/?${msg}`)
+                .then(resp=>{
+                    if(resp.status === 200){
+                        this.setState({
+                            papers:resp.data,
+                        })
+                    }
+                }).catch(err=>{
+
+                })
             this.setState({
+                showWarning : false,
                 showPaperTable : false,
                 paperDate : '',
                 paperID : ''
+            })
+        }else if(data === 3){
+            this.setState({
+                showWarning : true,
+                warningMsg : '请选择日期'
             })
         }
     }
@@ -378,7 +431,7 @@ class BatchInput extends React.Component{
                 showWarning : true,
             })
         }else if(data === 2){
-            msg = '请选择日期和试卷'
+            msg = '请选择试卷'
             this.setState({
                 showWarning : true,
             })

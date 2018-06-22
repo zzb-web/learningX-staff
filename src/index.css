@@ -206,3 +206,9 @@ body {
   width: 80px;
   text-align: right;
 }
+.homeworkTable .ant-switch-checked{
+  background-color: #c9c9c9 !important;
+}
+.homeworkTable .ant-switch{
+  background-color: red;
+}

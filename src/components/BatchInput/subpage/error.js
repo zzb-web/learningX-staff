@@ -41,12 +41,13 @@ class Error extends React.Component{
                 if(resp.status ===200){
                     let wrongProblems = resp.data.wrongProblems;
                     if(resp.data.length ===0){
-                        this.props.getWrongProblems(wrongProblems,true)
+                        this.props.getWrongProblems(true,wrongProblems,false)
                     }else{
-                        this.props.getWrongProblems(wrongProblems,true)
+                        this.props.getWrongProblems(true,wrongProblems,true)
                         this.props.showWarningHandle(10)
                     }
-
+                }else{
+                    this.props.getWrongProblems(false,[],false)
                 }
             }).catch(err=>{
                 

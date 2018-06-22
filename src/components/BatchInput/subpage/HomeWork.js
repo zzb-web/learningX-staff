@@ -37,11 +37,15 @@ class HomeWork extends React.Component{
         if(bookID !== '' && bookID !==undefined && page !== '' && page !== undefined){
             const msg = `book=${bookID}&page=${page}`;
             Get(`/api/v3/staffs/students/${learnID}/bookProblems/?${msg}`).then(resp=>{
-                if(resp.data.length ===0){
-                    this.props.getHomeworkData(resp.data,false);
-                }else{
-                    this.props.getHomeworkData(resp.data,true);
-                    this.props.showWarningHandle(10);
+                if(resp.status ===200){
+                    if(resp.data.length ===0){
+                        this.props.getHomeworkData(true,resp.data,false);
+                    }else{
+                        this.props.getHomeworkData(true,resp.data,true);
+                        this.props.showWarningHandle(10);
+                    }
+                }else if(resp.status === 404){
+                    this.props.getHomeworkData(false,[],false);
                 }
             }).catch(err=>{
                 

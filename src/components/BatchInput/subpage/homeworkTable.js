@@ -63,12 +63,14 @@ class HomeworkTable extends React.Component{
         let data = [];
         detailData.map((item,index)=>{
             item.map((item2,index2)=>{
-                data.push({
-                            isCorrect: item2.isCorrect,
-                            problemId: item2.problemId,
-                            subIdx: item2.subIdx
-                        }
-                        )
+                if(!item2.isCorrect){
+                    data.push({
+                        isCorrect: item2.isCorrect,
+                        problemId: item2.problemId,
+                        subIdx: item2.subIdx
+                    }
+                    )
+                }
             })
         })
         let timestamp = Date.parse(new Date());
@@ -108,13 +110,13 @@ class HomeworkTable extends React.Component{
                     dataSource.push({
                         key : `${index}${index2}`,
                         position : item2.idx,
-                        result : <Switch style={{width:60}} checkedChildren="√" unCheckedChildren="×" onChange={this.chooseRight.bind(this,[index,index2])} checked={item2.isCorrect}/>,
+                        result : <Switch style={{width:60}} checkedChildren="" unCheckedChildren="×" onChange={this.chooseRight.bind(this,[index,index2])} checked={item2.isCorrect}/>,
                     })
                 }else{
                     dataSource.push({
                         key :`${index}${index2}`,
                         position : `${item2.idx}/(${item2.subIdx})`,
-                        result : <Switch style={{width:60}} checkedChildren="√" unCheckedChildren="×" onChange={this.chooseRight.bind(this,[index,index2])} checked={item2.isCorrect}/>,
+                        result : <Switch style={{width:60}} checkedChildren="" unCheckedChildren="×" onChange={this.chooseRight.bind(this,[index,index2])} checked={item2.isCorrect}/>,
                     })
                 }
             })
@@ -122,7 +124,7 @@ class HomeworkTable extends React.Component{
 
         return(
             <div>
-                <div>
+                <div className='homeworkTable'>
                 <Table columns={columns}
                             bordered={true}
                             pagination={false}

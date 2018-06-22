@@ -1,6 +1,6 @@
 import React from 'react';
 import {Table,Switch,Button,message} from 'antd';
-import {Post} from '../../../fetch/data.js';
+import {Post,Delete} from '../../../fetch/data.js';
 class PaperTable extends React.Component{
     constructor(props){
         super();
@@ -61,29 +61,35 @@ class PaperTable extends React.Component{
     }
     saveHandle(){
         const {detailData,learnID,paperDate} = this.state;
-        let data = [];
-        detailData.map((item,index)=>{
-            item.map((item2,index2)=>{
-                data.push({
-                            isCorrect: item2.isCorrect,
-                            problemId: item2.problemId,
-                            subIdx: item2.subIdx
-                        }
-                        )
+        if(paperDate !=='' && paperDate !== undefined){
+            let data = [];
+            detailData.map((item,index)=>{
+                item.map((item2,index2)=>{
+                    data.push({
+                                isCorrect: item2.isCorrect,
+                                problemId: item2.problemId,
+                                subIdx: item2.subIdx
+                            }
+                            )
+                })
             })
-        })
-        let saveMsg = {
-            time : paperDate,
-            problems : data
-        }
-        Post(`/api/v3/staffs/students/${learnID}/problems/`,saveMsg).then(resp=>{
-            if(resp.status === 200){
-                message.success('保存成功');
-                this.props.tableSave(2);
+            let saveMsg = {
+                time : paperDate,
+                problems : data
             }
-        }).catch(err=>{
-
-        })
+            Post(`/api/v3/staffs/students/${learnID}/problems/`,saveMsg).then(resp=>{
+                if(resp.status === 200){
+                    message.success('保存成功');
+                    Delete(`/api/v3/staffs/students/${learnID}/uploadTasks/${paperDate}/`)
+                    this.props.tableSave(2);
+                }
+            }).catch(err=>{
+                    
+            })
+        }else{
+            this.props.tableSave(3);
+        }
+        
     }
     render(){
         const {detailData ,learnID} = this.state;
