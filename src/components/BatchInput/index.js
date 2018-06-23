@@ -171,38 +171,48 @@ class BatchInput extends React.Component{
         const {selectedLearnIDs} = this.state;
         this.setState({
             learnID : learnID,
-            showMarkMsg : false
+            showMarkMsg : false,
+            showWarning : false,
+            errDate : '',
+            bookID : '',
+            page : '',
+            paperID : '',
+            paperDate : '',
         })
-        let name;
+        let name = '';
         for(var i=0;i<=selectedLearnIDs.length;i++){
             if(selectedLearnIDs[i] !== undefined && selectedLearnIDs[i].learnID === learnID){
                 name = selectedLearnIDs[i].name;
-                console.log(name)
-                this.setState({
-                    name : name
-                })
                 break;
             }
         }
+        this.setState({
+            name :name
+        })
     }
     markName(e){
         const {selectedLearnIDs} = this.state;
         let name = e.target.value;
-        console.log(name)
         this.setState({
-            name : name
+            name : name,
+            showMarkMsg : false,
+            showWarning : false,
+            errDate : '',
+            bookID : '',
+            page : '',
+            paperID : '',
+            paperDate : '',
         })
-        let learnID;
+        let learnID = '';
         for(var i=0;i<=selectedLearnIDs.length;i++){
             if(selectedLearnIDs[i] !== undefined && selectedLearnIDs[i].name === name){
                 learnID = selectedLearnIDs[i].learnID;
-                console.log(learnID)
-                this.setState({
-                    learnID : learnID
-                })
                 break;
             }
         }
+        this.setState({
+            learnID : learnID
+        })
     }
     handleModeChange(e){
         const mode = e.target.value;
@@ -431,7 +441,7 @@ class BatchInput extends React.Component{
                 showWarning : true,
             })
         }else if(data === 2){
-            msg = '请选择试卷'
+            msg = '请选择日期和试卷'
             this.setState({
                 showWarning : true,
             })

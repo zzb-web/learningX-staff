@@ -34,8 +34,7 @@ class Paper extends React.Component{
     sureHandle(){
         const {paperID ,paperDate,learnID} = this.state;
         console.log(paperID , paperDate)
-        //paperDate !== '' && paperDate !==undefined &&
-        if( paperID !== '' && paperID !== undefined){
+        if(paperDate !== '' && paperDate !==undefined && paperID !== '' && paperID !== undefined){
             const msg = `paperID=${paperID}`;
             Get(`/api/v3/staffs/students/${learnID}/paperProblems/?${msg}`).then(resp=>{
                if(resp.status === 200){
