@@ -10,7 +10,8 @@ import {
             ClassStudyMaterialLoadable,
             StudyMaterialSummaryLoadable,
             StudentInfoEntryLoadable,
-            BatchInputLoadable
+            BatchInputLoadable,
+            BatchDownloadLoadable
       } from '../Loadable/homepageaComponent.js';
 import axios from 'axios';
 import './style.css';
@@ -19,7 +20,7 @@ const { Header, Sider, Content} = Layout;
 class Navigation extends Component {
   state = {
     collapsed: false,
-    key: '6',
+    key: '7',
     showUser : 'none',
     contentHeight :　0,
     userMsg : {},
@@ -140,11 +141,11 @@ class Navigation extends Component {
               <Icon type="exception" />
               <span>批量录入</span>
             </Menu.Item>
-          {/*
-            <Menu.Item key="8" style={hideMenu?{display:'block'}:{display:'none'}}>
+            <Menu.Item key="7">
               <Icon type="link" />
-              <span>检验题测试</span>
+              <span>批量下载</span>
             </Menu.Item>
+            {/*
             <Menu.Item key="5" style={hideMenu?{display:'block'}:{display:'none'}}>
               <Icon type="scan" />
               <span>错题复习</span>
@@ -204,9 +205,10 @@ class Navigation extends Component {
             {
                 this.state.key === '6' ? <BatchInputLoadable/> : null
             }
-            {/*
-                this.state.key === '8' ? <TestDetectionLoadable/> : null
+            {
+                this.state.key === '7' ? <BatchDownloadLoadable/> : null
             }
+            {/*
             {
               this.state.key === '9' ? <TestErrorMarkerLoadable/> : null
             }

@@ -80,6 +80,15 @@ const BatchInputComponent = Loadable({
   }
 }
 
+const BatchDownloadComponent = Loadable({
+  loader: () => import('../BatchDownload/index.js'),
+  loading: MyLoadingComponent,
+});
+ class BatchDownloadLoadable extends React.Component {
+  render() {
+    return <BatchDownloadComponent/>;
+  }
+}
 
 export {
         PassWordFormLoadable,
@@ -88,5 +97,6 @@ export {
         ClassStudyMaterialLoadable,
         StudyMaterialSummaryLoadable,
         StudentInfoEntryLoadable,
-        BatchInputLoadable
+        BatchInputLoadable,
+        BatchDownloadLoadable
       }
