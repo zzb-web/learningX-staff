@@ -49,7 +49,13 @@ class BatchDownload extends React.Component{
         selectAllStundent : true,
         selectedLearnIDs : [],
         statusMsgObj : {},
-        currentMsg : ''
+        currentMsg : '',
+        successArr_1 : [],
+        successArr_2 : [],
+        failArr_1 :[],
+        failArr_2 :[],
+        fileDataArray : [],
+        answerDataArray : []
     }
     componentWillMount(){
         Get('/api/v3/staffs/schools/')
@@ -222,10 +228,7 @@ class BatchDownload extends React.Component{
             allFileData : {},
             allDetailData : {},
             pickDownFlag : true,
-            success_file : 0,
-            fail_file : 0,
-            success_answer : 0,
-            fail_answer : 0
+           
           })
     }
     addMaterials(){
@@ -402,9 +405,11 @@ class BatchDownload extends React.Component{
                     finalRequestArray.push(item);
                     finalRequestArray.push(answerDataArray[index])
                 })
-
-                const {allFileData,allAnswerData,statusMsgObj,learnIDName} = this.state;
-                var successArr_1 = [],successArr_2 = [],failArr_1 =[],failArr_2 =[];
+                this.setState({
+                    fileDataArray,
+                    answerDataArray
+                })
+                const {allFileData,allAnswerData,statusMsgObj,learnIDName,successArr_1 ,successArr_2 ,failArr_1,failArr_2} = this.state;
                 (async () => {
                     for(let i=0;i<finalRequestArray.length;i++) {
                         const {generateFlag} = this.state;
@@ -443,6 +448,7 @@ class BatchDownload extends React.Component{
                                 this.setState({
                                     statusMsgObj : statusMsgObj
                                 })
+                                let {haslearnIDs} = this.state;
                                     if(i%2 === 0){
                                         if(resp.status === 200){
                                             successArr_1.push(0)
@@ -450,17 +456,22 @@ class BatchDownload extends React.Component{
                                             failArr_1.push(0)
                                         }
                                         allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
-                                        let haslearnIDs = [];
-                                        for(var key in allFileData){
-                                            if(allFileData[key] !== undefined){
-                                                haslearnIDs.push(Number(key))
+                                       
+                                        if(status === 200){
+                                            // for(var key in allFileData){
+                                            //     if(allFileData[key] !== undefined){
+                                            //         if(haslearnIDs.indexOf(Number(key))===-1){
+                                            //             haslearnIDs.push(Number(key))
+                                            //         }
+                                            //     }
+                                            // }
+                                            if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
+                                                haslearnIDs.push(Number(finalRequestArray[i].learnID))
                                             }
                                         }
-                                        
-                                        let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[key]} 正在请求`
+                                        let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
                                         this.setState({
                                             allFileData : allFileData,
-                                            haslearnIDs : haslearnIDs,
                                             currentMsg : showMsg
                                         })
                                     }else{
@@ -469,11 +480,26 @@ class BatchDownload extends React.Component{
                                         }else{
                                             failArr_2.push(0)
                                         }
+                                        if(status === 200){
+                                            // for(var key in allFileData){
+                                            //     if(allFileData[key] !== undefined){
+                                            //         if(haslearnIDs.indexOf(Number(key))===-1){
+                                            //             haslearnIDs.push(Number(key))
+                                            //         }
+                                            //     }
+                                            // }
+                                            if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
+                                                haslearnIDs.push(Number(finalRequestArray[i].learnID))
+                                            }
+                                        }
                                         allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
                                         this.setState({
                                             allAnswerData : allAnswerData
                                         })
                                     }
+                                    this.setState({
+                                        haslearnIDs : haslearnIDs
+                                    })
                                     if(i<finalRequestArray.length-1){
                                         this.setState({
                                             pickDownFlag : true,
@@ -482,10 +508,10 @@ class BatchDownload extends React.Component{
                                         this.setState({
                                             pickDownFlag : false,
                                             currentMsg : '所有学生请求完成',
-                                            success_file : successArr_1.length,
-                                            fail_file : failArr_1.length,
-                                            success_answer : successArr_2.length,
-                                            fail_answer : failArr_2.length
+                                            successArr_1 ,
+                                            successArr_2 ,
+                                            failArr_1,
+                                            failArr_2
                                         })
                                     }
                                 }
@@ -494,15 +520,8 @@ class BatchDownload extends React.Component{
                                 if(addDataFlag){
                                     if(i%2 === 0){
                                         allFileData[finalRequestArray[i].learnID] = '';
-                                            let haslearnIDs = [];
-                                            for(var key in allFileData){
-                                                if(allFileData[key] !== undefined){
-                                                    haslearnIDs.push(Number(key))
-                                                }
-                                            }
                                             this.setState({
                                                 allFileData : allFileData,
-                                                haslearnIDs : haslearnIDs
                                             })
                                     }else{
                                         allAnswerData[finalRequestArray[i].learnID] = '';
@@ -794,6 +813,105 @@ class BatchDownload extends React.Component{
             showSelectContent : true,
         })
     }
+    getFileAgain(key){
+        let currentId = key;
+       const {fileDataArray,statusMsgObj,haslearnIDs,allFileData,successArr_1,failArr_1} = this.state;
+       let data = {};
+       for(var i=0;i<=fileDataArray.length;i++){
+           if(fileDataArray[i].learnID === currentId){
+               data = fileDataArray[i].params;
+               break;
+           }
+        }
+        Post(`/api/v3/staffs/students/${currentId}/getProblemsFile/`,data).then(resp=>{
+            let status = resp.status;
+            let statusMsg = ''
+            switch(status){
+                case 200 : statusMsg = '成功';
+                break;
+                case 403 : statusMsg = '存在未标记的纠错本，不允许生成新文档' ;                                 
+                break;
+                case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+                break;
+                case 500 :  statusMsg = '内部未知错误';                                  
+                break;
+                case 504 : statusMsg = '处理超时';
+                break;
+                default :
+            }
+            
+            statusMsgObj[currentId][0] = statusMsg;
+            allFileData[currentId] = resp.data.pdfurl;
+
+            if(status === 200){
+                if(haslearnIDs.indexOf(Number(currentId)) === -1){
+                    haslearnIDs.push(Number(currentId))
+                }
+                successArr_1.push(0);
+                failArr_1.splice(0,1)
+            }
+            this.setState({
+                statusMsgObj : statusMsgObj,
+                allFileData : allFileData,
+                haslearnIDs : haslearnIDs,
+                successArr_1,failArr_1
+            })
+
+        }).catch(err=>{
+
+        })
+       
+    }
+    getAnswerAgain(key){
+        let currentId = key;
+       const {answerDataArray,statusMsgObj,haslearnIDs,allAnswerData,successArr_2,failArr_2} = this.state;
+       let data = {};
+       for(var i=0;i<=answerDataArray.length;i++){
+           if(answerDataArray[i].learnID === currentId){
+               data = answerDataArray[i].params;
+               break;
+           }
+        }
+        Post(`/api/v3/staffs/students/${currentId}/getAnswersFile/`,data).then(resp=>{
+            let status = resp.status;
+            let statusMsg = ''
+            switch(status){
+                case 200 : statusMsg = '成功';
+                break;
+                case 403 : statusMsg = '存在未标记的纠错本，不允许生成新文档' ;                                 
+                break;
+                case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+                break;
+                case 500 :  statusMsg = '内部未知错误';                                  
+                break;
+                case 504 : statusMsg = '处理超时';
+                break;
+                default :
+            }
+            
+            statusMsgObj[currentId][1] = statusMsg;
+            allAnswerData[currentId] = resp.data.pdfurl;
+            console.log(statusMsg,resp.data.pdfurl)
+            if(status === 200){
+                if(haslearnIDs.indexOf(Number(currentId)) === -1){
+                    haslearnIDs.push(Number(currentId))
+                }
+                successArr_2.push(0);
+                failArr_2.splice(0,1)
+            }
+            this.setState({
+                statusMsgObj : statusMsgObj,
+                allAnswerData : allAnswerData,
+                haslearnIDs : haslearnIDs,
+                successArr_2,
+                failArr_2
+            })
+
+        }).catch(err=>{
+
+        })
+       
+    }
     componentDidMount(){
         let that = this;
         let allHeight = document.documentElement.clientHeight;
@@ -811,7 +929,7 @@ class BatchDownload extends React.Component{
         const {papers,paperData,pickDownFlag,schoolName,grade,classNum,allStudentNum ,showDetail,learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
              requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData,allAnswerData,pickDownURL,
              showStudentDetail,selectAllStundent,contentHeight,showLeftLine,statusMsgObj,currentMsg,
-            success_answer,success_file,fail_answer,fail_file} = this.state;   
+             successArr_1 ,successArr_2 ,failArr_1,failArr_2} = this.state;   
         let papersHandle =[];
         let hasSelectPaperIds = [];
         paperData.map((item,index)=>{
@@ -898,17 +1016,17 @@ class BatchDownload extends React.Component{
             var fileDownload;
             var answerDownload;
             if(allFileData[key] === undefined){
-                fileDownload = <span className='downBtn' style={{border:'none',color:'red'}}>纠错本</span>
+                fileDownload = <span className='downBtn' style={{border:'none',color:'red'}} onClick={this.getFileAgain.bind(this,key)}>纠错本</span>
             }else{
-                fileDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee'}} onClick={this.getErrorToptic.bind(this,key)}>
-                                    <a download={allFileData[key]} href={allFileData[key]} target="blank">纠错本</a>
+                fileDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee'}}>
+                                    纠错本
                                 </span>
             }
             if(allAnswerData[key] === undefined){
-                answerDownload = <span className='downBtn' style={{border:'none',color:'red',marginLeft:30}}>答案</span>
+                answerDownload = <span className='downBtn' style={{border:'none',color:'red',marginLeft:30}} onClick={this.getAnswerAgain.bind(this,key)}>答案</span>
             }else{
                 answerDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee',marginLeft:30}}>
-                                     <a download={allAnswerData[key]} href={allAnswerData[key]} target="blank">答案</a>
+                                     答案
                                 </span>
             }
             var download =  <span>
@@ -933,7 +1051,7 @@ class BatchDownload extends React.Component{
                 name : learnIDName[key],
                 download : download,
                 isCorrect : isCorrect,
-                trueNum : allDetailData[key].questionNum,
+                trueNum : allDetailData[key] !== undefined ? allDetailData[key].questionNum : 0,
                 question :<div>
                             <div><span>纠错本:</span><span>{question_1}</span></div>
                             <div><span>答案:</span><span>{question_2}</span></div>
@@ -1031,10 +1149,10 @@ class BatchDownload extends React.Component{
                                     </div>
                                     <div>
                                         {!pickDownFlag ? <div>
-                                                            <div style={{color:'#108ee9'}}>{success_file}个学生纠错本成功</div>
-                                                            <div style={{color:'red'}}>{fail_file}个学生纠错本失败</div>
-                                                            <div style={{color:'#108ee9'}}>{success_answer}个学生答案成功</div>
-                                                            <div style={{color:'red'}}>{fail_answer}个学生答案成功</div>
+                                                            <div style={{color:'#108ee9'}}>{successArr_1.length}个学生纠错本成功</div>
+                                                            <div style={{color:'red'}}>{failArr_1.length}个学生纠错本失败</div>
+                                                            <div style={{color:'#108ee9'}}>{successArr_2.length}个学生答案成功</div>
+                                                            <div style={{color:'red'}}>{failArr_2.length}个学生答案失败</div>
                                                         </div> : null}
                                     </div>
                                  </div> : null

@@ -417,7 +417,6 @@ class BatchInput extends React.Component{
             this.setState({
                 showWarning : false,
                 showPaperTable : false,
-                paperDate : '',
                 paperID : ''
             })
         }else if(data === 3){
