@@ -412,8 +412,9 @@ class BatchDownload extends React.Component{
                 const {allFileData,allAnswerData,statusMsgObj,learnIDName,successArr_1 ,successArr_2 ,failArr_1,failArr_2} = this.state;
                 (async () => {
                     for(let i=0;i<finalRequestArray.length;i++) {
-                        const {generateFlag} = this.state;
+                        const {generateFlag,allDetailData} = this.state;
                         if(generateFlag){
+                            if( allDetailData[finalRequestArray[i].learnID].questionNum !==0){
                             let type = '';
                             if(i%2 ===0 ){
                                 type = 'getProblemsFile';
@@ -429,13 +430,13 @@ class BatchDownload extends React.Component{
                                 switch(status){
                                     case 200 : statusMsg = '成功';
                                     break;
-                                    case 403 : statusMsg = '存在未标记的纠错本，不允许生成新文档' ;                                 
+                                    case 403 : statusMsg = '纠错本未标记' ;                                 
                                     break;
                                     case 404 :  statusMsg = '题目或者答案文档缺失';                                 
                                     break;
                                     case 500 :  statusMsg = '内部未知错误';                                  
                                     break;
-                                    case 504 : statusMsg = '处理超时';
+                                    case 504 : statusMsg = '超时需再生成';
                                     break;
                                     default :
                                 }
@@ -458,13 +459,6 @@ class BatchDownload extends React.Component{
                                         allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
                                        
                                         if(status === 200){
-                                            // for(var key in allFileData){
-                                            //     if(allFileData[key] !== undefined){
-                                            //         if(haslearnIDs.indexOf(Number(key))===-1){
-                                            //             haslearnIDs.push(Number(key))
-                                            //         }
-                                            //     }
-                                            // }
                                             if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
                                                 haslearnIDs.push(Number(finalRequestArray[i].learnID))
                                             }
@@ -540,7 +534,17 @@ class BatchDownload extends React.Component{
                                     }
                             }
                             })
+                        }else{
+                            allAnswerData[finalRequestArray[i].learnID] = undefined;
+                            allFileData[finalRequestArray[i].learnID] = undefined;
+                            failArr_1.push(0)
+                            failArr_2.push(0)
+                            this.setState({
+                                allFileData,
+                                allAnswerData
+                            })
                         }
+                    }
                     }
                 })();
                 // var successArr = [];
@@ -829,13 +833,13 @@ class BatchDownload extends React.Component{
             switch(status){
                 case 200 : statusMsg = '成功';
                 break;
-                case 403 : statusMsg = '存在未标记的纠错本，不允许生成新文档' ;                                 
+                case 403 : statusMsg = '纠错本未标记' ;                                 
                 break;
                 case 404 :  statusMsg = '题目或者答案文档缺失';                                 
                 break;
                 case 500 :  statusMsg = '内部未知错误';                                  
                 break;
-                case 504 : statusMsg = '处理超时';
+                case 504 : statusMsg = '超时需再生成';
                 break;
                 default :
             }
@@ -878,13 +882,13 @@ class BatchDownload extends React.Component{
             switch(status){
                 case 200 : statusMsg = '成功';
                 break;
-                case 403 : statusMsg = '存在未标记的纠错本，不允许生成新文档' ;                                 
+                case 403 : statusMsg = '纠错本未标记' ;                                 
                 break;
                 case 404 :  statusMsg = '题目或者答案文档缺失';                                 
                 break;
                 case 500 :  statusMsg = '内部未知错误';                                  
                 break;
-                case 504 : statusMsg = '处理超时';
+                case 504 : statusMsg = '超时需再生成';
                 break;
                 default :
             }
@@ -1052,10 +1056,11 @@ class BatchDownload extends React.Component{
                 download : download,
                 isCorrect : isCorrect,
                 trueNum : allDetailData[key] !== undefined ? allDetailData[key].questionNum : 0,
-                question :<div>
-                            <div><span>纠错本:</span><span>{question_1}</span></div>
-                            <div><span>答案:</span><span>{question_2}</span></div>
-                          </div>
+                question :allDetailData[key].questionNum === 0 ? <div>0错题或未标记</div>
+                                                                    : <div>
+                                                                        <div><span>纠错本:</span><span>{question_1}</span></div>
+                                                                        <div><span>答案:</span><span>{question_2}</span></div>
+                                                                    </div>
             })
             
         }
