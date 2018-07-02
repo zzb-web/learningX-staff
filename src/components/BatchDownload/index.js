@@ -543,6 +543,15 @@ class BatchDownload extends React.Component{
                                 allFileData,
                                 allAnswerData
                             })
+                            if(i<finalRequestArray.length-1){
+                                this.setState({
+                                    pickDownFlag : true
+                                })
+                            }else{
+                                this.setState({
+                                    pickDownFlag : false
+                                })
+                            }
                         }
                     }
                     }
