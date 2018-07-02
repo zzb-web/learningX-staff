@@ -228,7 +228,7 @@ class BatchDownload extends React.Component{
             allFileData : {},
             allDetailData : {},
             pickDownFlag : true,
-           
+            paperData : [{paperID : ''}]
           })
     }
     addMaterials(){
@@ -547,50 +547,7 @@ class BatchDownload extends React.Component{
                     }
                     }
                 })();
-                // var successArr = [];
-                // var failArr =[];
-                /*
-                (async () => {
-                    for(let i=0;i<answerDataArray.length;i++) {
-                        const {generateFlag,pickDownFlag} = this.state;
-                        if(generateFlag){
-                            await Post(`/api/v3/staffs/students/${answerDataArray[i].learnID}/getAnswersFile/`,answerDataArray[i].params)
-                            .then(resp=>{
-                                const {addDataFlag} = this.state;
-                                if(addDataFlag){
-                                    if(resp.status === 200){
-                                        successArr.push(0)
-                                    }else{
-                                        failArr.push(0)
-                                    }
-                                    allAnswerData[answerDataArray[i].learnID] = resp.data.pdfurl;
-                                    if(i=== allStudentNum-1){
-                                        this.setState({
-                                            pickDownFlag : false
-                                        })  
-                                    }else{
-                                       this.setState({
-                                           pickDownFlag : true
-                                       })
-                                    }
-                                    if(i=== allStudentNum-1){
-                                        message.info(<span>
-                                            
-                                        </span>)
-                                    }
-                                }
-                                
-                            }).catch(err=>{
-                                
-                                allAnswerData[answerDataArray[i].learnID] = ''
-                            })    
-                            this.setState({
-                                allAnswerData : allAnswerData
-                            })
-                        }
-                    }
-                })();
-                */
+
             },times)
     }else{
         this.setState({
@@ -625,8 +582,19 @@ class BatchDownload extends React.Component{
         Post('/api/v3/staffs/students/getProbsAnsFilesZip/',postMsg_)
                                 .then(resp=>{
                                     // console.log(resp.data.URL)
-                                    window.open(resp.data.URL);
+                                    // window.open(resp.data.URL);
                                     // this._downloadFile(resp.data.URL)
+                                    // 创建隐藏的可下载链接
+                                    
+                                    var eleLink = document.createElement('a');
+                                    eleLink.download = resp.data.URL;
+                                    eleLink.href = resp.data.URL;
+                                    eleLink.style.display = 'none';  
+                                    document.body.appendChild(eleLink);
+
+                                    eleLink.click();
+                                    // 然后移除
+                                    document.body.removeChild(eleLink);
                                 }).catch(err=>{
                                    
                                 })
@@ -933,7 +901,7 @@ class BatchDownload extends React.Component{
         const {papers,paperData,pickDownFlag,schoolName,grade,classNum,allStudentNum ,showDetail,learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
              requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData,allAnswerData,pickDownURL,
              showStudentDetail,selectAllStundent,contentHeight,showLeftLine,statusMsgObj,currentMsg,
-             successArr_1 ,successArr_2 ,failArr_1,failArr_2} = this.state;   
+             successArr_1 ,successArr_2 ,failArr_1,failArr_2,addDataFlag} = this.state;   
         let papersHandle =[];
         let hasSelectPaperIds = [];
         paperData.map((item,index)=>{
@@ -1153,7 +1121,7 @@ class BatchDownload extends React.Component{
                                         <span style={{color:'#108ee9'}}>{currentMsg}</span>
                                     </div>
                                     <div>
-                                        {!pickDownFlag ? <div>
+                                        {!pickDownFlag && addDataFlag ? <div>
                                                             <div style={{color:'#108ee9'}}>{successArr_1.length}个学生纠错本成功</div>
                                                             <div style={{color:'red'}}>{failArr_1.length}个学生纠错本失败</div>
                                                             <div style={{color:'#108ee9'}}>{successArr_2.length}个学生答案成功</div>
