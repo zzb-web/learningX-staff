@@ -50,10 +50,8 @@ class BatchDownload extends React.Component{
         selectedLearnIDs : [],
         statusMsgObj : {},
         currentMsg : '',
-        successArr_1 : [],
-        successArr_2 : [],
-        failArr_1 :[],
-        failArr_2 :[],
+        fileSuccesNum : 0,
+        answerSuccessNum : 0,
         fileDataArray : [],
         answerDataArray : []
     }
@@ -228,7 +226,9 @@ class BatchDownload extends React.Component{
             allFileData : {},
             allDetailData : {},
             pickDownFlag : true,
-            paperData : [{paperID : ''}]
+            paperData : [{paperID : ''}],
+            fileSuccesNum:0,
+            answerSuccessNum : 0
           })
     }
     addMaterials(){
@@ -409,7 +409,7 @@ class BatchDownload extends React.Component{
                     fileDataArray,
                     answerDataArray
                 })
-                const {allFileData,allAnswerData,statusMsgObj,learnIDName,successArr_1 ,successArr_2 ,failArr_1,failArr_2} = this.state;
+                const {allFileData,allAnswerData,statusMsgObj,learnIDName} = this.state;
                 (async () => {
                     for(let i=0;i<finalRequestArray.length;i++) {
                         const {generateFlag,allDetailData} = this.state;
@@ -449,16 +449,12 @@ class BatchDownload extends React.Component{
                                 this.setState({
                                     statusMsgObj : statusMsgObj
                                 })
-                                let {haslearnIDs} = this.state;
+                                let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
                                     if(i%2 === 0){
-                                        if(resp.status === 200){
-                                            successArr_1.push(0)
-                                        }else{
-                                            failArr_1.push(0)
-                                        }
                                         allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
                                        
                                         if(status === 200){
+                                            fileSuccesNum = fileSuccesNum+1
                                             if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
                                                 haslearnIDs.push(Number(finalRequestArray[i].learnID))
                                             }
@@ -466,14 +462,10 @@ class BatchDownload extends React.Component{
                                         let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
                                         this.setState({
                                             allFileData : allFileData,
-                                            currentMsg : showMsg
+                                            currentMsg : showMsg,
+                                            fileSuccesNum : fileSuccesNum
                                         })
                                     }else{
-                                        if(resp.status === 200){
-                                            successArr_2.push(0)
-                                        }else{
-                                            failArr_2.push(0)
-                                        }
                                         if(status === 200){
                                             // for(var key in allFileData){
                                             //     if(allFileData[key] !== undefined){
@@ -482,13 +474,15 @@ class BatchDownload extends React.Component{
                                             //         }
                                             //     }
                                             // }
+                                            answerSuccessNum = answerSuccessNum +1
                                             if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
                                                 haslearnIDs.push(Number(finalRequestArray[i].learnID))
                                             }
                                         }
                                         allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
                                         this.setState({
-                                            allAnswerData : allAnswerData
+                                            allAnswerData : allAnswerData,
+                                            answerSuccessNum :answerSuccessNum
                                         })
                                     }
                                     this.setState({
@@ -502,10 +496,6 @@ class BatchDownload extends React.Component{
                                         this.setState({
                                             pickDownFlag : false,
                                             currentMsg : '所有学生请求完成',
-                                            successArr_1 ,
-                                            successArr_2 ,
-                                            failArr_1,
-                                            failArr_2
                                         })
                                     }
                                 }
@@ -537,8 +527,6 @@ class BatchDownload extends React.Component{
                         }else{
                             allAnswerData[finalRequestArray[i].learnID] = undefined;
                             allFileData[finalRequestArray[i].learnID] = undefined;
-                            failArr_1.push(0)
-                            failArr_2.push(0)
                             this.setState({
                                 allFileData,
                                 allAnswerData
@@ -796,7 +784,7 @@ class BatchDownload extends React.Component{
     }
     getFileAgain(key){
         let currentId = key;
-       const {fileDataArray,statusMsgObj,haslearnIDs,allFileData,successArr_1,failArr_1} = this.state;
+       let {fileDataArray,statusMsgObj,haslearnIDs,allFileData} = this.state;
        let data = {};
        for(var i=0;i<=fileDataArray.length;i++){
            if(fileDataArray[i].learnID === currentId){
@@ -823,19 +811,18 @@ class BatchDownload extends React.Component{
             
             statusMsgObj[currentId][0] = statusMsg;
             allFileData[currentId] = resp.data.pdfurl;
-
+            let {fileSuccesNum} = this.state;
             if(status === 200){
                 if(haslearnIDs.indexOf(Number(currentId)) === -1){
                     haslearnIDs.push(Number(currentId))
                 }
-                successArr_1.push(0);
-                failArr_1.splice(0,1)
+                fileSuccesNum = fileSuccesNum+1
             }
             this.setState({
                 statusMsgObj : statusMsgObj,
                 allFileData : allFileData,
                 haslearnIDs : haslearnIDs,
-                successArr_1,failArr_1
+                fileSuccesNum : fileSuccesNum
             })
 
         }).catch(err=>{
@@ -845,7 +832,7 @@ class BatchDownload extends React.Component{
     }
     getAnswerAgain(key){
         let currentId = key;
-       const {answerDataArray,statusMsgObj,haslearnIDs,allAnswerData,successArr_2,failArr_2} = this.state;
+       let {answerDataArray,statusMsgObj,haslearnIDs,allAnswerData} = this.state;
        let data = {};
        for(var i=0;i<=answerDataArray.length;i++){
            if(answerDataArray[i].learnID === currentId){
@@ -872,20 +859,18 @@ class BatchDownload extends React.Component{
             
             statusMsgObj[currentId][1] = statusMsg;
             allAnswerData[currentId] = resp.data.pdfurl;
-            console.log(statusMsg,resp.data.pdfurl)
+            let {answerSuccessNum} = this.state;
             if(status === 200){
                 if(haslearnIDs.indexOf(Number(currentId)) === -1){
                     haslearnIDs.push(Number(currentId))
                 }
-                successArr_2.push(0);
-                failArr_2.splice(0,1)
+                answerSuccessNum = answerSuccessNum +1
             }
             this.setState({
                 statusMsgObj : statusMsgObj,
                 allAnswerData : allAnswerData,
                 haslearnIDs : haslearnIDs,
-                successArr_2,
-                failArr_2
+                answerSuccessNum : answerSuccessNum
             })
 
         }).catch(err=>{
@@ -910,7 +895,7 @@ class BatchDownload extends React.Component{
         const {papers,paperData,pickDownFlag,schoolName,grade,classNum,allStudentNum ,showDetail,learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
              requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData,allAnswerData,pickDownURL,
              showStudentDetail,selectAllStundent,contentHeight,showLeftLine,statusMsgObj,currentMsg,
-             successArr_1 ,successArr_2 ,failArr_1,failArr_2,addDataFlag} = this.state;   
+             fileSuccesNum,answerSuccessNum,addDataFlag} = this.state;   
         let papersHandle =[];
         let hasSelectPaperIds = [];
         paperData.map((item,index)=>{
@@ -1131,10 +1116,10 @@ class BatchDownload extends React.Component{
                                     </div>
                                     <div>
                                         {!pickDownFlag && addDataFlag ? <div>
-                                                            <div style={{color:'#108ee9'}}>{successArr_1.length}个学生纠错本成功</div>
-                                                            <div style={{color:'red'}}>{failArr_1.length}个学生纠错本失败</div>
-                                                            <div style={{color:'#108ee9'}}>{successArr_2.length}个学生答案成功</div>
-                                                            <div style={{color:'red'}}>{failArr_2.length}个学生答案失败</div>
+                                                            <div style={{color:'#108ee9'}}>{fileSuccesNum}个学生纠错本成功</div>
+                                                            <div style={{color:'red'}}>{allStudentNum-fileSuccesNum}个学生纠错本失败</div>
+                                                            <div style={{color:'#108ee9'}}>{answerSuccessNum}个学生答案成功</div>
+                                                            <div style={{color:'red'}}>{allStudentNum-answerSuccessNum}个学生答案失败</div>
                                                         </div> : null}
                                     </div>
                                  </div> : null
