@@ -44,7 +44,8 @@ class BatchInput extends React.Component{
             showPaperTable : false,
             bookID : '',
             page : '',
-            paperID : ''
+            paperID : '',
+            bookType : 0
         }
     }
     componentWillMount(){
@@ -249,7 +250,6 @@ class BatchInput extends React.Component{
                 Get(`/api/v3/staffs/classes/books/?${msg}`)
                 .then(resp=>{
                     if(resp.status === 200){
-                        console.log(resp.data)
                         this.setState({
                             materials:resp.data,
                         })
@@ -356,9 +356,10 @@ class BatchInput extends React.Component{
             showWarning :false
         })
     }
-    getBookID(value){
+    getBookID(bookID,bookType){
         this.setState({
-            bookID : value,
+            bookID : bookID,
+            bookType : bookType,
             showWarning : false
         })
     }
@@ -458,7 +459,7 @@ class BatchInput extends React.Component{
         const {schools,learnIDs,showStudentDetail,selectAllStundent,showFirstPage,showSecondPage,mode,
                 errorQues,name,learnID,showMarkMsg,wrongProblems,errDate,materials,homeworkData,
                 papers,paperData,showWarning,warningMsg,paperDate,showErrorTable,showHomeworkTable,
-            bookID,page,showPaperTable,paperID} = this.state;
+            bookID,page,showPaperTable,paperID,bookType} = this.state;
         const allGrage = ['一','二','三','四','五','六','七','八','九'];
         const columns_student = [
             {
@@ -623,6 +624,7 @@ class BatchInput extends React.Component{
                                                     </div>
                                                     <div style={mode === 'homework'?{display:'block'}:{display:'none'}}>
                                                         {showHomeworkTable ?<HomeworkTable homeworkData={homeworkData}
+                                                                                            bookType={bookType}
                                                                                             learnID={learnID}
                                                                                             tableSave={this.tableSave.bind(this)}/>:null}
                                                     </div>

@@ -21,10 +21,15 @@ class HomeWork extends React.Component{
       })
     }
     bookChange(value){
-        // this.setState({
-        //     bookID : value
-        // })
-        this.props.getBookID(value)
+        const {materials} = this.state;
+        let bookType;
+        for(var i=0;i<materials.length;i++){
+            if(materials[i].bookID === value){
+                bookType = materials[i].type;
+                break;
+            }
+        }
+        this.props.getBookID(value,bookType)
     }
     pageChange(value){
         // this.setState({

@@ -78,10 +78,11 @@ class WrongProblemTable extends React.Component{
         })
         let saveMsg = {
             time : errDate,
+            type : 5,
             problems : data
         }
        
-        Post(`/api/v3/staffs/students/${learnID}/problemsRevised/`,saveMsg).then(resp=>{
+        Post(`/api/v3/staffs/students/${learnID}/problems/`,saveMsg).then(resp=>{
             if(resp.status === 200){
                 message.success('保存成功');
                 Delete(`/api/v3/staffs/students/${learnID}/uploadTasks/${errDate}/`)

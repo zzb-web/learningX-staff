@@ -8,6 +8,7 @@ class HomeworkTable extends React.Component{
             homeworkData : props.homeworkData,
             detailData : [],
             learnID : props.learnID,
+            bookType : props.bookType
         }
     }
     componentWillMount(){
@@ -23,6 +24,7 @@ class HomeworkTable extends React.Component{
         this.setState({
             detailData,
             learnID : nextProps.learnID,
+            bookType : nextProps.bookType
         })
     }
     _handleData(homeworkData){
@@ -58,7 +60,7 @@ class HomeworkTable extends React.Component{
         })
     }
     saveHandle(){
-        const {detailData,learnID} = this.state;
+        const {detailData,learnID,bookType} = this.state;
         console.log(detailData)
         let data = [];
         detailData.map((item,index)=>{
@@ -76,6 +78,7 @@ class HomeworkTable extends React.Component{
         let timestamp = Date.parse(new Date());
         let saveMsg = {
             time : timestamp,
+            type: bookType,
             problems : data
         }
         Post(`/api/v3/staffs/students/${learnID}/problems/`,saveMsg).then(resp=>{
