@@ -31,7 +31,7 @@ class GradeClassCommon extends React.Component{
         this.props.classMsgInput(classMsg)
     }
     render(){
-        const calss = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','F']
+        const calss = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','高复']
         const {gradeWarning,classWarning} = this.state;
         return(
            <div>

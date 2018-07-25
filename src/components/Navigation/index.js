@@ -17,10 +17,12 @@ import axios from 'axios';
 import './style.css';
 import GradeClassCommon from '../Common/gradeclassCommon.js';
 const { Header, Sider, Content} = Layout;
+const {SubMenu} = Menu;
 class Navigation extends Component {
   state = {
     collapsed: false,
-    key: '7',
+    key: '2',
+    subKey : ['sub1'],
     showUser : 'none',
     contentHeight :　0,
     userMsg : {},
@@ -89,8 +91,13 @@ class Navigation extends Component {
        hideMenu : flag
      })
   }
+  onOpenChange(e){
+    this.setState({
+      subKey : e
+    })
+  }
   render() {
-    const {userMsg,userName,phone,gender,school,classId,grade,hideMenu} = this.state;
+    const {userName,hideMenu,subKey,key} = this.state;
     const {staffId} = sessionStorage
     return (
       <Layout>
@@ -114,47 +121,50 @@ class Navigation extends Component {
             type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'}
             onClick={this.toggle}
           />
-           <Menu theme="dark" mode="inline" onClick={this.clickHandle.bind(this)}>
-            <Menu.Item key="1">
+           <Menu theme="dark" 
+                  mode="inline" 
+                  onClick={this.clickHandle.bind(this)}
+                  openKeys={subKey}
+                  selectedKeys={[key]}
+                  onOpenChange={this.onOpenChange.bind(this)}>
+              <SubMenu key="sub1" title={<span><Icon type="user-add"/><span>学生管理</span></span>}>
+                <Menu.Item key="2">
+                  <span>学生名单上传</span>
+                </Menu.Item>
+                <Menu.Item key="5">
+                  <span>学生信息汇总</span>
+                </Menu.Item>
+              </SubMenu>
+              <SubMenu key="sub2" title={<span><Icon type="book"/><span>资料对应</span></span>}>
+                <Menu.Item key="3">
+                    <span>班级材料对应</span>
+                  </Menu.Item>
+                  <Menu.Item key="4">
+                    <span>班级材料汇总</span>
+                </Menu.Item>
+              </SubMenu>
+              <SubMenu key="sub3" title={<span><Icon type="pushpin"/><span>错题标记</span></span>}>
+                  <Menu.Item key="6">
+                    <span>批量标记</span>
+                  </Menu.Item>
+              </SubMenu>
+              <SubMenu key="sub4" title={<span><Icon type="file-add"/><span>生成纠错本</span></span>}>
+                <Menu.Item key="7">
+                  <span>人工EPU1</span>
+                </Menu.Item>
+              </SubMenu>
+              <SubMenu key="sub5" title={<span><Icon type="user"/><span>用户信息</span></span>}>
+                <Menu.Item key="">
+                  <span>个人信息</span>
+                </Menu.Item>
+                <Menu.Item key="">
+                  <span>修改密码</span>
+                </Menu.Item>
+              </SubMenu>
+            {/* <Menu.Item key="1">
                 <Icon type="rocket" />
                 <span>班级错题测试</span>
-            </Menu.Item>
-            <Menu.Item key="2">
-              <Icon type="book" />
-              <span>班级基本信息录入</span>
-            </Menu.Item>
-            
-            <Menu.Item key="3">
-              <Icon type="line-chart" />
-              <span>班级与学习材料对应</span>
-            </Menu.Item>
-
-            <Menu.Item key="4">
-              <Icon type="appstore" />
-              <span>班级与学习材料汇总</span>
-            </Menu.Item>
-            <Menu.Item key="5">
-              <Icon type="bar-chart" />
-              <span>学生基本信息汇总列表</span>
-            </Menu.Item>
-            <Menu.Item key="6">
-              <Icon type="exception" />
-              <span>批量录入</span>
-            </Menu.Item>
-            <Menu.Item key="7">
-              <Icon type="link" />
-              <span>批量下载</span>
-            </Menu.Item>
-            {/*
-            <Menu.Item key="5" style={hideMenu?{display:'block'}:{display:'none'}}>
-              <Icon type="scan" />
-              <span>错题复习</span>
-            </Menu.Item>
-            <Menu.Item key="6" style={hideMenu?{display:'block'}:{display:'none'}}>
-              <Icon type="database" />
-              <span>考题检验</span>
             </Menu.Item> */}
-            
           </Menu>
         </Sider>
         <Layout>
@@ -165,12 +175,13 @@ class Navigation extends Component {
                 <Icon type="user" className='user-icon'/>
               </div>
               <div className='user-name'>{userName ||staffId}</div>
+              <div className='logout' title='退出' onClick={this.logoutHandle.bind(this)}><Icon type="logout" /></div>
             </div>
-            <ul className='user-content' onMouseLeave={this.userMouseLeave.bind(this)} style={{display:this.state.showUser}}>
+            {/* <ul className='user-content' onMouseLeave={this.userMouseLeave.bind(this)} style={{display:this.state.showUser}}>
               <li onClick={this.usermsgHandle.bind(this)}>个人信息</li>
               <li onClick={this.passwordHandle.bind(this)}>修改密码</li>
               <li onClick={this.logoutHandle.bind(this)}>退出登录</li>
-            </ul>
+            </ul> */}
           </div>
           </Header>
           <Content style={{ margin: '16px 16px', padding: 24, background: '#fff', minHeight:this.state.contentHeight,/*marginTop:80 */ }}>

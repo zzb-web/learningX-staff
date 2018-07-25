@@ -45,7 +45,8 @@ class BatchInput extends React.Component{
             bookID : '',
             page : '',
             paperID : '',
-            bookType : 0
+            bookType : 0,
+            selectSchoolValue : ''
         }
     }
     componentWillMount(){
@@ -67,16 +68,19 @@ class BatchInput extends React.Component{
         })
     }
     schoolSelect(value){
-        const {schools} = this.state;
-        let schoolName;
-        schools.map((item,index)=>{
-            if(item.schoolID === value){
-                schoolName = item.name
-            }
-        })
+        let currentId = value.split('_')[1]
+        let currentName = value.split('_')[0]
+        // const {schools} = this.state;
+        // let schoolName;
+        // schools.map((item,index)=>{
+        //     if(item.schoolID === value){
+        //         schoolName = item.name
+        //     }
+        // })
         this.setState({
-            schoolID : value,
-            schoolName : schoolName
+            selectSchoolValue : value,
+            schoolID : currentId,
+            schoolName : currentName
         })
     }
     gradeSelect(value){
@@ -459,7 +463,7 @@ class BatchInput extends React.Component{
         const {schools,learnIDs,showStudentDetail,selectAllStundent,showFirstPage,showSecondPage,mode,
                 errorQues,name,learnID,showMarkMsg,wrongProblems,errDate,materials,homeworkData,
                 papers,paperData,showWarning,warningMsg,paperDate,showErrorTable,showHomeworkTable,
-            bookID,page,showPaperTable,paperID,bookType} = this.state;
+            bookID,page,showPaperTable,paperID,bookType,selectSchoolValue} = this.state;
         const allGrage = ['一','二','三','四','五','六','七','八','九'];
         const columns_student = [
             {
@@ -502,9 +506,14 @@ class BatchInput extends React.Component{
                                 <div className='select-info-content'>
                                     <div className='select-category-1'>
                                         <span>学校&nbsp;&nbsp;:</span>
-                                        <Select placeholder='选择学校' style={{ width: 240, marginLeft:'10px' }} onChange={this.schoolSelect.bind(this)}>
-                                            {schools.map((item,index)=><Option value={item.schoolID} key={index}>{item.name}</Option>)}
-                                        </Select>
+                                        <Select style={{ width: 240, marginLeft:'10px' }} 
+                                            onChange={this.schoolSelect.bind(this)}
+                                            combobox
+                                            value={selectSchoolValue.split('_')[0]}
+                                            placeholder="填写学校的规范全称"
+                                            tabIndex={0}>
+                                            {schools.map((item,index)=><Option value={`${item.name}_${item.schoolID}`} key={index}>{item.name}</Option>)}
+                                         </Select>
                                     </div>
                                     <div className='select-category-1'>
                                         <span>年级&nbsp;&nbsp;:</span>

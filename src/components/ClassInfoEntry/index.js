@@ -219,7 +219,7 @@ class ClassInfoEntry extends React.Component{
         for (let i = 0; i < schools.length; i++) {
             children.push(<Option key={i} value={schools[i].name}>{schools[i].name}</Option>);
         }
-        const calss = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','F',]
+        const calss = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','高复',]
         return(
             <div>
                 <Row>

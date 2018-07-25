@@ -53,7 +53,8 @@ class BatchDownload extends React.Component{
         fileSuccesNum : 0,
         answerSuccessNum : 0,
         fileDataArray : [],
-        answerDataArray : []
+        answerDataArray : [],
+        selectSchoolValue : ''
     }
     componentWillMount(){
         Get('/api/v3/staffs/schools/')
@@ -93,16 +94,19 @@ class BatchDownload extends React.Component{
         })
     }
     schoolSelect(value){
-        const {schools} = this.state;
-        let schoolName;
-        schools.map((item,index)=>{
-            if(item.schoolID === value){
-                schoolName = item.name
-            }
-        })
+        let currentId = value.split('_')[1]
+        let currentName = value.split('_')[0]
+        // const {schools} = this.state;
+        // let schoolName;
+        // schools.map((item,index)=>{
+        //     if(item.schoolID === value){
+        //         schoolName = item.name
+        //     }
+        // })
         this.setState({
-            schoolID : value,
-            schoolName : schoolName
+            selectSchoolValue : value,
+            schoolID : currentId,
+            schoolName : currentName
         })
     }
     gradeSelect(value){
@@ -228,7 +232,9 @@ class BatchDownload extends React.Component{
             pickDownFlag : true,
             paperData : [{paperID : ''}],
             fileSuccesNum:0,
-            answerSuccessNum : 0
+            answerSuccessNum : 0,
+            selectSchoolValue : '',
+            selectAllStundent : true
           })
     }
     addMaterials(){
@@ -895,7 +901,7 @@ class BatchDownload extends React.Component{
         const {papers,paperData,pickDownFlag,schoolName,grade,classNum,allStudentNum ,showDetail,learnIDName,schools,learnIDs,showSelectStudent,showSelectContent,showMaterials,
              requestData,materials,showSure,chooseAgain,showDownContent,allDetailData,allFileData,allAnswerData,pickDownURL,
              showStudentDetail,selectAllStundent,contentHeight,showLeftLine,statusMsgObj,currentMsg,
-             fileSuccesNum,answerSuccessNum,addDataFlag} = this.state;   
+             fileSuccesNum,answerSuccessNum,addDataFlag,selectSchoolValue} = this.state;   
         let papersHandle =[];
         let hasSelectPaperIds = [];
         paperData.map((item,index)=>{
@@ -1036,8 +1042,13 @@ class BatchDownload extends React.Component{
                             <div className='select-info-content'>
                                 <div className='select-category-1'>
                                     <span>学校&nbsp;&nbsp;:</span>
-                                    <Select placeholder='选择学校' style={{ width: 240, marginLeft:'10px' }} onChange={this.schoolSelect.bind(this)}>
-                                        {schools.map((item,index)=><Option value={item.schoolID} key={index}>{item.name}</Option>)}
+                                    <Select style={{ width: 240, marginLeft:'10px' }} 
+                                            onChange={this.schoolSelect.bind(this)}
+                                            combobox
+                                            value={selectSchoolValue.split('_')[0]}
+                                            placeholder="填写学校的规范全称"
+                                            tabIndex={0}>
+                                        {schools.map((item,index)=><Option value={`${item.name}_${item.schoolID}`} key={index}>{item.name}</Option>)}
                                     </Select>
                                 </div>
                                 <div className='select-category-1'>

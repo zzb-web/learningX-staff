@@ -24,7 +24,7 @@
       color:rgba(255, 255, 255, 0.67);
   }
 
-  .user-icon-content{
+  /* .user-icon-content{
       width: 30px;
       height: 30px;
       border-radius:15px;
@@ -35,14 +35,28 @@
       right:120px;
       background-color: rgba(255, 255, 255, 0.67);
       color: #fff;
-  }
+  } */
+  .user-icon-content{
+    width: 30px;
+    height: 30px;
+    border-radius:15px;
+    line-height: 30px;
+    text-align: center;
+    position: absolute;
+    top: 16px;
+    right:130px;
+    /* background-color: rgba(255, 255, 255, 0.67); */
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+}
   .user-main{
     width: 120px;
     height: 200px;
     position: absolute;
     right: 0;
   }
-  .user-name{
+  /* .user-name{
     width: 80px;
     height: 30px;
     line-height: 30px;
@@ -56,6 +70,36 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+} */
+.user-name{
+  width: 80px;
+  height: 30px;
+  line-height: 30px;
+  text-align: left;
+  position: absolute;
+  top: 16px;
+  right:50px;
+  color:  rgba(255, 255, 255, 0.67);
+  color: #fff;
+  font-size: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.logout{
+  width: 30px;
+  height: 30px;
+  border-radius:15px;
+  line-height: 30px;
+  text-align: center;
+  position: absolute;
+  top: 16px;
+  right:20px;
+  font-size: 20px;
+  font-weight: 600;
+  /* background-color: rgba(255, 255, 255, 0.67); */
+  color: #fff;
+  cursor: pointer;
 }
 .user-msg {
   cursor: pointer;
