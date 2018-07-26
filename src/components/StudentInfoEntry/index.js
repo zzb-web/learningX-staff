@@ -151,7 +151,7 @@ class StudentInfoEntry extends React.Component{
       return y +'-'+this._add(m)+'-'+this._add(d); 
     }
     render(){
-        const {mode,showModal,imgURL, title,data,dataPaper ,showTable ,schools ,schoolWarning,cityWarning,gradeWarning,classWarning} = this.state;
+        const {mode,data,dataPaper ,showTable ,schools ,schoolWarning,cityWarning,gradeWarning,classWarning} = this.state;
         const children = [];
         for (let i = 0; i < schools.length; i++) {
             children.push(<Option key={i} value={schools[i].name}>{schools[i].name}</Option>);

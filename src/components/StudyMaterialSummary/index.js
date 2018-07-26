@@ -4,6 +4,7 @@ import { withRouter } from 'react-router';
 import {Get ,Post ,Delete} from '../../fetch/data.js'
 import CityCommon from '../Common/cityCommon.js';
 import GradeClassCommon from '../Common/gradeclassCommon.js';
+import ImgViewModal from '../Common/imgViewModal/index.js';
 const {Option} = Select;
 class StudyMaterialSummary extends React.Component{
     constructor(){
@@ -23,8 +24,8 @@ class StudyMaterialSummary extends React.Component{
             showTable : false,
             data : [],
             dataPaper : [],
-            imgURL : '',
-            showModal : false,
+            imgNow : '',
+            openModal : false,
             mode : 'book',
         }
     }
@@ -141,17 +142,9 @@ class StudyMaterialSummary extends React.Component{
         }
     }
     showPic(value){
-        console.log(value)
         this.setState({
-            showModal : true,
-            title : value[1],
-            imgURL : value[0]
-        })
-    }
-    modalCancel(){
-        this.setState({
-            showModal : false,
-            imgURL : ''
+            openModal : true,
+            imgNow : value
         })
     }
     confirm(data){
@@ -302,9 +295,9 @@ class StudyMaterialSummary extends React.Component{
                 edi : `${item.ediYear}-${item.ediMonth}-${item.ediVersion}`,
                 imp : `${item.impYear}-${item.impMonth}-${item.impNum}`,
                 pic : <div>
-                        <div className='picName' onClick={this.showPic.bind(this,[item.coverURL,'封面'])}>封面</div>
-                        <div className='picName' onClick={this.showPic.bind(this,[item.cipURL,'CIP数据'])}>CIP数据</div>
-                        <div className='picName' onClick={this.showPic.bind(this,[item.priceURL,'印版次数据'])}>印版次数据</div>
+                        <div className='picName' onClick={this.showPic.bind(this,item.coverURL)}>封面</div>
+                        <div className='picName' onClick={this.showPic.bind(this,item.cipURL)}>CIP数据</div>
+                        <div className='picName' onClick={this.showPic.bind(this,item.priceURL)}>印版次数据</div>
                       </div>,
                 opera : <Popconfirm title="你确定要删除这个对应吗?" 
                                     onConfirm={this.confirm.bind(this,[item.bookID,0])}
@@ -390,7 +383,7 @@ class StudyMaterialSummary extends React.Component{
                 versionYear : `${item.version}${item.year}`,
                 choice : item.choice,
                 blank : item.blank,
-                pic : <div className='picName' onClick={this.showPic.bind(this,[item.imageURL,'试卷题头'])}>试卷题头</div>,
+                pic : <div className='picName' onClick={this.showPic.bind(this,item.imageURL)}>试卷题头</div>,
                 opera : <Popconfirm title="你确定要删除这个对应吗?" 
                                     onConfirm={this.confirm.bind(this,[item.paperID,1])}
                                     onCancel={this.cancel.bind(this)} okText="确定" cancelText="取消">
@@ -468,17 +461,11 @@ class StudyMaterialSummary extends React.Component{
                         </div> 
                     </div> : null
                 }
-               <Modal title={title}
-                        visible={showModal}
-                        footer={null}
-                        maskClosable={false}
-                        onCancel={this.modalCancel.bind(this)}
-                        wrapClassName="vertical-center-modal"
-                        >
-                    <div style={{overflowX:'auto'}}>
-                        <img src={imgURL}/>
-                    </div>
-                </Modal>
+               <ImgViewModal
+                    open={this.state.openModal}
+                    src={this.state.imgNow}
+                    onClose={() => { this.setState({ openModal: false }) }}
+                />
             </div>
         )
     }

@@ -3,6 +3,7 @@ import {Input ,InputNumber, Select ,Row , Col,Radio ,Button, Table, Modal,messag
 import {Get, Post} from '../../fetch/data.js';
 import CityCommon from '../Common/cityCommon.js';
 import GradeClassCommon from '../Common/gradeclassCommon.js';
+import ImgViewModal from '../Common/imgViewModal/index.js';
 const {Option} = Select;
 class ClassStudyMaterial extends React.Component {
     state={
@@ -152,10 +153,10 @@ class Book extends React.Component{
             books : [],
             showTable : false,
             showModal : false,
-            title : '',
-            imgURL : '',
             schoolMsg : props.schoolMsg,
-            classMsg : props.classMsg
+            classMsg : props.classMsg,
+            imgNow : '',
+            openModal : false
         }
     }
     componentWillReceiveProps(nextProps){
@@ -200,25 +201,10 @@ class Book extends React.Component{
             
         })
     }
-    bookHandle(data){
-        let title;
-        switch(data[1]){
-            case 0 :
-                title = '封面';
-                break;
-            case 1 :
-                title ='CIP数据';
-                break;
-            case 2 :
-                title = '印刷次数据';
-                break;
-            default : 
-                break;
-        }
+    bookHandle(url){
         this.setState({
-            showModal : true,
-            title : title,
-            imgURL : data[0]
+            openModal : true,
+            imgNow : url
         })
     }
     okHandle(data){
@@ -237,12 +223,6 @@ class Book extends React.Component{
 
         })
     }
-    modalCancel(){
-        this.setState({
-            showModal : false,
-            imgURL : ''
-        })
-    }
    
     render(){
         let years = [] , month = [] , version = [];
@@ -255,7 +235,7 @@ class Book extends React.Component{
         for(var i=1;i<=100;i++){
             version.push(<Option value={i} key={i}>{i}</Option>)
         }
-        const {books , showTable, showModal, title , imgURL} = this.state;
+        const {books , showTable} = this.state;
         const columns = [
             {
                 title : '书本资料识别码',
@@ -293,9 +273,9 @@ class Book extends React.Component{
             dataSource.push({
                 key : index,
                 bookID : item.bookID,
-                coverURL : <span onClick={this.bookHandle.bind(this,[item.coverURL,0])} style={{color:'#108ee9',cursor:'pointer'}}>封面</span>,
-                cipURL : <span onClick={this.bookHandle.bind(this,[item.cipURL,1])} style={{color:'#108ee9',cursor:'pointer'}}>CIP数据</span>,
-                priceURL : <span onClick={this.bookHandle.bind(this,[item.priceURL,2])} style={{color:'#108ee9',cursor:'pointer'}}>印刷次数据</span>,
+                coverURL : <span onClick={this.bookHandle.bind(this,item.coverURL)} style={{color:'#108ee9',cursor:'pointer'}}>封面</span>,
+                cipURL : <span onClick={this.bookHandle.bind(this,item.cipURL)} style={{color:'#108ee9',cursor:'pointer'}}>CIP数据</span>,
+                priceURL : <span onClick={this.bookHandle.bind(this,item.priceURL)} style={{color:'#108ee9',cursor:'pointer'}}>印刷次数据</span>,
                 operation : <span onClick={this.okHandle.bind(this,item.bookID)} style={{color:'#108ee9',cursor:'pointer'}}>确认对应</span>,
             })
         })
@@ -333,17 +313,11 @@ class Book extends React.Component{
                                 />
                     </div> : null
                 }
-                <Modal title={title}
-                        visible={showModal}
-                        footer={null}
-                        maskClosable={false}
-                        onCancel={this.modalCancel.bind(this)}
-                        wrapClassName="vertical-center-modal"
-                        >
-                    <div style={{overflowX:'auto'}}>
-                        <img src={imgURL}/>
-                    </div>
-                </Modal>
+                  <ImgViewModal
+                    open={this.state.openModal}
+                    src={this.state.imgNow}
+                    onClose={() => { this.setState({ openModal: false }) }}
+                />
             </div>
         )
     }
@@ -356,10 +330,10 @@ class TestPaper extends React.Component{
             testPaper :['','',''],
             tests : [],
             showTable : false,
-            showModal : false,
-            imgURL : '',
             schoolMsg : props.schoolMsg,
-            classMsg : props.classMsg
+            classMsg : props.classMsg,
+            openModal : false,
+            imgNow : ''
         }
     }
     componentWillReceiveProps(nextProps){
@@ -389,8 +363,8 @@ class TestPaper extends React.Component{
     }
     testHandle(url){
         this.setState({
-            imgURL : url,
-            showModal : true
+            imgNow : url,
+            openModal : true
         })
     }
     okHandle(data){
@@ -407,12 +381,6 @@ class TestPaper extends React.Component{
             }
         }).catch(err=>{
 
-        })
-    }
-    modalCancel(){
-        this.setState({
-            showModal : false,
-            imgURL : ''
         })
     }
     render(){
@@ -448,7 +416,7 @@ class TestPaper extends React.Component{
                 width : '15%'
             }
         ]
-        const {tests ,showTable ,showModal ,imgURL} = this.state;
+        const {tests ,showTable} = this.state;
         let dataSource = [];
         tests.map((item,index)=>{
             dataSource.push({
@@ -492,17 +460,13 @@ class TestPaper extends React.Component{
                                         scroll={{x:null,y:300}}/> : null
                     }
                 </div>
-                <Modal title='试卷题头'
-                        visible={showModal}
-                        footer={null}
-                        maskClosable={false}
-                        onCancel={this.modalCancel.bind(this)}
-                        wrapClassName="vertical-center-modal"
-                        >
-                    <div style={{overflowX:'auto'}}>
-                        <img src={imgURL}/>
-                    </div>
-                </Modal>
+                <ImgViewModal
+                    open={this.state.openModal}
+                    src={this.state.imgNow}
+                    onClose={() => { this.setState({ openModal: false }) }}
+                />
+              
+
             </div>
         )
     }
