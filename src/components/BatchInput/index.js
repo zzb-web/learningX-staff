@@ -261,7 +261,8 @@ class BatchInput extends React.Component{
                 }).catch(err=>{
                 })
                 //获取试卷
-                Get(`/api/v3/staffs/classes/papers/?${msg}`)
+                
+                Get(`/api/v3/staffs/students/${learnID}/notMarkedPapers/`)
                 .then(resp=>{
                     if(resp.status === 200){
                         this.setState({
@@ -409,7 +410,7 @@ class BatchInput extends React.Component{
         }else if(data === 2){
             const {schoolID,grade,classNum} = this.state;
             const msg = `schoolID=${schoolID}&grade=${grade}&class=${classNum}`;
-            Get(`/api/v3/staffs/classes/papers/?${msg}`)
+            Get(`/api/v3/staffs/students/${learnID}/notMarkedPapers/`)
                 .then(resp=>{
                     if(resp.status === 200){
                         this.setState({

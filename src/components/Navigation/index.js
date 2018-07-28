@@ -147,10 +147,19 @@ class Navigation extends Component {
                   <Menu.Item key="6">
                     <span>批量标记</span>
                   </Menu.Item>
+                  <Menu.Item key="8">
+                    <span>标记情况查看</span>
+                  </Menu.Item>
               </SubMenu>
               <SubMenu key="sub4" title={<span><Icon type="file-add"/><span>生成纠错本</span></span>}>
                 <Menu.Item key="7">
                   <span>人工EPU1</span>
+                </Menu.Item>
+                <Menu.Item key="9">
+                  <span>智能EPU2</span>
+                </Menu.Item>
+                <Menu.Item key="10">
+                  <span>分化EPU3</span>
                 </Menu.Item>
               </SubMenu>
               <SubMenu key="sub5" title={<span><Icon type="user"/><span>用户信息</span></span>}>

@@ -16,7 +16,8 @@ class ClassStudyMaterial extends React.Component {
         schoolsNames : [],
         name_schoolID : {},
         gradeWarning : false,
-        classWarning : false
+        classWarning : false,
+        selectSchoolValue : ''
     }
     componentWillMount(){
         // Get('/api/v3/staffs/schools/').then(resp=>{
@@ -76,9 +77,10 @@ class ClassStudyMaterial extends React.Component {
     }
 
     schoolMsgInput(value){
-        console.log(value)
+        let currentId = value.split('_')[1]
         this.setState({
-            schoolMsg : value
+            schoolMsg : currentId,
+            selectSchoolValue : value
         })
     }
 
@@ -89,11 +91,11 @@ class ClassStudyMaterial extends React.Component {
         })
     }
     render(){
-        const {cityWarning, mode,schools,schoolMsg,classMsg,gradeWarning,classWarning} = this.state;
-        const children = [];
-        for (let i = 0; i < schools.length; i++) {
-            children.push(<Option key={i} value={schools[i].schoolID}>{schools[i].name}</Option>);
-        }
+        const {cityWarning, mode,schools,schoolMsg,classMsg,gradeWarning,classWarning,selectSchoolValue} = this.state;
+        // const children = [];
+        // for (let i = 0; i < schools.length; i++) {
+        //     children.push(<Option key={i} value={schools[i].schoolID}>{schools[i].name}</Option>);
+        // }
         return(
             <div>
                 <Row>
@@ -105,11 +107,18 @@ class ClassStudyMaterial extends React.Component {
                                         cityWarningHandle={this.cityWarningHandle.bind(this)}/>
                         <div style={{marginTop:30}}>
                             <span className='book-title'>学校全称:</span>
-                            <Select
+                            {/* <Select
                                 style={{ width:300,marginLeft:20}}
                                 onChange={this.schoolMsgInput.bind(this)}
-                            >
-                                {children}
+                            > */}
+                            <Select combobox
+                                    style={{width:300,marginLeft:20}}
+                                    placeholder="填写学校的规范全称"
+                                    value={selectSchoolValue.split('_')[0]}
+                                    onChange={this.schoolMsgInput.bind(this)}
+                                    tabIndex={0}
+                                        >
+                                 {schools.map((item,index)=><Option value={`${item.name}_${item.schoolID}`} key={index}>{item.name}</Option>)}
                             </Select>
                         </div>
                         <div style={{marginTop:30}}>

@@ -44,7 +44,7 @@ class GradeClassCommon extends React.Component{
                 </div>
                 <div style={{marginTop:30}}>
                     <span className='book-title'><span style={{color:'red'}}>*</span>班级:</span>
-                    <InputNumber max={1000} min={1} style={classWarning ?{width:300,marginLeft:20,borderColor:'red'}:{width:300,marginLeft:20}}
+                    <InputNumber max={1000} min={0} style={classWarning ?{width:300,marginLeft:20,borderColor:'red'}:{width:300,marginLeft:20}}
                                                  onChange={this.classMsgInput.bind(this,1)}/>
                 </div>
            </div>
