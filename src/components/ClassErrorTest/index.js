@@ -748,7 +748,7 @@ class ClassErrorTest extends React.Component{
         })
 
 
-        const allGrage = ['一','二','三','四','五','六','七','八','九'];
+        const allGrage = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','高复'];
         const columns = [
             {
                 title : '学习号',

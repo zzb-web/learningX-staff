@@ -90,6 +90,16 @@ const BatchDownloadComponent = Loadable({
   }
 }
 
+const EPU2Component = Loadable({
+  loader: () => import('../EPU2/index.js'),
+  loading: MyLoadingComponent,
+});
+ class EPU2Loadable extends React.Component {
+  render() {
+    return <EPU2Component/>;
+  }
+}
+
 export {
         PassWordFormLoadable,
         ClassErrorTestLoadable,
@@ -98,5 +108,6 @@ export {
         StudyMaterialSummaryLoadable,
         StudentInfoEntryLoadable,
         BatchInputLoadable,
-        BatchDownloadLoadable
+        BatchDownloadLoadable,
+        EPU2Loadable
       }

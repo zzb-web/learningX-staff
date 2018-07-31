@@ -70,13 +70,6 @@ class BatchInput extends React.Component{
     schoolSelect(value){
         let currentId = value.split('_')[1]
         let currentName = value.split('_')[0]
-        // const {schools} = this.state;
-        // let schoolName;
-        // schools.map((item,index)=>{
-        //     if(item.schoolID === value){
-        //         schoolName = item.name
-        //     }
-        // })
         this.setState({
             selectSchoolValue : value,
             schoolID : currentId,
@@ -166,7 +159,6 @@ class BatchInput extends React.Component{
         this.setState({
             selectedLearnIDs : selectedLearnIDs,
             allStudentNum : selectedLearnIDs.length,
-            showSelectStudent : false,
             showStudentDetail : false,
             showFirstPage : false,
             showSecondPage : true
@@ -465,7 +457,7 @@ class BatchInput extends React.Component{
                 errorQues,name,learnID,showMarkMsg,wrongProblems,errDate,materials,homeworkData,
                 papers,paperData,showWarning,warningMsg,paperDate,showErrorTable,showHomeworkTable,
             bookID,page,showPaperTable,paperID,bookType,selectSchoolValue} = this.state;
-        const allGrage = ['一','二','三','四','五','六','七','八','九'];
+        const allGrage = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','高复'];
         const columns_student = [
             {
                 title : '学习号',

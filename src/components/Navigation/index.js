@@ -11,7 +11,8 @@ import {
             StudyMaterialSummaryLoadable,
             StudentInfoEntryLoadable,
             BatchInputLoadable,
-            BatchDownloadLoadable
+            BatchDownloadLoadable,
+            EPU2Loadable
       } from '../Loadable/homepageaComponent.js';
 import axios from 'axios';
 import './style.css';
@@ -21,7 +22,7 @@ const {SubMenu} = Menu;
 class Navigation extends Component {
   state = {
     collapsed: false,
-    key: '2',
+    key: '9',
     subKey : ['sub1'],
     showUser : 'none',
     contentHeight :　0,
@@ -228,11 +229,10 @@ class Navigation extends Component {
             {
                 this.state.key === '7' ? <BatchDownloadLoadable/> : null
             }
-            {/*
             {
-              this.state.key === '9' ? <TestErrorMarkerLoadable/> : null
+              this.state.key === '9' ? <EPU2Loadable/> : null
             }
-            {
+            {/*
               this.state.key === '10' ? <TestErrorDetectionLoadable/> : null
             }  */}
           </Content>
