@@ -151,9 +151,11 @@ class EPU2 extends React.Component{
 
         Post(`/api/v3/staffs/students/getProblemRecords/`,selectIdArr).then(resp=>{
             let data = resp.data;
+            let {learnIDName} = this.state;
             data.map((item,index)=>{
-                item.learnID = selectedLearnIDs[index].learnID;
-                item.name = selectedLearnIDs[index].name;
+                // item.learnID = selectedLearnIDs[index].learnID;
+                // item.name = selectedLearnIDs[index].name;
+                item.name = learnIDName[item.learnID];
             })
             this.setState({
                 studentMarks : data
@@ -204,7 +206,7 @@ class EPU2 extends React.Component{
             }
         })
         let allNum = data.bookStatus.length +2;
-        let evaluation =  Math.round(status0/allNum) * 10;
+        let evaluation =  Math.round(status0/allNum* 10) ;
         return evaluation;
     }
     getMarkDetail(data){
@@ -820,13 +822,15 @@ class EPU2 extends React.Component{
                 title : '未标记',
                 dataIndex : 'noMarking',
                 key : 'noMarking',
-                width:'20%'
+                width:'20%',
+                sorter: (a, b) => a.noMarking.length - b.noMarking.length
             },
             {
                 title : '标记评估',
                 dataIndex : 'markingEvaluation',
                 key : 'markingEvaluation',
-                width:'20%'
+                width:'20%',
+                sorter: (a, b) => a.markingEvaluation - b.markingEvaluation
             },
             {
                 title : '标记详情',
