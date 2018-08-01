@@ -22,7 +22,7 @@ const {SubMenu} = Menu;
 class Navigation extends Component {
   state = {
     collapsed: false,
-    key: '9',
+    key: '2',
     subKey : ['sub1'],
     showUser : 'none',
     contentHeight :　0,
@@ -106,7 +106,7 @@ class Navigation extends Component {
           trigger={null}
           collapsible
           collapsed={this.state.collapsed}
-          width={135}
+          width={150}
         >
           <div className='head-font'>
             工作人员

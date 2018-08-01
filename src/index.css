@@ -212,3 +212,15 @@ body {
 .homeworkTable .ant-switch{
   background-color: red;
 }
+.detail-content {
+  position: absolute;
+  top: 280px;
+  left: -100px;
+}
+.detail-table{
+  width: 450px;
+  height: 190px;
+  position: absolute;
+  top: 300px;
+  right: 0px;
+}

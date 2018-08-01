@@ -9,7 +9,7 @@ class EPU2 extends React.Component{
             schools : [],
             grade : '',
             mode : 'error',
-            classNum : 0,
+            classNum : '',
             schoolID : '',
             schoolName : '',
             showFail :false,
@@ -48,7 +48,15 @@ class EPU2 extends React.Component{
             maxNum : 10,
             paper : 2,
             pickDownFlag : true,
-            showSure : true
+            showSure : true,
+            statusMsgObj : {},
+            currentMsg : '',
+            fileSuccesNum : 0,
+            answerSuccessNum : 0,
+            tableData : [],
+            showDetailTable : false,
+            haslearnIDs : [],
+            showTipMsg : false
         }
     }
     componentWillMount(){
@@ -122,7 +130,8 @@ class EPU2 extends React.Component{
                     showFail : false,
                     showStudentDetail : true,
                     showLeftLine : true,
-                    allStudentNum : resp.data.total
+                    allStudentNum : resp.data.total,
+                    showTipMsg : true
                 })
             }
         }).catch(err=>{
@@ -135,16 +144,16 @@ class EPU2 extends React.Component{
         let selectedLearnIDs = [] ,selectIdArr = [];
         for(var k=0;k<learnIDs.length;k++){
             if(learnIDs[k].status){
-                selectedLearnIDs.push(learnIDs[k].learnID);
-                selectIdArr.push(learnIDs[k]);
+                selectedLearnIDs.push(learnIDs[k]);
+                selectIdArr.push(learnIDs[k].learnID);
             }
         }
 
-        Post(`/api/v3/staffs/students/getProblemRecords/`,selectedLearnIDs).then(resp=>{
+        Post(`/api/v3/staffs/students/getProblemRecords/`,selectIdArr).then(resp=>{
             let data = resp.data;
             data.map((item,index)=>{
-                item.learnID = selectIdArr[index].learnID;
-                item.name = selectIdArr[index].name;
+                item.learnID = selectedLearnIDs[index].learnID;
+                item.name = selectedLearnIDs[index].name;
             })
             this.setState({
                 studentMarks : data
@@ -156,7 +165,8 @@ class EPU2 extends React.Component{
             allStudentNum : selectedLearnIDs.length,
             showStudentDetail : false,
             showFirstPage : false,
-            showSecondPage : true
+            showSecondPage : true,
+            showTipMsg : false
         })
     }
     chooseAllStudent(value){
@@ -230,13 +240,14 @@ class EPU2 extends React.Component{
             setTimeout(()=>{
                 this.setState({showSure:true})
         },500)
-        const {requestData, maxNum,sort,paper , selectedLearnIDs, allStudentNum,paperData} = this.state;
+        const {requestData, maxNum,paper , selectedLearnIDs, allStudentNum,paperData} = this.state;
         var requestFlag = true;
         if(requestFlag){
             var allDetailData  = {};
             var allReturnData = {};
+            var sort = 1;
             selectedLearnIDs.map((item,idnex)=>{
-                var url = `/api/v3/staffs/students/${item}/wrongProblems/?sort=1&max=${maxNum}`;
+                var url = `/api/v3/staffs/students/${item.learnID}/wrongProblems/?sort=1&max=${maxNum}`;
                 Get(url)
                 .then((response)=>{
                 if(response.status === 200){
@@ -285,12 +296,10 @@ class EPU2 extends React.Component{
                 .catch(function (error) {
                 });
             })
+            console.log(allDetailData)
             
-                /*this.setState({
-                        showMaterials : false,
-                        chooseAgain : true,
-                        showDownContent : true,
-                        showDetail : true,
+                this.setState({
+                
                         allAnswerData : {},
                         allFileData : {},
                         generateFlag: true,
@@ -299,6 +308,7 @@ class EPU2 extends React.Component{
                         allDetailData : allDetailData,
                         fileFlag : true
                     })
+                    
                     const {allStudentNum} = this.state;
                     var times = (allStudentNum+10)*100;
                 setTimeout(()=>{
@@ -330,6 +340,10 @@ class EPU2 extends React.Component{
                         for(let i=0;i<finalRequestArray.length;i++) {
                             const {generateFlag,allDetailData} = this.state;
                             if(generateFlag){
+                                let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
+                                this.setState({
+                                    currentMsg : showMsg
+                                })
                                 if( allDetailData[finalRequestArray[i].learnID].questionNum !==0){
                                 let type = '';
                                 if(i%2 ===0 ){
@@ -366,20 +380,23 @@ class EPU2 extends React.Component{
                                         statusMsgObj : statusMsgObj
                                     })
                                     let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
+                                    console.log(haslearnIDs)
                                         if(i%2 === 0){
                                             allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
                                         
                                             if(status === 200){
-                                                fileSuccesNum = fileSuccesNum+1
+                                                fileSuccesNum = fileSuccesNum+1;
+                                                this.setState({
+                                                    fileSuccesNum : fileSuccesNum
+                                                })
                                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
                                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
                                                 }
                                             }
-                                            let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
+                                            // let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
                                             this.setState({
                                                 allFileData : allFileData,
-                                                currentMsg : showMsg,
-                                                fileSuccesNum : fileSuccesNum
+                                                // currentMsg : showMsg,
                                             })
                                         }else{
                                             if(status === 200){
@@ -391,14 +408,17 @@ class EPU2 extends React.Component{
                                                 //     }
                                                 // }
                                                 answerSuccessNum = answerSuccessNum +1
+                                                this.setState({
+                                                    answerSuccessNum :answerSuccessNum
+                                                })
                                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
                                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
                                                 }
+                                                
                                             }
                                             allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
                                             this.setState({
                                                 allAnswerData : allAnswerData,
-                                                answerSuccessNum :answerSuccessNum
                                             })
                                         }
                                         this.setState({
@@ -461,7 +481,7 @@ class EPU2 extends React.Component{
                         }
                     })();
 
-                },times)*/
+                },times)
         }else{
             this.setState({
                 showFail : true,
@@ -526,12 +546,230 @@ class EPU2 extends React.Component{
             markFlag : e.target.checked
         })
     }
+    _getFileData(currentData,paper){
+        var dataObj = {};
+        var dataParams = []
+        currentData.map((item,i)=>{
+            item.map((item2,i2)=>{
+                      dataObj[item2.problemId+'_'+i2] = {
+                        index : item2.index,
+                        subIdx : item2.subIdx,
+                        full : item2.full,
+                        type : item2.type
+                        }                              
+            })
+        })
+        for(var key in dataObj){
+            if(dataParams[dataObj[key].type] === undefined){
+                dataParams[dataObj[key].type] = [];
+                dataParams[dataObj[key].type].push({
+                                    problemId: key.split('_')[0],
+                                    subIdx: dataObj[key].subIdx,
+                                    index: dataObj[key].index,
+                                    full:dataObj[key].full,
+                                })
+            }else{
+                dataParams[dataObj[key].type].push({
+                    problemId: key.split('_')[0],
+                    subIdx: dataObj[key].subIdx,
+                    index: dataObj[key].index,
+                    full:dataObj[key].full,
+                })
+            }
+        }
+        if(paper === ''){
+            var params = [];
+            for(var key in dataParams){
+                params.push({
+                    type : key,
+                    problems : dataParams[key]
+                })
+            }
+        }else{
+            var problems = [];
+            var paperString;
+            if(paper === 1){
+                paperString = 'A3';
+            }else{
+                paperString = 'A4';
+            }
+            for(var key in dataParams){
+                problems.push({
+                    type : key,
+                    problems : dataParams[key]
+                })
+            }
+            var params = {
+                pageType : paperString,
+                problems : problems
+            }
+        }
+        return params;
+    }
+    _getAnswerData(currentData,paper){
+        //  console.log(currentData)
+        var dataObj = {};
+        var dataParams = []
+        currentData.map((item,i)=>{
+            item.map((item2,i2)=>{
+                dataObj[item2.problemId+'_'] = item2
+            })
+        })
+        if(paper === ''){
+            var dataParams = []
+            for(var key in dataObj){
+                dataParams.push({
+                    problemId: key.split('_')[0],
+                    index: dataObj[key],
+                })
+            }
+        }else{
+            var problems = [];
+            var paperString;
+            if(paper === 1){
+                paperString = 'A3';
+            }else{
+                paperString = 'A4';
+            }
+            // console.log(dataObj)
+            for(var key in dataObj){
+                problems.push({
+                    problemId: dataObj[key].problemId,
+                    index: dataObj[key].index,
+                    location : dataObj[key].type
+                })
+            }
+            var dataParams = {
+                pageType : paperString,
+                problems : problems
+            }
+        }
+        // console.log(dataParams)
+        return dataParams;
+     }
+     getFileAgain(key){
+        let currentId = key;
+       let {fileDataArray,statusMsgObj,haslearnIDs,allFileData} = this.state;
+       let data = {};
+       for(var i=0;i<=fileDataArray.length;i++){
+           if(fileDataArray[i].learnID === currentId){
+               data = fileDataArray[i].params;
+               break;
+           }
+        }
+        Post(`/api/v3/staffs/students/${currentId}/getProblemsFile/`,data).then(resp=>{
+            let status = resp.status;
+            let statusMsg = ''
+            switch(status){
+                case 200 : statusMsg = '成功';
+                break;
+                case 403 : statusMsg = '纠错本未标记' ;                                 
+                break;
+                case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+                break;
+                case 500 :  statusMsg = '内部未知错误';                                  
+                break;
+                case 504 : statusMsg = '超时需再生成';
+                break;
+                default :
+            }
+            
+            statusMsgObj[currentId][0] = statusMsg;
+            allFileData[currentId] = resp.data.pdfurl;
+            let {fileSuccesNum} = this.state;
+            if(status === 200){
+                if(haslearnIDs.indexOf(Number(currentId)) === -1){
+                    haslearnIDs.push(Number(currentId))
+                }
+                fileSuccesNum = fileSuccesNum+1
+            }
+            this.setState({
+                statusMsgObj : statusMsgObj,
+                allFileData : allFileData,
+                haslearnIDs : haslearnIDs,
+                fileSuccesNum : fileSuccesNum
+            })
+
+        }).catch(err=>{
+
+        })
+       
+    }
+    getAnswerAgain(key){
+        let currentId = key;
+       let {answerDataArray,statusMsgObj,haslearnIDs,allAnswerData} = this.state;
+       let data = {};
+       for(var i=0;i<=answerDataArray.length;i++){
+           if(answerDataArray[i].learnID === currentId){
+               data = answerDataArray[i].params;
+               break;
+           }
+        }
+        Post(`/api/v3/staffs/students/${currentId}/getAnswersFile/`,data).then(resp=>{
+            let status = resp.status;
+            let statusMsg = ''
+            switch(status){
+                case 200 : statusMsg = '成功';
+                break;
+                case 403 : statusMsg = '纠错本未标记' ;                                 
+                break;
+                case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+                break;
+                case 500 :  statusMsg = '内部未知错误';                                  
+                break;
+                case 504 : statusMsg = '超时需再生成';
+                break;
+                default :
+            }
+            
+            statusMsgObj[currentId][1] = statusMsg;
+            allAnswerData[currentId] = resp.data.pdfurl;
+            let {answerSuccessNum} = this.state;
+            if(status === 200){
+                if(haslearnIDs.indexOf(Number(currentId)) === -1){
+                    haslearnIDs.push(Number(currentId))
+                }
+                answerSuccessNum = answerSuccessNum +1
+            }
+            this.setState({
+                statusMsgObj : statusMsgObj,
+                allAnswerData : allAnswerData,
+                haslearnIDs : haslearnIDs,
+                answerSuccessNum : answerSuccessNum
+            })
+
+        }).catch(err=>{
+
+        })
+       
+    }
+    downloadDetail(data){
+        this.setState({
+            showDetailTable : true,
+            detailData : this._handleDetailData(data)
+        })
+    }
+    _handleDetailData(data){
+        if(data !== undefined){
+            let returnData = []
+            data.map((item,index)=>{
+                item.map((item2,index2)=>{
+                    returnData.push({
+                        titleNumber : item2.subIdx === -1 ? `${item2.index}` : `${item2.index}(${item2.subIdx})`,
+                        titleSource : item2.subIdx === -1 ? `${item2.book}/P${item2.page}/T${item2.idx}` : `${item2.book}/P${item2.page}/T${item2.idx}/(${item2.subIdx})`,
+                        titleBasic : item2.reason
+                    })
+                })
+            })
+            return returnData;
+        }
+    }
     render(){
-        const {schools,learnIDs,showStudentDetail,selectAllStundent,showFirstPage,showSecondPage,mode,
-            errorQues,name,learnID,showMarkMsg,wrongProblems,errDate,materials,homeworkData,
-            papers,paperData,showWarning,warningMsg,paperDate,showErrorTable,showHomeworkTable,
-        bookID,page,showPaperTable,paperID,bookType,selectSchoolValue,studentMarks,markDetailData,
-        showMarkDetail,showThirdPage,showFourthPage,pickDownFlag,showSure} = this.state;
+        const {schools,learnIDs,schoolName,grade,classNum,showStudentDetail,selectAllStundent,showFirstPage,showSecondPage,
+           selectSchoolValue,studentMarks,markDetailData,pickDownFlag,learnIDName,detailData,showDetailTable
+            ,showSure,allDetailData,allFileData,allAnswerData,statusMsgObj,fileSuccesNum,answerSuccessNum
+            ,showMarkDetail,showThirdPage,showFourthPage,currentMsg,allStudentNum,addDataFlag} = this.state;
+            console.log(fileSuccesNum)
         const allGrage = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','高复'];
         const columns_student = [
             {
@@ -648,6 +886,58 @@ class EPU2 extends React.Component{
             }
         ]
 
+        const dataSource_download = [];
+        for(var key in allFileData){
+            var fileDownload;
+            var answerDownload;
+            console.log(key)
+            if(allFileData[key] === undefined){
+                fileDownload = <span className='downBtn' style={{border:'none',color:'red'}} onClick={this.getFileAgain.bind(this,key)}>纠错本</span>
+            }else{
+                fileDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee'}}>
+                                    纠错本
+                                </span>
+            }
+            if(allAnswerData[key] === undefined){
+                answerDownload = <span className='downBtn' style={{border:'none',color:'red',marginLeft:30}} onClick={this.getAnswerAgain.bind(this,key)}>答案</span>
+            }else{
+                answerDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee',marginLeft:30}}>
+                                     答案
+                                </span>
+            }
+            var download =  <span>
+                                {fileDownload}
+                                {answerDownload}
+                            </span>
+        var isCorrect;
+        if(allFileData[key] !== undefined && allAnswerData[key] !== undefined){
+            isCorrect = true
+        }else{
+            isCorrect = false
+        }
+        var question_1 = ''
+        var question_2 = ''
+        if(statusMsgObj[key] !== undefined){
+            question_1 = <span>{statusMsgObj[key][0]}</span>
+            question_2 = <span>{statusMsgObj[key][1]}</span>
+        }
+        dataSource_download.push({
+                key : key,
+                learnID : key,
+                name : learnIDName[key],
+                download : download,
+                isCorrect : isCorrect,
+                trueNum : allDetailData[key] !== undefined ? allDetailData[key].questionNum : 0,
+                selectDetail : <span style={{color:'#108ee9',cursor:'pointer'}} onClick={this.downloadDetail.bind(this,allDetailData[key].data)}>详情</span>,
+                question :allDetailData[key].questionNum === 0 ? <div>0错题或未标记</div>
+                                                                    : <div>
+                                                                        <div><span>纠错本:</span><span>{question_1}</span></div>
+                                                                        <div><span>答案:</span><span>{question_2}</span></div>
+                                                                    </div>
+            })
+            
+        }
+
         return(
             <div>
             { showFirstPage ?
@@ -657,7 +947,7 @@ class EPU2 extends React.Component{
                                 <h2 className='select-info-h2'>选择班级</h2>
                                 <div className='select-info-content'>
                                     <div className='select-category-1'>
-                                        <span>学校&nbsp;&nbsp;:</span>
+                                        <span><span style={{color:'red'}}>*</span>学校&nbsp;&nbsp;:</span>
                                         <Select style={{ width: 240, marginLeft:'10px' }} 
                                             onChange={this.schoolSelect.bind(this)}
                                             combobox
@@ -668,13 +958,13 @@ class EPU2 extends React.Component{
                                          </Select>
                                     </div>
                                     <div className='select-category-1'>
-                                        <span>年级&nbsp;&nbsp;:</span>
+                                        <span><span style={{color:'red'}}>*</span>年级&nbsp;&nbsp;:</span>
                                         <Select placeholder='选择年级' style={{ width: 240, marginLeft:'10px' }} onChange={this.gradeSelect.bind(this)}>
                                             {allGrage.map((item,index)=><Option value={item} key={index}>{item}</Option>)}
                                         </Select>
                                     </div>
                                     <div className='select-category-1'>
-                                        <span>班级&nbsp;&nbsp;:</span>
+                                        <span><span style={{color:'red'}}>*</span>班级&nbsp;&nbsp;:</span>
                                         <InputNumber placeholder='输入班级' style={{ width: 240, marginLeft:'10px' }} onChange={this.classInput.bind(this)}/>
                                     </div>
                                     <div className='select-category-1'>
@@ -688,6 +978,11 @@ class EPU2 extends React.Component{
                                 {
                                     this.state.showFail? <div className='save-success'>
                                                             <span style={{color:'red'}}>{this.state.failMsg}</span>
+                                                            </div> : null
+                                }
+                                {
+                                    this.state.showTipMsg ?<div className='save-success'>
+                                                                <span style={{color:'#108ee9'}}>学生总数:{allStudentNum}</span>
                                                             </div> : null
                                 }
                             </div>
@@ -786,7 +1081,7 @@ class EPU2 extends React.Component{
                                                         size='large' 
                                                         style={{width:240,height:35,marginLeft:'10px'}} 
                                                         onClick={this.sureParam.bind(this)}
-                                                        disabled={!showSure}>>确定</Button>
+                                                        disabled={!showSure}>确定</Button>
                                             </div>
                                         </Col>
                                         <Col span={15}></Col>
@@ -797,29 +1092,29 @@ class EPU2 extends React.Component{
                                         <Col span={1}></Col>
                                         <Col span={22}>
                                                     <div className='studentTable'>
-                                                    <div style={{height:370}}>
+                                                    <div style={{height:300}}>
                                                         <Table 
                                                             columns={columns_download}
                                                             bordered={true}
                                                             pagination={false}
-                                                            // dataSource={dataSource}
-                                                            scroll={{x:false,y:300}}
-                                                            // rowClassName={(record, index)=>{
-                                                            //     if(record.isCorrect){
-                                                            //         return ''
-                                                            //     }else{
-                                                            //         return 'wrong-row'
-                                                            //     }  
-                                                            // }}
+                                                            dataSource={dataSource_download}
+                                                            scroll={{x:false,y:230}}
+                                                            rowClassName={(record, index)=>{
+                                                                if(record.isCorrect){
+                                                                    return ''
+                                                                }else{
+                                                                    return 'wrong-row'
+                                                                }  
+                                                            }}
                                                             />
                                                     </div>
 
-                                                    <div style={{textAlign:'center',marginTop:50}}>
+                                                    <div style={{marginLeft:250,marginTop:50}}>
                                                         
                                                     <span style={{position:'relative',display:'inline-block'}}>
                                                         <div className='mark-position'><Checkbox onChange={this.markChange.bind(this)}>生成标记</Checkbox></div>
                                                             <Popconfirm title="你确定吗？" onConfirm={this.pickDown.bind(this)} okText="确认" cancelText="取消">
-                                                                <Button type='primary' size='large' style={{width:230,marginRight:10}}
+                                                                <Button type='primary' size='large' style={{width:150,marginRight:10}}
                                                                     disabled={pickDownFlag}>
                                                                     合并下载
                                                                 </Button>
@@ -827,10 +1122,31 @@ class EPU2 extends React.Component{
                                                     </span>
                                                         <Popconfirm title="你确定吗？" onConfirm={this.stopGenerate.bind(this)} okText="确认" cancelText="取消">
                                                             <Button size='large'
-                                                                style={{width:230,marginLeft:10,background:'#FF0000',color:'#fff'}}>停止</Button>
+                                                                style={{width:150,marginLeft:10,background:'#FF0000',color:'#fff'}}>停止</Button>
                                                         </Popconfirm>
                                                     </div>
-                                                
+                                <div className='save-success detail-content'>
+                                     <div>
+                                         学生：<span style={{color:'#108ee9'}}>
+                                                {allStudentNum===0?<span style={{color:'red'}}>没有学生</span>:
+                                                        `${schoolName} ${grade}(${classNum})班,${allStudentNum}人`}
+                                                </span>
+                                    </div>
+                                    <div style={{marginTop:5}}>
+                                        <span style={{color:'#108ee9'}}>{currentMsg}</span>
+                                    </div>
+                                    <div>
+                                        {!pickDownFlag && addDataFlag ? <div>
+                                                            <div style={{color:'#108ee9'}}>{fileSuccesNum}个学生纠错本成功</div>
+                                                            <div style={{color:'red'}}>{allStudentNum-fileSuccesNum}个学生纠错本待进一步处理</div>
+                                                            <div style={{color:'#108ee9'}}>{answerSuccessNum}个学生答案成功</div>
+                                                            <div style={{color:'red'}}>{allStudentNum-answerSuccessNum}个学生答案待进一步处理</div>
+                                                        </div> : null}
+                                    </div>
+                                 </div> 
+                                 {showDetailTable ?<div className='detail-table'>
+                                                        <DownloadDetail detailData={detailData}/>
+                                                    </div> : null}   
                                             </div>
                                         </Col>
                                         <Col span={1}></Col>
@@ -903,6 +1219,57 @@ class MarkDetail extends React.Component{
                          scroll={{ y: 300 }}
                          pagination={false}/>
              </div>
+         )
+     }
+ }
+
+ class DownloadDetail extends React.Component{
+     constructor(props){
+         super();
+         this.state={
+            detailData : props.detailData
+         }
+     }
+     componentWillReceiveProps(nextProps){
+         this.setState({
+            detailData : nextProps.detailData
+         })
+     }
+     render(){
+         const {detailData} = this.state;
+        const columns = [{
+            title: '题目序号',
+            dataIndex: 'titleNumber',
+            key: 'titleNumber',
+            width:'20%'
+          }, {
+            title: '题目来源',
+            dataIndex: 'titleSource',
+            key: 'titleSource',
+            width:'30%'
+          },{
+            title: '选题依据',
+            dataIndex: 'titleBasic',
+            key: 'titleBasic',
+            width:'50%'
+          }];
+          let dataSource = []
+          if(detailData !== undefined){
+            detailData.map((item,index)=>{
+                dataSource.push({
+                    key : index,
+                    titleNumber : item.titleNumber,
+                    titleSource : item.titleSource,
+                    titleBasic : item.titleBasic
+                })
+            })
+        }
+         return(
+            <Table  columns={columns}
+            dataSource={dataSource}
+            bordered
+            scroll={{ y: 140 }}
+            pagination={false}/>
          )
      }
  }
