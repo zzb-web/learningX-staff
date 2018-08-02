@@ -54,7 +54,9 @@ class BatchDownload extends React.Component{
         answerSuccessNum : 0,
         fileDataArray : [],
         answerDataArray : [],
-        selectSchoolValue : ''
+        selectSchoolValue : '',
+        allDetailData:{},
+        showTipMsg : false,
     }
     componentWillMount(){
         Get('/api/v3/staffs/schools/')
@@ -154,7 +156,8 @@ class BatchDownload extends React.Component{
                     showFail : false,
                     showStudentDetail : true,
                     showLeftLine : true,
-                    allStudentNum : resp.data.total
+                    allStudentNum : resp.data.total,
+                    showTipMsg : true
                 })
             }
         }).catch(err=>{
@@ -281,7 +284,6 @@ class BatchDownload extends React.Component{
                 this.setState({showSure:true})
         },500)
       const {category , requestData, maxNum,sort,paper , selectedLearnIDs, allStudentNum,paperData} = this.state;
-    //   console.log(category , requestData, maxNum,sort,paper)
       if(maxNum === 0 || maxNum === undefined){
           this.setState({
             showFail : true,
@@ -322,59 +324,69 @@ class BatchDownload extends React.Component{
         paperIDs : hasSelectPaperIds
         }
       if(requestFlag){
-        var allDetailData  = {};
+        // var allDetailData  = {};
         var allReturnData = {};
-        selectedLearnIDs.map((item,idnex)=>{
-            var url = `/api/v3/staffs/students/${item.learnID}/${category}/`;
-            Post(url,postMsg)
-            .then((response)=>{
-              if(response.status === 200){
-                  var data1 = {};
-                  var detailData = [];
-                  var wrongProblems = response.data.wrongProblems;
-                  var questionNumber = response.data.totalNum;
-                  if(sort === 1){
-                      wrongProblems.map((item,index)=>{
-                          item.problems.map((item2,index2)=>{
-                              item2.type = `${item2.book}/P${item2.page}/${item2.idx}`
-                          })
-                      })
-                  }
-                  wrongProblems.map((item,index)=>{
-                      item.problems.map((item2,index2)=>{
-                          if(data1[item2.problemId+'_']===undefined){
-                              data1[item2.problemId+'_']=[];
-                              data1[item2.problemId+'_'].push(item2)
-                          }else{
-                              data1[item2.problemId+'_'].push(item2)
-                          }
-                      })
-                  })
-                  console.log(data1)
-                  for(var key in data1){
-                      detailData.push(data1[key])
-                  }
-            
-                allDetailData[item.learnID] = {
-                    data : detailData,
-                    questionNum : questionNumber,
-                    status : ''
-                };
-                allReturnData[item.learnID] = response.data
-                this.setState({
-                    allReturnData : allReturnData,
-                })
-              }else if(response.status === 404){
-                allDetailData[item.learnID] = {
-                    data : [],
-                    questionNum : 0,
-                    status : ''
-                };
-              }
-            })
-            .catch(function (error) {
-            });
-        })
+        (async () => {
+            for(let k=0;k<selectedLearnIDs.length;k++){
+                    var url = `/api/v3/staffs/students/${selectedLearnIDs[k].learnID}/${category}/`;
+                    await Post(url,postMsg)
+                    .then((response)=>{
+                        let {allDetailData} = this.state;
+                    if(response.status === 200){
+                        var data1 = {};
+                        var detailData = [];
+                        var wrongProblems = response.data.wrongProblems;
+                        var questionNumber = response.data.totalNum;
+                        if(sort === 1){
+                            wrongProblems.map((item,index)=>{
+                                item.problems.map((item2,index2)=>{
+                                    item2.type = `${item2.book}/P${item2.page}/${item2.idx}`
+                                })
+                            })
+                        }
+                        wrongProblems.map((item,index)=>{
+                            item.problems.map((item2,index2)=>{
+                                if(data1[item2.problemId+'_']===undefined){
+                                    data1[item2.problemId+'_']=[];
+                                    data1[item2.problemId+'_'].push(item2)
+                                }else{
+                                    data1[item2.problemId+'_'].push(item2)
+                                }
+                            })
+                        })
+                        console.log(data1)
+                        for(var key in data1){
+                            detailData.push(data1[key])
+                        }
+                    
+                        allDetailData[selectedLearnIDs[k].learnID] = {
+                            data : detailData,
+                            questionNum : questionNumber,
+                            status : ''
+                        };
+                        allReturnData[selectedLearnIDs[k].learnID] = response.data
+                        this.setState({
+                            allReturnData : allReturnData,
+                        })
+                    }else if(response.status === 404){
+                        allDetailData[selectedLearnIDs[k].learnID] = {
+                            data : [],
+                            questionNum : 0,
+                            status : ''
+                        };
+                    }
+                    this.setState({
+                        allDetailData : allDetailData
+                    })
+                    })
+                    .catch(function (error) {
+                    });
+                    if(k >= (selectedLearnIDs.length-1)){
+                        this._getPDF()
+                    }
+            }
+           
+        })();
         
             this.setState({
                       showMaterials : false,
@@ -386,172 +398,172 @@ class BatchDownload extends React.Component{
                        generateFlag: true,
                        addDataFlag : true,
                        pickDownFlag : true,
-                       allDetailData : allDetailData,
+                    //    allDetailData : allDetailData,
                        fileFlag : true
                   })
                   const {allStudentNum} = this.state;
                   var times = (allStudentNum+10)*100;
-            setTimeout(()=>{
-                var fileDataArray = [];
-                var answerDataArray = [];
-                for(var key in allDetailData){
-                    var obj = {}
-                    obj.learnID = key
-                    obj.params = this._getFileData(allDetailData[key].data,paper)
-                    fileDataArray.push(obj);
+            // setTimeout(()=>{
+            //     var fileDataArray = [];
+            //     var answerDataArray = [];
+            //     for(var key in allDetailData){
+            //         var obj = {}
+            //         obj.learnID = key
+            //         obj.params = this._getFileData(allDetailData[key].data,paper)
+            //         fileDataArray.push(obj);
 
-                    var obj2 = {};
-                    obj2.learnID = key;
-                    obj2.params = this._getAnswerData(allDetailData[key].data,paper)
-                    answerDataArray.push(obj2)
-                }
+            //         var obj2 = {};
+            //         obj2.learnID = key;
+            //         obj2.params = this._getAnswerData(allDetailData[key].data,paper)
+            //         answerDataArray.push(obj2)
+            //     }
 
-                var finalRequestArray = [];
-                fileDataArray.map((item,index)=>{
-                    finalRequestArray.push(item);
-                    finalRequestArray.push(answerDataArray[index])
-                })
-                this.setState({
-                    fileDataArray,
-                    answerDataArray
-                })
-                const {allFileData,allAnswerData,statusMsgObj,learnIDName} = this.state;
-                (async () => {
-                    for(let i=0;i<finalRequestArray.length;i++) {
-                        const {generateFlag,allDetailData} = this.state;
-                        if(generateFlag){
-                            if( allDetailData[finalRequestArray[i].learnID].questionNum !==0){
-                            let type = '';
-                            if(i%2 ===0 ){
-                                type = 'getProblemsFile';
-                            }else{
-                                type = 'getAnswersFile';
-                            }
-                            await Post(`/api/v3/staffs/students/${finalRequestArray[i].learnID}/${type}/`,finalRequestArray[i].params)
-                            .then(resp=>{
-                                const {addDataFlag,pickDownFlag} = this.state;
-                                if(addDataFlag){
-                                let status = resp.status;
-                                let statusMsg = ''
-                                switch(status){
-                                    case 200 : statusMsg = '成功';
-                                    break;
-                                    case 403 : statusMsg = '纠错本未标记' ;                                 
-                                    break;
-                                    case 404 :  statusMsg = '题目或者答案文档缺失';                                 
-                                    break;
-                                    case 500 :  statusMsg = '内部未知错误';                                  
-                                    break;
-                                    case 504 : statusMsg = '超时需再生成';
-                                    break;
-                                    default :
-                                }
-                                if(statusMsgObj[finalRequestArray[i].learnID] === undefined){
-                                    statusMsgObj[finalRequestArray[i].learnID]=[];
-                                    statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
-                                }else{
-                                    statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
-                                }
-                                this.setState({
-                                    statusMsgObj : statusMsgObj
-                                })
-                                let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
-                                    if(i%2 === 0){
-                                        allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
+            //     var finalRequestArray = [];
+            //     fileDataArray.map((item,index)=>{
+            //         finalRequestArray.push(item);
+            //         finalRequestArray.push(answerDataArray[index])
+            //     })
+            //     this.setState({
+            //         fileDataArray,
+            //         answerDataArray
+            //     })
+            //     const {allFileData,allAnswerData,statusMsgObj,learnIDName} = this.state;
+            //     (async () => {
+            //         for(let i=0;i<finalRequestArray.length;i++) {
+            //             const {generateFlag,allDetailData} = this.state;
+            //             if(generateFlag){
+            //                 if( allDetailData[finalRequestArray[i].learnID].questionNum !==0){
+            //                 let type = '';
+            //                 if(i%2 ===0 ){
+            //                     type = 'getProblemsFile';
+            //                 }else{
+            //                     type = 'getAnswersFile';
+            //                 }
+            //                 await Post(`/api/v3/staffs/students/${finalRequestArray[i].learnID}/${type}/`,finalRequestArray[i].params)
+            //                 .then(resp=>{
+            //                     const {addDataFlag,pickDownFlag} = this.state;
+            //                     if(addDataFlag){
+            //                     let status = resp.status;
+            //                     let statusMsg = ''
+            //                     switch(status){
+            //                         case 200 : statusMsg = '成功';
+            //                         break;
+            //                         case 403 : statusMsg = '纠错本未标记' ;                                 
+            //                         break;
+            //                         case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+            //                         break;
+            //                         case 500 :  statusMsg = '内部未知错误';                                  
+            //                         break;
+            //                         case 504 : statusMsg = '超时需再生成';
+            //                         break;
+            //                         default :
+            //                     }
+            //                     if(statusMsgObj[finalRequestArray[i].learnID] === undefined){
+            //                         statusMsgObj[finalRequestArray[i].learnID]=[];
+            //                         statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
+            //                     }else{
+            //                         statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
+            //                     }
+            //                     this.setState({
+            //                         statusMsgObj : statusMsgObj
+            //                     })
+            //                     let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
+            //                         if(i%2 === 0){
+            //                             allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
                                        
-                                        if(status === 200){
-                                            fileSuccesNum = fileSuccesNum+1
-                                            if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
-                                                haslearnIDs.push(Number(finalRequestArray[i].learnID))
-                                            }
-                                        }
-                                        let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
-                                        this.setState({
-                                            allFileData : allFileData,
-                                            currentMsg : showMsg,
-                                            fileSuccesNum : fileSuccesNum
-                                        })
-                                    }else{
-                                        if(status === 200){
-                                            // for(var key in allFileData){
-                                            //     if(allFileData[key] !== undefined){
-                                            //         if(haslearnIDs.indexOf(Number(key))===-1){
-                                            //             haslearnIDs.push(Number(key))
-                                            //         }
-                                            //     }
-                                            // }
-                                            answerSuccessNum = answerSuccessNum +1
-                                            if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
-                                                haslearnIDs.push(Number(finalRequestArray[i].learnID))
-                                            }
-                                        }
-                                        allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
-                                        this.setState({
-                                            allAnswerData : allAnswerData,
-                                            answerSuccessNum :answerSuccessNum
-                                        })
-                                    }
-                                    this.setState({
-                                        haslearnIDs : haslearnIDs
-                                    })
-                                    if(i<finalRequestArray.length-1){
-                                        this.setState({
-                                            pickDownFlag : true,
-                                        })
-                                    }else{
-                                        this.setState({
-                                            pickDownFlag : false,
-                                            currentMsg : '所有学生请求完成',
-                                        })
-                                    }
-                                }
-                            }).catch(err=>{
-                                const {addDataFlag} = this.state;
-                                if(addDataFlag){
-                                    if(i%2 === 0){
-                                        allFileData[finalRequestArray[i].learnID] = '';
-                                            this.setState({
-                                                allFileData : allFileData,
-                                            })
-                                    }else{
-                                        allAnswerData[finalRequestArray[i].learnID] = '';
-                                            this.setState({
-                                                allAnswerData : allAnswerData
-                                            })
-                                    }
-                                    if(i<finalRequestArray.length-1){
-                                        this.setState({
-                                            pickDownFlag : true
-                                        })
-                                    }else{
-                                        this.setState({
-                                            pickDownFlag : false
-                                        })
-                                    }
-                            }
-                            })
-                        }else{
-                            allAnswerData[finalRequestArray[i].learnID] = undefined;
-                            allFileData[finalRequestArray[i].learnID] = undefined;
-                            this.setState({
-                                allFileData,
-                                allAnswerData
-                            })
-                            if(i<finalRequestArray.length-1){
-                                this.setState({
-                                    pickDownFlag : true
-                                })
-                            }else{
-                                this.setState({
-                                    pickDownFlag : false
-                                })
-                            }
-                        }
-                    }
-                    }
-                })();
+            //                             if(status === 200){
+            //                                 fileSuccesNum = fileSuccesNum+1
+            //                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
+            //                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
+            //                                 }
+            //                             }
+            //                             let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
+            //                             this.setState({
+            //                                 allFileData : allFileData,
+            //                                 currentMsg : showMsg,
+            //                                 fileSuccesNum : fileSuccesNum
+            //                             })
+            //                         }else{
+            //                             if(status === 200){
+            //                                 // for(var key in allFileData){
+            //                                 //     if(allFileData[key] !== undefined){
+            //                                 //         if(haslearnIDs.indexOf(Number(key))===-1){
+            //                                 //             haslearnIDs.push(Number(key))
+            //                                 //         }
+            //                                 //     }
+            //                                 // }
+            //                                 answerSuccessNum = answerSuccessNum +1
+            //                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
+            //                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
+            //                                 }
+            //                             }
+            //                             allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
+            //                             this.setState({
+            //                                 allAnswerData : allAnswerData,
+            //                                 answerSuccessNum :answerSuccessNum
+            //                             })
+            //                         }
+            //                         this.setState({
+            //                             haslearnIDs : haslearnIDs
+            //                         })
+            //                         if(i<finalRequestArray.length-1){
+            //                             this.setState({
+            //                                 pickDownFlag : true,
+            //                             })
+            //                         }else{
+            //                             this.setState({
+            //                                 pickDownFlag : false,
+            //                                 currentMsg : '所有学生请求完成',
+            //                             })
+            //                         }
+            //                     }
+            //                 }).catch(err=>{
+            //                     const {addDataFlag} = this.state;
+            //                     if(addDataFlag){
+            //                         if(i%2 === 0){
+            //                             allFileData[finalRequestArray[i].learnID] = '';
+            //                                 this.setState({
+            //                                     allFileData : allFileData,
+            //                                 })
+            //                         }else{
+            //                             allAnswerData[finalRequestArray[i].learnID] = '';
+            //                                 this.setState({
+            //                                     allAnswerData : allAnswerData
+            //                                 })
+            //                         }
+            //                         if(i<finalRequestArray.length-1){
+            //                             this.setState({
+            //                                 pickDownFlag : true
+            //                             })
+            //                         }else{
+            //                             this.setState({
+            //                                 pickDownFlag : false
+            //                             })
+            //                         }
+            //                 }
+            //                 })
+            //             }else{
+            //                 allAnswerData[finalRequestArray[i].learnID] = undefined;
+            //                 allFileData[finalRequestArray[i].learnID] = undefined;
+            //                 this.setState({
+            //                     allFileData,
+            //                     allAnswerData
+            //                 })
+            //                 if(i<finalRequestArray.length-1){
+            //                     this.setState({
+            //                         pickDownFlag : true
+            //                     })
+            //                 }else{
+            //                     this.setState({
+            //                         pickDownFlag : false
+            //                     })
+            //                 }
+            //             }
+            //         }
+            //         }
+            //     })();
 
-            },times)
+            // },times)
     }else{
         this.setState({
             showFail : true,
@@ -560,6 +572,176 @@ class BatchDownload extends React.Component{
         })
     }
     }
+    }
+    _getPDF(){
+        const {requestData, maxNum,paper , selectedLearnIDs, allStudentNum,paperData,allDetailData} = this.state;
+        var fileDataArray = [];
+                    var answerDataArray = [];
+                    for(var key in allDetailData){
+                        var obj = {}
+                        obj.learnID = key
+                        obj.params = this._getFileData(allDetailData[key].data,paper)
+                        fileDataArray.push(obj);
+
+                        var obj2 = {};
+                        obj2.learnID = key;
+                        obj2.params = this._getAnswerData(allDetailData[key].data,paper)
+                        answerDataArray.push(obj2)
+                    }
+
+                    var finalRequestArray = [];
+                    fileDataArray.map((item,index)=>{
+                        finalRequestArray.push(item);
+                        finalRequestArray.push(answerDataArray[index]);
+                    })
+                    this.setState({
+                        fileDataArray,
+                        answerDataArray
+                    })
+                    const {allFileData,allAnswerData,statusMsgObj,learnIDName} = this.state;
+                    (async () => {
+                        for(let i=0;i<finalRequestArray.length;i++) {
+                            const {generateFlag,allDetailData} = this.state;
+                            if(generateFlag){
+                                let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
+                                this.setState({
+                                    currentMsg : showMsg
+                                })
+                                if( allDetailData[finalRequestArray[i].learnID].questionNum !==0){
+                                let type = '';
+                                if(i%2 ===0 ){
+                                    type = 'getProblemsFile';
+                                }else{
+                                    type = 'getAnswersFile';
+                                }
+                                await Post(`/api/v3/staffs/students/${finalRequestArray[i].learnID}/${type}/`,finalRequestArray[i].params)
+                                .then(resp=>{
+                                    const {addDataFlag,pickDownFlag} = this.state;
+                                    if(addDataFlag){
+                                    let status = resp.status;
+                                    let statusMsg = ''
+                                    switch(status){
+                                        case 200 : statusMsg = '成功';
+                                        break;
+                                        case 403 : statusMsg = '纠错本未标记' ;                                 
+                                        break;
+                                        case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+                                        break;
+                                        case 500 :  statusMsg = '内部未知错误';                                  
+                                        break;
+                                        case 504 : statusMsg = '超时需再生成';
+                                        break;
+                                        default :
+                                    }
+                                    if(statusMsgObj[finalRequestArray[i].learnID] === undefined){
+                                        statusMsgObj[finalRequestArray[i].learnID]=[];
+                                        statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
+                                    }else{
+                                        statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
+                                    }
+                                    this.setState({
+                                        statusMsgObj : statusMsgObj
+                                    })
+                                    let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
+                                        if(i%2 === 0){
+                                            allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
+                                        
+                                            if(status === 200){
+                                                fileSuccesNum = fileSuccesNum+1;
+                                                this.setState({
+                                                    fileSuccesNum : fileSuccesNum
+                                                })
+                                                if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
+                                                    haslearnIDs.push(Number(finalRequestArray[i].learnID))
+                                                }
+                                            }
+                                            // let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
+                                            this.setState({
+                                                allFileData : allFileData,
+                                                // currentMsg : showMsg,
+                                            })
+                                        }else{
+                                            if(status === 200){
+                                                // for(var key in allFileData){
+                                                //     if(allFileData[key] !== undefined){
+                                                //         if(haslearnIDs.indexOf(Number(key))===-1){
+                                                //             haslearnIDs.push(Number(key))
+                                                //         }
+                                                //     }
+                                                // }
+                                                answerSuccessNum = answerSuccessNum +1
+                                                this.setState({
+                                                    answerSuccessNum :answerSuccessNum
+                                                })
+                                                if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
+                                                    haslearnIDs.push(Number(finalRequestArray[i].learnID))
+                                                }
+                                                
+                                            }
+                                            allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
+                                            this.setState({
+                                                allAnswerData : allAnswerData,
+                                            })
+                                        }
+                                        this.setState({
+                                            haslearnIDs : haslearnIDs
+                                        })
+                                        if(i<finalRequestArray.length-1){
+                                            this.setState({
+                                                pickDownFlag : true,
+                                            })
+                                        }else{
+                                            this.setState({
+                                                pickDownFlag : false,
+                                                currentMsg : '所有学生请求完成',
+                                            })
+                                        }
+                                    }
+                                }).catch(err=>{
+                                    const {addDataFlag} = this.state;
+                                    if(addDataFlag){
+                                        if(i%2 === 0){
+                                            allFileData[finalRequestArray[i].learnID] = '';
+                                                this.setState({
+                                                    allFileData : allFileData,
+                                                })
+                                        }else{
+                                            allAnswerData[finalRequestArray[i].learnID] = '';
+                                                this.setState({
+                                                    allAnswerData : allAnswerData
+                                                })
+                                        }
+                                        if(i<finalRequestArray.length-1){
+                                            this.setState({
+                                                pickDownFlag : true
+                                            })
+                                        }else{
+                                            this.setState({
+                                                pickDownFlag : false
+                                            })
+                                        }
+                                }
+                                })
+                            }else{
+                                allAnswerData[finalRequestArray[i].learnID] = undefined;
+                                allFileData[finalRequestArray[i].learnID] = undefined;
+                                this.setState({
+                                    allFileData,
+                                    allAnswerData
+                                })
+                                if(i<finalRequestArray.length-1){
+                                    this.setState({
+                                        pickDownFlag : true
+                                    })
+                                }else{
+                                    this.setState({
+                                        pickDownFlag : false
+                                    })
+                                }
+                            }
+                        }
+                        }
+                    })();
     }
     pickDown(){
         const {markFlag,haslearnIDs,grade,classNum} = this.state;
@@ -786,6 +968,7 @@ class BatchDownload extends React.Component{
             showSelectStudent : false,
             showStudentDetail : false,
             showSelectContent : true,
+            showTipMsg : false
         })
     }
     getFileAgain(key){
@@ -1073,6 +1256,11 @@ class BatchDownload extends React.Component{
                                 this.state.showFail? <div className='save-success'>
                                                            <span style={{color:'red'}}>{this.state.failMsg}</span>
                                                         </div> : null
+                            }
+                             {
+                                    this.state.showTipMsg ?<div className='save-success'>
+                                                                <span style={{color:'#108ee9'}}>学生总数:{allStudentNum}</span>
+                                                            </div> : null
                             }
                         </div> : null
                         }

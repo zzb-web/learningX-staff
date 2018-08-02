@@ -46,7 +46,8 @@ class BatchInput extends React.Component{
             page : '',
             paperID : '',
             bookType : 0,
-            selectSchoolValue : ''
+            selectSchoolValue : '',
+            showTipMsg : false
         }
     }
     componentWillMount(){
@@ -121,7 +122,8 @@ class BatchInput extends React.Component{
                     showFail : false,
                     showStudentDetail : true,
                     showLeftLine : true,
-                    allStudentNum : resp.data.total
+                    allStudentNum : resp.data.total,
+                    showTipMsg : true
                 })
             }
         }).catch(err=>{
@@ -161,7 +163,8 @@ class BatchInput extends React.Component{
             allStudentNum : selectedLearnIDs.length,
             showStudentDetail : false,
             showFirstPage : false,
-            showSecondPage : true
+            showSecondPage : true,
+            showTipMsg : false
         })
     }
     markLearnId(learnID){
@@ -456,7 +459,7 @@ class BatchInput extends React.Component{
         const {schools,learnIDs,showStudentDetail,selectAllStundent,showFirstPage,showSecondPage,mode,
                 errorQues,name,learnID,showMarkMsg,wrongProblems,errDate,materials,homeworkData,
                 papers,paperData,showWarning,warningMsg,paperDate,showErrorTable,showHomeworkTable,
-            bookID,page,showPaperTable,paperID,bookType,selectSchoolValue} = this.state;
+            bookID,page,showPaperTable,paperID,bookType,selectSchoolValue,allStudentNum} = this.state;
         const allGrage = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','高复'];
         const columns_student = [
             {
@@ -529,6 +532,11 @@ class BatchInput extends React.Component{
                                 {
                                     this.state.showFail? <div className='save-success'>
                                                             <span style={{color:'red'}}>{this.state.failMsg}</span>
+                                                            </div> : null
+                                }
+                                 {
+                                    this.state.showTipMsg ?<div className='save-success'>
+                                                                <span style={{color:'#108ee9'}}>学生总数:{allStudentNum}</span>
                                                             </div> : null
                                 }
                             </div>

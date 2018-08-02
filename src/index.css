@@ -224,3 +224,7 @@ body {
   top: 300px;
   right: 0px;
 }
+.markName{
+  display: inline-block;
+  width: 70px;
+}

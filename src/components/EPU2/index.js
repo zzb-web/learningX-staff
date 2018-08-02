@@ -1,5 +1,5 @@
 import React from 'react';
-import {Row,Col,Select,InputNumber,Button,Table,Switch,Input,Radio,Checkbox,Popconfirm} from 'antd';
+import {Row,Col,Select,InputNumber,Button,Table,Switch,Input,Radio,Checkbox,Popconfirm,Modal} from 'antd';
 import {Get,Post} from '../../fetch/data.js';
 const {Option} = Select;
 class EPU2 extends React.Component{
@@ -56,7 +56,9 @@ class EPU2 extends React.Component{
             tableData : [],
             showDetailTable : false,
             haslearnIDs : [],
-            showTipMsg : false
+            showTipMsg : false,
+            allDetailData : {},
+            markName : ''
         }
     }
     componentWillMount(){
@@ -213,7 +215,8 @@ class EPU2 extends React.Component{
         console.log(data)
         this.setState({
             showMarkDetail : true,
-            markDetailData : data
+            markDetailData : data,
+            markName : data.name
         })
     }
     nextStep(){
@@ -245,10 +248,10 @@ class EPU2 extends React.Component{
         const {requestData, maxNum,paper , selectedLearnIDs, allStudentNum,paperData} = this.state;
         var requestFlag = true;
         if(requestFlag){
-            var allDetailData  = {};
+            // var allDetailData  = {};
             var allReturnData = {};
             var sort = 1;
-            selectedLearnIDs.map((item,idnex)=>{
+            /*selectedLearnIDs.map((item,index)=>{
                 var url = `/api/v3/staffs/students/${item.learnID}/wrongProblems/?sort=1&max=${maxNum}`;
                 Get(url)
                 .then((response)=>{
@@ -297,8 +300,69 @@ class EPU2 extends React.Component{
                 })
                 .catch(function (error) {
                 });
-            })
-            console.log(allDetailData)
+                console.log(index)
+            })*/
+
+            (async () => {
+                for(let k =0;k<selectedLearnIDs.length;k++){
+                    var url = `/api/v3/staffs/students/${selectedLearnIDs[k].learnID}/wrongProblems/?sort=1&max=${maxNum}`;
+                await Get(url)
+                    .then((response)=>{
+                        let {allDetailData} = this.state;
+                    if(response.status === 200){
+                        var data1 = {};
+                        var detailData = [];
+                        var wrongProblems = response.data.wrongProblems;
+                        var questionNumber = response.data.totalNum;
+                        if(sort === 1){
+                            wrongProblems.map((item,index)=>{
+                                item.problems.map((item2,index2)=>{
+                                    item2.type = `${item2.book}/P${item2.page}/${item2.idx}`
+                                })
+                            })
+                        }
+                        wrongProblems.map((item,index)=>{
+                            item.problems.map((item2,index2)=>{
+                                if(data1[item2.problemId+'_']===undefined){
+                                    data1[item2.problemId+'_']=[];
+                                    data1[item2.problemId+'_'].push(item2)
+                                }else{
+                                    data1[item2.problemId+'_'].push(item2)
+                                }
+                            })
+                        })
+                        for(var key in data1){
+                            detailData.push(data1[key])
+                        }
+                    
+                        allDetailData[selectedLearnIDs[k].learnID] = {
+                            data : detailData,
+                            questionNum : questionNumber,
+                            status : ''
+                        };
+                        allReturnData[selectedLearnIDs[k].learnID] = response.data
+                        this.setState({
+                            allReturnData : allReturnData,
+                        })
+                    }else if(response.status === 404){
+                        allDetailData[selectedLearnIDs[k].learnID] = {
+                            data : [],
+                            questionNum : 0,
+                            status : ''
+                        };
+                        
+                    }
+                    this.setState({
+                        allDetailData : allDetailData,
+                    })
+                    })
+                    .catch(function (error) {
+                    });
+                    if(k >= (selectedLearnIDs.length-1)){
+                        this._getPDF()
+                    }
+                }
+            })();
             
                 this.setState({
                 
@@ -307,14 +371,193 @@ class EPU2 extends React.Component{
                         generateFlag: true,
                         addDataFlag : true,
                         pickDownFlag : true,
-                        allDetailData : allDetailData,
+                        // allDetailData : allDetailData,
                         fileFlag : true
                     })
                     
-                    const {allStudentNum} = this.state;
-                    var times = (allStudentNum+10)*100;
-                setTimeout(()=>{
-                    var fileDataArray = [];
+                // const {allStudentNum} = this.state;
+                // var times = (allStudentNum+20)*100;
+                // setTimeout(()=>{
+                //     var fileDataArray = [];
+                //     var answerDataArray = [];
+                //     for(var key in allDetailData){
+                //         var obj = {}
+                //         obj.learnID = key
+                //         obj.params = this._getFileData(allDetailData[key].data,paper)
+                //         fileDataArray.push(obj);
+
+                //         var obj2 = {};
+                //         obj2.learnID = key;
+                //         obj2.params = this._getAnswerData(allDetailData[key].data,paper)
+                //         answerDataArray.push(obj2)
+                //     }
+
+                //     var finalRequestArray = [];
+                //     fileDataArray.map((item,index)=>{
+                //         finalRequestArray.push(item);
+                //         finalRequestArray.push(answerDataArray[index]);
+                //     })
+                //     this.setState({
+                //         fileDataArray,
+                //         answerDataArray
+                //     })
+                //     const {allFileData,allAnswerData,statusMsgObj,learnIDName} = this.state;
+                //     (async () => {
+                //         for(let i=0;i<finalRequestArray.length;i++) {
+                //             const {generateFlag,allDetailData} = this.state;
+                //             if(generateFlag){
+                //                 let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
+                //                 this.setState({
+                //                     currentMsg : showMsg
+                //                 })
+                //                 if( allDetailData[finalRequestArray[i].learnID].questionNum !==0){
+                //                 let type = '';
+                //                 if(i%2 ===0 ){
+                //                     type = 'getProblemsFile';
+                //                 }else{
+                //                     type = 'getAnswersFile';
+                //                 }
+                //                 await Post(`/api/v3/staffs/students/${finalRequestArray[i].learnID}/${type}/`,finalRequestArray[i].params)
+                //                 .then(resp=>{
+                //                     const {addDataFlag,pickDownFlag} = this.state;
+                //                     if(addDataFlag){
+                //                     let status = resp.status;
+                //                     let statusMsg = ''
+                //                     switch(status){
+                //                         case 200 : statusMsg = '成功';
+                //                         break;
+                //                         case 403 : statusMsg = '纠错本未标记' ;                                 
+                //                         break;
+                //                         case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+                //                         break;
+                //                         case 500 :  statusMsg = '内部未知错误';                                  
+                //                         break;
+                //                         case 504 : statusMsg = '超时需再生成';
+                //                         break;
+                //                         default :
+                //                     }
+                //                     if(statusMsgObj[finalRequestArray[i].learnID] === undefined){
+                //                         statusMsgObj[finalRequestArray[i].learnID]=[];
+                //                         statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
+                //                     }else{
+                //                         statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
+                //                     }
+                //                     this.setState({
+                //                         statusMsgObj : statusMsgObj
+                //                     })
+                //                     let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
+                //                         if(i%2 === 0){
+                //                             allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
+                                        
+                //                             if(status === 200){
+                //                                 fileSuccesNum = fileSuccesNum+1;
+                //                                 this.setState({
+                //                                     fileSuccesNum : fileSuccesNum
+                //                                 })
+                //                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
+                //                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
+                //                                 }
+                //                             }
+                //                             // let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
+                //                             this.setState({
+                //                                 allFileData : allFileData,
+                //                                 // currentMsg : showMsg,
+                //                             })
+                //                         }else{
+                //                             if(status === 200){
+                //                                 // for(var key in allFileData){
+                //                                 //     if(allFileData[key] !== undefined){
+                //                                 //         if(haslearnIDs.indexOf(Number(key))===-1){
+                //                                 //             haslearnIDs.push(Number(key))
+                //                                 //         }
+                //                                 //     }
+                //                                 // }
+                //                                 answerSuccessNum = answerSuccessNum +1
+                //                                 this.setState({
+                //                                     answerSuccessNum :answerSuccessNum
+                //                                 })
+                //                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
+                //                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
+                //                                 }
+                                                
+                //                             }
+                //                             allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
+                //                             this.setState({
+                //                                 allAnswerData : allAnswerData,
+                //                             })
+                //                         }
+                //                         this.setState({
+                //                             haslearnIDs : haslearnIDs
+                //                         })
+                //                         if(i<finalRequestArray.length-1){
+                //                             this.setState({
+                //                                 pickDownFlag : true,
+                //                             })
+                //                         }else{
+                //                             this.setState({
+                //                                 pickDownFlag : false,
+                //                                 currentMsg : '所有学生请求完成',
+                //                             })
+                //                         }
+                //                     }
+                //                 }).catch(err=>{
+                //                     const {addDataFlag} = this.state;
+                //                     if(addDataFlag){
+                //                         if(i%2 === 0){
+                //                             allFileData[finalRequestArray[i].learnID] = '';
+                //                                 this.setState({
+                //                                     allFileData : allFileData,
+                //                                 })
+                //                         }else{
+                //                             allAnswerData[finalRequestArray[i].learnID] = '';
+                //                                 this.setState({
+                //                                     allAnswerData : allAnswerData
+                //                                 })
+                //                         }
+                //                         if(i<finalRequestArray.length-1){
+                //                             this.setState({
+                //                                 pickDownFlag : true
+                //                             })
+                //                         }else{
+                //                             this.setState({
+                //                                 pickDownFlag : false
+                //                             })
+                //                         }
+                //                 }
+                //                 })
+                //             }else{
+                //                 allAnswerData[finalRequestArray[i].learnID] = undefined;
+                //                 allFileData[finalRequestArray[i].learnID] = undefined;
+                //                 this.setState({
+                //                     allFileData,
+                //                     allAnswerData
+                //                 })
+                //                 if(i<finalRequestArray.length-1){
+                //                     this.setState({
+                //                         pickDownFlag : true
+                //                     })
+                //                 }else{
+                //                     this.setState({
+                //                         pickDownFlag : false
+                //                     })
+                //                 }
+                //             }
+                //         }
+                //         }
+                //     })();
+
+                // },times)
+        }else{
+            this.setState({
+                showFail : true,
+                showDetail : false,
+                failMsg : '页码不正常'
+            })
+        }
+    }
+    _getPDF(){
+        const {requestData, maxNum,paper , selectedLearnIDs, allStudentNum,paperData,allDetailData} = this.state;
+        var fileDataArray = [];
                     var answerDataArray = [];
                     for(var key in allDetailData){
                         var obj = {}
@@ -331,7 +574,7 @@ class EPU2 extends React.Component{
                     var finalRequestArray = [];
                     fileDataArray.map((item,index)=>{
                         finalRequestArray.push(item);
-                        finalRequestArray.push(answerDataArray[index])
+                        finalRequestArray.push(answerDataArray[index]);
                     })
                     this.setState({
                         fileDataArray,
@@ -382,7 +625,6 @@ class EPU2 extends React.Component{
                                         statusMsgObj : statusMsgObj
                                     })
                                     let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
-                                    console.log(haslearnIDs)
                                         if(i%2 === 0){
                                             allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
                                         
@@ -482,18 +724,6 @@ class EPU2 extends React.Component{
                         }
                         }
                     })();
-
-                },times)
-        }else{
-            this.setState({
-                showFail : true,
-                showDetail : false,
-                failMsg : '页码不正常'
-            })
-        }
-        
-
-
     }
     pickDown(){
         const {markFlag,haslearnIDs,grade,classNum} = this.state;
@@ -766,11 +996,16 @@ class EPU2 extends React.Component{
             return returnData;
         }
     }
+    handleCancel = () => {
+        this.setState({
+            showDetailTable: false,
+        });
+      }
     render(){
         const {schools,learnIDs,schoolName,grade,classNum,showStudentDetail,selectAllStundent,showFirstPage,showSecondPage,
            selectSchoolValue,studentMarks,markDetailData,pickDownFlag,learnIDName,detailData,showDetailTable
             ,showSure,allDetailData,allFileData,allAnswerData,statusMsgObj,fileSuccesNum,answerSuccessNum
-            ,showMarkDetail,showThirdPage,showFourthPage,currentMsg,allStudentNum,addDataFlag} = this.state;
+            ,showMarkDetail,showThirdPage,showFourthPage,currentMsg,allStudentNum,addDataFlag,markName} = this.state;
             console.log(fileSuccesNum)
         const allGrage = ['一','二','三','四','五','六','七','八','九','高一','高二','高三','高复'];
         const columns_student = [
@@ -1045,7 +1280,7 @@ class EPU2 extends React.Component{
                         <Col span={7}>
                             {
                                 showMarkDetail ? <div>
-                                                    <h3 style={{padding:'20px 0 10px 0'}}>标记详情</h3>
+                                                    <h3 style={{padding:'20px 0 10px 0'}}><span className='markName'>{markName}</span>标记详情</h3>
                                                     <MarkDetail problemRecords={markDetailData}/>
                                                 </div> : null
                             }
@@ -1096,13 +1331,13 @@ class EPU2 extends React.Component{
                                         <Col span={1}></Col>
                                         <Col span={22}>
                                                     <div className='studentTable'>
-                                                    <div style={{height:300}}>
+                                                    <div style={{height:370}}>
                                                         <Table 
                                                             columns={columns_download}
                                                             bordered={true}
                                                             pagination={false}
                                                             dataSource={dataSource_download}
-                                                            scroll={{x:false,y:230}}
+                                                            scroll={{x:false,y:300}}
                                                             rowClassName={(record, index)=>{
                                                                 if(record.isCorrect){
                                                                     return ''
@@ -1112,9 +1347,7 @@ class EPU2 extends React.Component{
                                                             }}
                                                             />
                                                     </div>
-
-                                                    <div style={{marginLeft:250,marginTop:50}}>
-                                                        
+                                                    <div style={{textAlign:'center',marginTop:50}}>
                                                     <span style={{position:'relative',display:'inline-block'}}>
                                                         <div className='mark-position'><Checkbox onChange={this.markChange.bind(this)}>生成标记</Checkbox></div>
                                                             <Popconfirm title="你确定吗？" onConfirm={this.pickDown.bind(this)} okText="确认" cancelText="取消">
@@ -1147,16 +1380,22 @@ class EPU2 extends React.Component{
                                                             <div style={{color:'red'}}>{allStudentNum-answerSuccessNum}个学生答案待进一步处理</div>
                                                         </div> : null}
                                     </div>
-                                 </div> 
-                                 {showDetailTable ?<div className='detail-table'>
-                                                        <DownloadDetail detailData={detailData}/>
-                                                    </div> : null}   
-                                            </div>
+                                 </div>                                      
+                                </div>
                                         </Col>
                                         <Col span={1}></Col>
                                     </Row>
                                       : null
-                }
+                                    }
+                                 <Modal
+                                        title='选题详情'
+                                        wrapClassName="vertical-center-modal"
+                                        visible={showDetailTable}
+                                        onCancel={this.handleCancel}
+                                        footer={null}
+                                        >
+                                        <DownloadDetail detailData={detailData}/>
+                                 </Modal>
                 </div>
         )
     }
@@ -1272,7 +1511,7 @@ class MarkDetail extends React.Component{
             <Table  columns={columns}
             dataSource={dataSource}
             bordered
-            scroll={{ y: 140 }}
+            scroll={{ y:400 }}
             pagination={false}/>
          )
      }
