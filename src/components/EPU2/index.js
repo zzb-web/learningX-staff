@@ -1351,7 +1351,7 @@ class EPU2 extends React.Component{
                                                     <span style={{position:'relative',display:'inline-block'}}>
                                                         <div className='mark-position'><Checkbox onChange={this.markChange.bind(this)}>生成标记</Checkbox></div>
                                                             <Popconfirm title="你确定吗？" onConfirm={this.pickDown.bind(this)} okText="确认" cancelText="取消">
-                                                                <Button type='primary' size='large' style={{width:150,marginRight:10}}
+                                                                <Button type='primary' size='large' style={{width:230,marginRight:10}}
                                                                     disabled={pickDownFlag}>
                                                                     合并下载
                                                                 </Button>
@@ -1359,7 +1359,7 @@ class EPU2 extends React.Component{
                                                     </span>
                                                         <Popconfirm title="你确定吗？" onConfirm={this.stopGenerate.bind(this)} okText="确认" cancelText="取消">
                                                             <Button size='large'
-                                                                style={{width:150,marginLeft:10,background:'#FF0000',color:'#fff'}}>停止</Button>
+                                                                style={{width:230,marginLeft:10,background:'#FF0000',color:'#fff'}}>停止</Button>
                                                         </Popconfirm>
                                                     </div>
                                 <div className='save-success detail-content'>
