@@ -57,6 +57,7 @@ class BatchDownload extends React.Component{
         selectSchoolValue : '',
         allDetailData:{},
         showTipMsg : false,
+        batchID : ''
     }
     componentWillMount(){
         Get('/api/v3/staffs/schools/')
@@ -139,8 +140,8 @@ class BatchDownload extends React.Component{
                 failMsg : '请选择班级'
             })
         }else if(schoolID !=='' && grade !=='' && classNum !==''){
-            const msg = `schoolID=${schoolID}&grade=${grade}&class=${classNum}`;
-        Get(`/api/v3/staffs/students/?${msg}`)
+            const msg = `schoolID=${schoolID}&grade=${grade}&class=${classNum}&epu=1&serviceType=全包`;
+        Get(`/api/v3/staffs/classes/students/?${msg}`)
         .then(resp=>{
             if(resp.status === 200){
                 resp.data.learnIDs.map((item,index)=>{
@@ -283,27 +284,7 @@ class BatchDownload extends React.Component{
             setTimeout(()=>{
                 this.setState({showSure:true})
         },500)
-      const {category , requestData, maxNum,sort,paper , selectedLearnIDs, allStudentNum,paperData} = this.state;
-      if(maxNum === 0 || maxNum === undefined){
-          this.setState({
-            showFail : true,
-            showDetail : false,
-            failMsg : '请输入题目数量的最大值'
-          })
-      }else if(sort === ''){
-        this.setState({
-            showFail : true,
-            showDetail : false,
-            failMsg : '请选择题目排序方式'
-          })
-      }else if(paper === ''){
-        this.setState({
-            showFail : true,
-            showDetail : false,
-            failMsg : '请选择纸张大小'
-          })
-      }else{
-      var requestFlag = true;
+      const {category,sort,batchID,requestData,selectedLearnIDs, allStudentNum,paperData} = this.state;
       var thisRequestData = [];
       requestData.map((item,index)=>{
         if(item.bookID !== ''){
@@ -318,13 +299,11 @@ class BatchDownload extends React.Component{
       })
       var postMsg = {
         sort : sort,
-        paper :paper,
-        max: maxNum,
         bookPage:thisRequestData,
-        paperIDs : hasSelectPaperIds
+        paperIDs : hasSelectPaperIds,
+        batchID : batchID
         }
-      if(requestFlag){
-        // var allDetailData  = {};
+
         var allReturnData = {};
         (async () => {
             for(let k=0;k<selectedLearnIDs.length;k++){
@@ -354,7 +333,6 @@ class BatchDownload extends React.Component{
                                 }
                             })
                         })
-                        console.log(data1)
                         for(var key in data1){
                             detailData.push(data1[key])
                         }
@@ -387,7 +365,6 @@ class BatchDownload extends React.Component{
             }
            
         })();
-        
             this.setState({
                       showMaterials : false,
                       chooseAgain : true,
@@ -401,177 +378,7 @@ class BatchDownload extends React.Component{
                     //    allDetailData : allDetailData,
                        fileFlag : true
                   })
-                  const {allStudentNum} = this.state;
-                  var times = (allStudentNum+10)*100;
-            // setTimeout(()=>{
-            //     var fileDataArray = [];
-            //     var answerDataArray = [];
-            //     for(var key in allDetailData){
-            //         var obj = {}
-            //         obj.learnID = key
-            //         obj.params = this._getFileData(allDetailData[key].data,paper)
-            //         fileDataArray.push(obj);
-
-            //         var obj2 = {};
-            //         obj2.learnID = key;
-            //         obj2.params = this._getAnswerData(allDetailData[key].data,paper)
-            //         answerDataArray.push(obj2)
-            //     }
-
-            //     var finalRequestArray = [];
-            //     fileDataArray.map((item,index)=>{
-            //         finalRequestArray.push(item);
-            //         finalRequestArray.push(answerDataArray[index])
-            //     })
-            //     this.setState({
-            //         fileDataArray,
-            //         answerDataArray
-            //     })
-            //     const {allFileData,allAnswerData,statusMsgObj,learnIDName} = this.state;
-            //     (async () => {
-            //         for(let i=0;i<finalRequestArray.length;i++) {
-            //             const {generateFlag,allDetailData} = this.state;
-            //             if(generateFlag){
-            //                 if( allDetailData[finalRequestArray[i].learnID].questionNum !==0){
-            //                 let type = '';
-            //                 if(i%2 ===0 ){
-            //                     type = 'getProblemsFile';
-            //                 }else{
-            //                     type = 'getAnswersFile';
-            //                 }
-            //                 await Post(`/api/v3/staffs/students/${finalRequestArray[i].learnID}/${type}/`,finalRequestArray[i].params)
-            //                 .then(resp=>{
-            //                     const {addDataFlag,pickDownFlag} = this.state;
-            //                     if(addDataFlag){
-            //                     let status = resp.status;
-            //                     let statusMsg = ''
-            //                     switch(status){
-            //                         case 200 : statusMsg = '成功';
-            //                         break;
-            //                         case 403 : statusMsg = '纠错本未标记' ;                                 
-            //                         break;
-            //                         case 404 :  statusMsg = '题目或者答案文档缺失';                                 
-            //                         break;
-            //                         case 500 :  statusMsg = '内部未知错误';                                  
-            //                         break;
-            //                         case 504 : statusMsg = '超时需再生成';
-            //                         break;
-            //                         default :
-            //                     }
-            //                     if(statusMsgObj[finalRequestArray[i].learnID] === undefined){
-            //                         statusMsgObj[finalRequestArray[i].learnID]=[];
-            //                         statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
-            //                     }else{
-            //                         statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
-            //                     }
-            //                     this.setState({
-            //                         statusMsgObj : statusMsgObj
-            //                     })
-            //                     let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
-            //                         if(i%2 === 0){
-            //                             allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
-                                       
-            //                             if(status === 200){
-            //                                 fileSuccesNum = fileSuccesNum+1
-            //                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
-            //                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
-            //                                 }
-            //                             }
-            //                             let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
-            //                             this.setState({
-            //                                 allFileData : allFileData,
-            //                                 currentMsg : showMsg,
-            //                                 fileSuccesNum : fileSuccesNum
-            //                             })
-            //                         }else{
-            //                             if(status === 200){
-            //                                 // for(var key in allFileData){
-            //                                 //     if(allFileData[key] !== undefined){
-            //                                 //         if(haslearnIDs.indexOf(Number(key))===-1){
-            //                                 //             haslearnIDs.push(Number(key))
-            //                                 //         }
-            //                                 //     }
-            //                                 // }
-            //                                 answerSuccessNum = answerSuccessNum +1
-            //                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
-            //                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
-            //                                 }
-            //                             }
-            //                             allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
-            //                             this.setState({
-            //                                 allAnswerData : allAnswerData,
-            //                                 answerSuccessNum :answerSuccessNum
-            //                             })
-            //                         }
-            //                         this.setState({
-            //                             haslearnIDs : haslearnIDs
-            //                         })
-            //                         if(i<finalRequestArray.length-1){
-            //                             this.setState({
-            //                                 pickDownFlag : true,
-            //                             })
-            //                         }else{
-            //                             this.setState({
-            //                                 pickDownFlag : false,
-            //                                 currentMsg : '所有学生请求完成',
-            //                             })
-            //                         }
-            //                     }
-            //                 }).catch(err=>{
-            //                     const {addDataFlag} = this.state;
-            //                     if(addDataFlag){
-            //                         if(i%2 === 0){
-            //                             allFileData[finalRequestArray[i].learnID] = '';
-            //                                 this.setState({
-            //                                     allFileData : allFileData,
-            //                                 })
-            //                         }else{
-            //                             allAnswerData[finalRequestArray[i].learnID] = '';
-            //                                 this.setState({
-            //                                     allAnswerData : allAnswerData
-            //                                 })
-            //                         }
-            //                         if(i<finalRequestArray.length-1){
-            //                             this.setState({
-            //                                 pickDownFlag : true
-            //                             })
-            //                         }else{
-            //                             this.setState({
-            //                                 pickDownFlag : false
-            //                             })
-            //                         }
-            //                 }
-            //                 })
-            //             }else{
-            //                 allAnswerData[finalRequestArray[i].learnID] = undefined;
-            //                 allFileData[finalRequestArray[i].learnID] = undefined;
-            //                 this.setState({
-            //                     allFileData,
-            //                     allAnswerData
-            //                 })
-            //                 if(i<finalRequestArray.length-1){
-            //                     this.setState({
-            //                         pickDownFlag : true
-            //                     })
-            //                 }else{
-            //                     this.setState({
-            //                         pickDownFlag : false
-            //                     })
-            //                 }
-            //             }
-            //         }
-            //         }
-            //     })();
-
-            // },times)
-    }else{
-        this.setState({
-            showFail : true,
-            showDetail : false,
-            failMsg : '页码不正常'
-        })
-    }
-    }
+                //   const {allStudentNum} = this.state;
     }
     _getPDF(){
         const {requestData, maxNum,paper , selectedLearnIDs, allStudentNum,paperData,allDetailData} = this.state;
@@ -598,8 +405,9 @@ class BatchDownload extends React.Component{
                         fileDataArray,
                         answerDataArray
                     })
-                    const {allFileData,allAnswerData,statusMsgObj,learnIDName} = this.state;
+                    const {allFileData,allAnswerData,statusMsgObj,learnIDName,batchID} = this.state;
                     (async () => {
+                        console.log('999999',finalRequestArray)
                         for(let i=0;i<finalRequestArray.length;i++) {
                             const {generateFlag,allDetailData} = this.state;
                             if(generateFlag){
@@ -614,25 +422,30 @@ class BatchDownload extends React.Component{
                                 }else{
                                     type = 'getAnswersFile';
                                 }
-                                await Post(`/api/v3/staffs/students/${finalRequestArray[i].learnID}/${type}/`,finalRequestArray[i].params)
+                                let postMsg = {
+                                    batchID : batchID,
+                                    problems : finalRequestArray[i].params.problems
+                                };
+                                console.log('xxxxxx',finalRequestArray[i].params)
+                                await Post(`/api/v3/staffs/students/${finalRequestArray[i].learnID}/${type}/`,postMsg)
                                 .then(resp=>{
                                     const {addDataFlag,pickDownFlag} = this.state;
                                     if(addDataFlag){
                                     let status = resp.status;
                                     let statusMsg = ''
-                                    switch(status){
-                                        case 200 : statusMsg = '成功';
-                                        break;
-                                        case 403 : statusMsg = '纠错本未标记' ;                                 
-                                        break;
-                                        case 404 :  statusMsg = '题目或者答案文档缺失';                                 
-                                        break;
-                                        case 500 :  statusMsg = '内部未知错误';                                  
-                                        break;
-                                        case 504 : statusMsg = '超时需再生成';
-                                        break;
-                                        default :
-                                    }
+                                    // switch(status){
+                                    //     case 200 : statusMsg = '成功';
+                                    //     break;
+                                    //     case 403 : statusMsg = '纠错本未标记' ;                                 
+                                    //     break;
+                                    //     case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+                                    //     break;
+                                    //     case 500 :  statusMsg = '内部未知错误';                                  
+                                    //     break;
+                                    //     case 504 : statusMsg = '超时需再生成';
+                                    //     break;
+                                    //     default :
+                                    // }
                                     if(statusMsgObj[finalRequestArray[i].learnID] === undefined){
                                         statusMsgObj[finalRequestArray[i].learnID]=[];
                                         statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
@@ -644,9 +457,8 @@ class BatchDownload extends React.Component{
                                     })
                                     let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
                                         if(i%2 === 0){
-                                            allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
-                                        
                                             if(status === 200){
+                                                allFileData[finalRequestArray[i].learnID] = 1;
                                                 fileSuccesNum = fileSuccesNum+1;
                                                 this.setState({
                                                     fileSuccesNum : fileSuccesNum
@@ -654,6 +466,8 @@ class BatchDownload extends React.Component{
                                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
                                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
                                                 }
+                                            }else{
+                                                allFileData[finalRequestArray[i].learnID] = 0;
                                             }
                                             // let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
                                             this.setState({
@@ -662,13 +476,7 @@ class BatchDownload extends React.Component{
                                             })
                                         }else{
                                             if(status === 200){
-                                                // for(var key in allFileData){
-                                                //     if(allFileData[key] !== undefined){
-                                                //         if(haslearnIDs.indexOf(Number(key))===-1){
-                                                //             haslearnIDs.push(Number(key))
-                                                //         }
-                                                //     }
-                                                // }
+                                                allAnswerData[finalRequestArray[i].learnID] = 1;
                                                 answerSuccessNum = answerSuccessNum +1
                                                 this.setState({
                                                     answerSuccessNum :answerSuccessNum
@@ -677,8 +485,9 @@ class BatchDownload extends React.Component{
                                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
                                                 }
                                                 
+                                            }else{
+                                                allAnswerData[finalRequestArray[i].learnID] = 0;
                                             }
-                                            allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
                                             this.setState({
                                                 allAnswerData : allAnswerData,
                                             })
@@ -701,12 +510,12 @@ class BatchDownload extends React.Component{
                                     const {addDataFlag} = this.state;
                                     if(addDataFlag){
                                         if(i%2 === 0){
-                                            allFileData[finalRequestArray[i].learnID] = '';
+                                            allFileData[finalRequestArray[i].learnID] = 0;
                                                 this.setState({
                                                     allFileData : allFileData,
                                                 })
                                         }else{
-                                            allAnswerData[finalRequestArray[i].learnID] = '';
+                                            allAnswerData[finalRequestArray[i].learnID] = 0;
                                                 this.setState({
                                                     allAnswerData : allAnswerData
                                                 })
@@ -723,8 +532,8 @@ class BatchDownload extends React.Component{
                                 }
                                 })
                             }else{
-                                allAnswerData[finalRequestArray[i].learnID] = undefined;
-                                allFileData[finalRequestArray[i].learnID] = undefined;
+                                allAnswerData[finalRequestArray[i].learnID] = 0;
+                                allFileData[finalRequestArray[i].learnID] = 0;
                                 this.setState({
                                     allFileData,
                                     allAnswerData
@@ -957,9 +766,14 @@ class BatchDownload extends React.Component{
     selectStudentSure(){
         const {learnIDs} = this.state;
         let selectedLearnIDs = [];
+        let postStudents = [];
         learnIDs.map((item,index)=>{
             if(item.status){
-                selectedLearnIDs.push(item)
+                selectedLearnIDs.push(item);
+                postStudents.push({
+                    name : item.name,
+                    learnID : item.learnID
+                })
             }
         })
         this.setState({
@@ -970,10 +784,29 @@ class BatchDownload extends React.Component{
             showSelectContent : true,
             showTipMsg : false
         })
+
+        //获取批量生成纠错本的任务ID
+        const {schoolID, grade, classNum} = this.state;
+        let postMsg = {
+            school: schoolID,
+            grade: grade,
+            class: classNum,
+            students : postStudents
+        }
+        Post(`/api/v3/staffs/batchDownloads/`,postMsg).then(resp=>{
+            if(resp.status === 200){
+                this.setState({
+                    batchID : resp.data.batchID
+                })
+            }
+        }).catch(err=>{
+
+        })
+
     }
     getFileAgain(key){
         let currentId = key;
-       let {fileDataArray,statusMsgObj,haslearnIDs,allFileData} = this.state;
+       let {fileDataArray,statusMsgObj,haslearnIDs,allFileData,batchID} = this.state;
        let data = {};
        for(var i=0;i<=fileDataArray.length;i++){
            if(fileDataArray[i].learnID === currentId){
@@ -981,31 +814,37 @@ class BatchDownload extends React.Component{
                break;
            }
         }
-        Post(`/api/v3/staffs/students/${currentId}/getProblemsFile/`,data).then(resp=>{
+        let postMsg = {
+            batchID : batchID,
+            problems :  data.problems
+        };
+        Post(`/api/v3/staffs/students/${currentId}/getProblemsFile/`,postMsg).then(resp=>{
             let status = resp.status;
             let statusMsg = ''
-            switch(status){
-                case 200 : statusMsg = '成功';
-                break;
-                case 403 : statusMsg = '纠错本未标记' ;                                 
-                break;
-                case 404 :  statusMsg = '题目或者答案文档缺失';                                 
-                break;
-                case 500 :  statusMsg = '内部未知错误';                                  
-                break;
-                case 504 : statusMsg = '超时需再生成';
-                break;
-                default :
-            }
+            // switch(status){
+            //     case 200 : statusMsg = '成功';
+            //     break;
+            //     case 403 : statusMsg = '纠错本未标记' ;                                 
+            //     break;
+            //     case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+            //     break;
+            //     case 500 :  statusMsg = '内部未知错误';                                  
+            //     break;
+            //     case 504 : statusMsg = '超时需再生成';
+            //     break;
+            //     default :
+            // }
             
             statusMsgObj[currentId][0] = statusMsg;
-            allFileData[currentId] = resp.data.pdfurl;
             let {fileSuccesNum} = this.state;
             if(status === 200){
+                allFileData[currentId] = 1;
                 if(haslearnIDs.indexOf(Number(currentId)) === -1){
                     haslearnIDs.push(Number(currentId))
                 }
                 fileSuccesNum = fileSuccesNum+1
+            }else{
+                allFileData[currentId] = 0;
             }
             this.setState({
                 statusMsgObj : statusMsgObj,
@@ -1021,7 +860,7 @@ class BatchDownload extends React.Component{
     }
     getAnswerAgain(key){
         let currentId = key;
-       let {answerDataArray,statusMsgObj,haslearnIDs,allAnswerData} = this.state;
+       let {answerDataArray,statusMsgObj,haslearnIDs,allAnswerData,batchID} = this.state;
        let data = {};
        for(var i=0;i<=answerDataArray.length;i++){
            if(answerDataArray[i].learnID === currentId){
@@ -1029,31 +868,38 @@ class BatchDownload extends React.Component{
                break;
            }
         }
-        Post(`/api/v3/staffs/students/${currentId}/getAnswersFile/`,data).then(resp=>{
+        let postMsg = {
+            batchID : batchID,
+            problems :  data.problems
+        };
+        Post(`/api/v3/staffs/students/${currentId}/getAnswersFile/`,postMsg).then(resp=>{
             let status = resp.status;
             let statusMsg = ''
-            switch(status){
-                case 200 : statusMsg = '成功';
-                break;
-                case 403 : statusMsg = '纠错本未标记' ;                                 
-                break;
-                case 404 :  statusMsg = '题目或者答案文档缺失';                                 
-                break;
-                case 500 :  statusMsg = '内部未知错误';                                  
-                break;
-                case 504 : statusMsg = '超时需再生成';
-                break;
-                default :
-            }
+            // switch(status){
+            //     case 200 : statusMsg = '成功';
+            //     break;
+            //     case 403 : statusMsg = '纠错本未标记' ;                                 
+            //     break;
+            //     case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+            //     break;
+            //     case 500 :  statusMsg = '内部未知错误';                                  
+            //     break;
+            //     case 504 : statusMsg = '超时需再生成';
+            //     break;
+            //     default :
+            // }
             
             statusMsgObj[currentId][1] = statusMsg;
-            allAnswerData[currentId] = resp.data.pdfurl;
+            
             let {answerSuccessNum} = this.state;
             if(status === 200){
+                allAnswerData[currentId] = 1;
                 if(haslearnIDs.indexOf(Number(currentId)) === -1){
                     haslearnIDs.push(Number(currentId))
                 }
                 answerSuccessNum = answerSuccessNum +1
+            }else{
+                allAnswerData[currentId] = 0;
             }
             this.setState({
                 statusMsgObj : statusMsgObj,
@@ -1170,14 +1016,14 @@ class BatchDownload extends React.Component{
         for(var key in allFileData){
             var fileDownload;
             var answerDownload;
-            if(allFileData[key] === undefined){
+            if(allFileData[key] === 0){
                 fileDownload = <span className='downBtn' style={{border:'none',color:'red'}} onClick={this.getFileAgain.bind(this,key)}>纠错本</span>
             }else{
                 fileDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee'}}>
                                     纠错本
                                 </span>
             }
-            if(allAnswerData[key] === undefined){
+            if(allAnswerData[key] === 0){
                 answerDownload = <span className='downBtn' style={{border:'none',color:'red',marginLeft:30}} onClick={this.getAnswerAgain.bind(this,key)}>答案</span>
             }else{
                 answerDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee',marginLeft:30}}>
@@ -1189,7 +1035,7 @@ class BatchDownload extends React.Component{
                                 {answerDownload}
                             </span>
         var isCorrect;
-        if(allFileData[key] !== undefined && allAnswerData[key] !== undefined){
+        if(allFileData[key] !== 0 && allAnswerData[key] !== 0){
             isCorrect = true
         }else{
             isCorrect = false
@@ -1271,32 +1117,32 @@ class BatchDownload extends React.Component{
                                 <div className='select-category-1'>
                                     <span>错题状态&nbsp;&nbsp;:</span>
                                     <Select placeholder='选择错题状态' style={{ width: 240, marginLeft:'10px' }} onChange={this.changeCategory.bind(this)} defaultValue='2'>
-                                       <Option value='1'>曾经错过的所有题</Option>
+                                       {/* <Option value='1'>曾经错过的所有题</Option> */}
                                        <Option value='2'>现在仍错的题</Option>
                                     </Select>
                                 </div>
-                                <div className='select-category-1'>
+                                {/* <div className='select-category-1'>
                                     <span>题量控制&nbsp;&nbsp;:</span>
                                     <InputNumber placeholder='控制题目数量的最大值'
                                                  defaultValue = {10} 
                                                  min={1} 
                                                  style={{ width: 240, marginLeft:'10px'}} 
                                                  onChange={this.maxNumChange.bind(this)}/>
-                                </div>
-                                <div className='select-category-1'>
+                                </div> */}
+                                {/* <div className='select-category-1'>
                                     <span>排序算法&nbsp;&nbsp;:</span>
                                     <Select defaultValue='1' placeholder='选择题目排序方式' style={{ width: 240, marginLeft:'10px' }} onChange={this.changeSort.bind(this)}>
                                        <Option value='1'>按出题方式</Option>
                                        <Option value='2'>按题目类型</Option>
                                     </Select>
-                                </div>
-                                <div className='select-category-1'>
+                                </div> */}
+                                {/* <div className='select-category-1'>
                                     <span>纸张大小&nbsp;&nbsp;:</span>
                                     <Select defaultValue='2' placeholder='选择输出纸张的大小' style={{ width: 240, marginLeft:'10px' }} onChange={this.changePaper.bind(this)}>
                                         <Option value='1'>A3</Option>
                                         <Option value='2'>A4</Option>
                                     </Select>
-                                </div>
+                                </div> */}
                                 <div className='select-category-1' style={chooseAgain?{display:'block'}:{display:'none'}}>
                                     <span></span>
                                     <Button type="primary" size='large' style={{width:240,height:35,marginLeft:'10px'}} onClick={this.chooseAgain.bind(this)}>重选题目</Button>

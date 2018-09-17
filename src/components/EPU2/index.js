@@ -58,7 +58,8 @@ class EPU2 extends React.Component{
             haslearnIDs : [],
             showTipMsg : false,
             allDetailData : {},
-            markName : ''
+            markName : '',
+            batchID : ''
         }
     }
     componentWillMount(){
@@ -116,8 +117,8 @@ class EPU2 extends React.Component{
                 failMsg : '请选择班级'
             })
         }else if(schoolID !=='' && grade !=='' && classNum !==''){
-            const msg = `schoolID=${schoolID}&grade=${grade}&class=${classNum}`;
-        Get(`/api/v3/staffs/students/?${msg}`)
+            const msg = `schoolID=${schoolID}&grade=${grade}&class=${classNum}&epu=2&serviceType=全包`;
+        Get(`/api/v3/staffs/classes/students/?${msg}`)
         .then(resp=>{
             if(resp.status === 200){
                 resp.data.learnIDs.map((item,index)=>{
@@ -143,11 +144,15 @@ class EPU2 extends React.Component{
     }
     selectStudentSure(){
         const {learnIDs} = this.state;
-        let selectedLearnIDs = [] ,selectIdArr = [];
+        let selectedLearnIDs = [] ,selectIdArr = [],postStudents=[];
         for(var k=0;k<learnIDs.length;k++){
             if(learnIDs[k].status){
                 selectedLearnIDs.push(learnIDs[k]);
                 selectIdArr.push(learnIDs[k].learnID);
+                postStudents.push({
+                    name : learnIDs[k].name,
+                    learnID : learnIDs[k].learnID
+                })
             }
         }
 
@@ -162,6 +167,24 @@ class EPU2 extends React.Component{
             this.setState({
                 studentMarks : data
             })
+        })
+
+        //获取批量生成纠错本的任务ID
+        const {schoolID, grade, classNum} = this.state;
+        let postMsg = {
+            school: schoolID,
+            grade: grade,
+            class: classNum,
+            students : postStudents
+        }
+        Post(`/api/v3/staffs/batchDownloads/`,postMsg).then(resp=>{
+            if(resp.status === 200){
+                this.setState({
+                    batchID : resp.data.batchID
+                })
+            }
+        }).catch(err=>{
+
         })
 
         this.setState({
@@ -238,74 +261,21 @@ class EPU2 extends React.Component{
     sureParam(){
         this.setState({
             showFourthPage : true,
-            showThirdPage : false
+            // showThirdPage : false,
+            showSecondPage : false
         })
-
         this.setState({showSure : false})
             setTimeout(()=>{
                 this.setState({showSure:true})
         },500)
-        const {requestData, maxNum,paper , selectedLearnIDs, allStudentNum,paperData} = this.state;
+        const {requestData, maxNum,paper ,batchID, selectedLearnIDs, allStudentNum,paperData} = this.state;
         var requestFlag = true;
         if(requestFlag){
-            // var allDetailData  = {};
             var allReturnData = {};
             var sort = 1;
-            /*selectedLearnIDs.map((item,index)=>{
-                var url = `/api/v3/staffs/students/${item.learnID}/wrongProblems/?sort=1&max=${maxNum}`;
-                Get(url)
-                .then((response)=>{
-                if(response.status === 200){
-                    var data1 = {};
-                    var detailData = [];
-                    var wrongProblems = response.data.wrongProblems;
-                    var questionNumber = response.data.totalNum;
-                    if(sort === 1){
-                        wrongProblems.map((item,index)=>{
-                            item.problems.map((item2,index2)=>{
-                                item2.type = `${item2.book}/P${item2.page}/${item2.idx}`
-                            })
-                        })
-                    }
-                    wrongProblems.map((item,index)=>{
-                        item.problems.map((item2,index2)=>{
-                            if(data1[item2.problemId+'_']===undefined){
-                                data1[item2.problemId+'_']=[];
-                                data1[item2.problemId+'_'].push(item2)
-                            }else{
-                                data1[item2.problemId+'_'].push(item2)
-                            }
-                        })
-                    })
-                    for(var key in data1){
-                        detailData.push(data1[key])
-                    }
-                
-                    allDetailData[item.learnID] = {
-                        data : detailData,
-                        questionNum : questionNumber,
-                        status : ''
-                    };
-                    allReturnData[item.learnID] = response.data
-                    this.setState({
-                        allReturnData : allReturnData,
-                    })
-                }else if(response.status === 404){
-                    allDetailData[item.learnID] = {
-                        data : [],
-                        questionNum : 0,
-                        status : ''
-                    };
-                }
-                })
-                .catch(function (error) {
-                });
-                console.log(index)
-            })*/
-
             (async () => {
                 for(let k =0;k<selectedLearnIDs.length;k++){
-                    var url = `/api/v3/staffs/students/${selectedLearnIDs[k].learnID}/wrongProblems/?sort=1&max=${maxNum}`;
+                    var url = `/api/v3/staffs/students/${selectedLearnIDs[k].learnID}/wrongProblems/?sort=1&batchID=${batchID}`;
                 await Get(url)
                     .then((response)=>{
                         let {allDetailData} = this.state;
@@ -374,179 +344,6 @@ class EPU2 extends React.Component{
                         // allDetailData : allDetailData,
                         fileFlag : true
                     })
-                    
-                // const {allStudentNum} = this.state;
-                // var times = (allStudentNum+20)*100;
-                // setTimeout(()=>{
-                //     var fileDataArray = [];
-                //     var answerDataArray = [];
-                //     for(var key in allDetailData){
-                //         var obj = {}
-                //         obj.learnID = key
-                //         obj.params = this._getFileData(allDetailData[key].data,paper)
-                //         fileDataArray.push(obj);
-
-                //         var obj2 = {};
-                //         obj2.learnID = key;
-                //         obj2.params = this._getAnswerData(allDetailData[key].data,paper)
-                //         answerDataArray.push(obj2)
-                //     }
-
-                //     var finalRequestArray = [];
-                //     fileDataArray.map((item,index)=>{
-                //         finalRequestArray.push(item);
-                //         finalRequestArray.push(answerDataArray[index]);
-                //     })
-                //     this.setState({
-                //         fileDataArray,
-                //         answerDataArray
-                //     })
-                //     const {allFileData,allAnswerData,statusMsgObj,learnIDName} = this.state;
-                //     (async () => {
-                //         for(let i=0;i<finalRequestArray.length;i++) {
-                //             const {generateFlag,allDetailData} = this.state;
-                //             if(generateFlag){
-                //                 let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
-                //                 this.setState({
-                //                     currentMsg : showMsg
-                //                 })
-                //                 if( allDetailData[finalRequestArray[i].learnID].questionNum !==0){
-                //                 let type = '';
-                //                 if(i%2 ===0 ){
-                //                     type = 'getProblemsFile';
-                //                 }else{
-                //                     type = 'getAnswersFile';
-                //                 }
-                //                 await Post(`/api/v3/staffs/students/${finalRequestArray[i].learnID}/${type}/`,finalRequestArray[i].params)
-                //                 .then(resp=>{
-                //                     const {addDataFlag,pickDownFlag} = this.state;
-                //                     if(addDataFlag){
-                //                     let status = resp.status;
-                //                     let statusMsg = ''
-                //                     switch(status){
-                //                         case 200 : statusMsg = '成功';
-                //                         break;
-                //                         case 403 : statusMsg = '纠错本未标记' ;                                 
-                //                         break;
-                //                         case 404 :  statusMsg = '题目或者答案文档缺失';                                 
-                //                         break;
-                //                         case 500 :  statusMsg = '内部未知错误';                                  
-                //                         break;
-                //                         case 504 : statusMsg = '超时需再生成';
-                //                         break;
-                //                         default :
-                //                     }
-                //                     if(statusMsgObj[finalRequestArray[i].learnID] === undefined){
-                //                         statusMsgObj[finalRequestArray[i].learnID]=[];
-                //                         statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
-                //                     }else{
-                //                         statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
-                //                     }
-                //                     this.setState({
-                //                         statusMsgObj : statusMsgObj
-                //                     })
-                //                     let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
-                //                         if(i%2 === 0){
-                //                             allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
-                                        
-                //                             if(status === 200){
-                //                                 fileSuccesNum = fileSuccesNum+1;
-                //                                 this.setState({
-                //                                     fileSuccesNum : fileSuccesNum
-                //                                 })
-                //                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
-                //                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
-                //                                 }
-                //                             }
-                //                             // let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
-                //                             this.setState({
-                //                                 allFileData : allFileData,
-                //                                 // currentMsg : showMsg,
-                //                             })
-                //                         }else{
-                //                             if(status === 200){
-                //                                 // for(var key in allFileData){
-                //                                 //     if(allFileData[key] !== undefined){
-                //                                 //         if(haslearnIDs.indexOf(Number(key))===-1){
-                //                                 //             haslearnIDs.push(Number(key))
-                //                                 //         }
-                //                                 //     }
-                //                                 // }
-                //                                 answerSuccessNum = answerSuccessNum +1
-                //                                 this.setState({
-                //                                     answerSuccessNum :answerSuccessNum
-                //                                 })
-                //                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
-                //                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
-                //                                 }
-                                                
-                //                             }
-                //                             allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
-                //                             this.setState({
-                //                                 allAnswerData : allAnswerData,
-                //                             })
-                //                         }
-                //                         this.setState({
-                //                             haslearnIDs : haslearnIDs
-                //                         })
-                //                         if(i<finalRequestArray.length-1){
-                //                             this.setState({
-                //                                 pickDownFlag : true,
-                //                             })
-                //                         }else{
-                //                             this.setState({
-                //                                 pickDownFlag : false,
-                //                                 currentMsg : '所有学生请求完成',
-                //                             })
-                //                         }
-                //                     }
-                //                 }).catch(err=>{
-                //                     const {addDataFlag} = this.state;
-                //                     if(addDataFlag){
-                //                         if(i%2 === 0){
-                //                             allFileData[finalRequestArray[i].learnID] = '';
-                //                                 this.setState({
-                //                                     allFileData : allFileData,
-                //                                 })
-                //                         }else{
-                //                             allAnswerData[finalRequestArray[i].learnID] = '';
-                //                                 this.setState({
-                //                                     allAnswerData : allAnswerData
-                //                                 })
-                //                         }
-                //                         if(i<finalRequestArray.length-1){
-                //                             this.setState({
-                //                                 pickDownFlag : true
-                //                             })
-                //                         }else{
-                //                             this.setState({
-                //                                 pickDownFlag : false
-                //                             })
-                //                         }
-                //                 }
-                //                 })
-                //             }else{
-                //                 allAnswerData[finalRequestArray[i].learnID] = undefined;
-                //                 allFileData[finalRequestArray[i].learnID] = undefined;
-                //                 this.setState({
-                //                     allFileData,
-                //                     allAnswerData
-                //                 })
-                //                 if(i<finalRequestArray.length-1){
-                //                     this.setState({
-                //                         pickDownFlag : true
-                //                     })
-                //                 }else{
-                //                     this.setState({
-                //                         pickDownFlag : false
-                //                     })
-                //                 }
-                //             }
-                //         }
-                //         }
-                //     })();
-
-                // },times)
         }else{
             this.setState({
                 showFail : true,
@@ -580,7 +377,7 @@ class EPU2 extends React.Component{
                         fileDataArray,
                         answerDataArray
                     })
-                    const {allFileData,allAnswerData,statusMsgObj,learnIDName} = this.state;
+                    const {allFileData,allAnswerData,statusMsgObj,learnIDName,batchID} = this.state;
                     (async () => {
                         for(let i=0;i<finalRequestArray.length;i++) {
                             const {generateFlag,allDetailData} = this.state;
@@ -596,7 +393,11 @@ class EPU2 extends React.Component{
                                 }else{
                                     type = 'getAnswersFile';
                                 }
-                                await Post(`/api/v3/staffs/students/${finalRequestArray[i].learnID}/${type}/`,finalRequestArray[i].params)
+                                let postMsg = {
+                                    batchID : batchID,
+                                    problems : finalRequestArray[i].params.problems
+                                };
+                                await Post(`/api/v3/staffs/students/${finalRequestArray[i].learnID}/${type}/`,postMsg)
                                 .then(resp=>{
                                     const {addDataFlag,pickDownFlag} = this.state;
                                     if(addDataFlag){
@@ -1273,7 +1074,7 @@ class EPU2 extends React.Component{
                             <div style={{width:'100%',textAlign:'center',marginTop:20}}>
                                 <Button type='primary'
                                         size='large' 
-                                        style={{width:240,height:35}} onClick={this.nextStep.bind(this)}>下一步</Button>
+                                        style={{width:240,height:35}} onClick={this.sureParam.bind(this)}>下一步</Button>
                             </div>
                         </Col>   
                         <Col span={1}></Col>   
@@ -1288,7 +1089,7 @@ class EPU2 extends React.Component{
                         <Col span={1}></Col>   
                     </Row> : null
                 }
-                {
+                {/* {
                     showThirdPage ? <Row>
                                         <Col span={1}></Col>
                                         <Col span={8}>
@@ -1325,7 +1126,7 @@ class EPU2 extends React.Component{
                                         </Col>
                                         <Col span={15}></Col>
                                     </Row> : null
-                }
+                } */}
                 {
                     showFourthPage ?<Row>
                                         <Col span={1}></Col>
