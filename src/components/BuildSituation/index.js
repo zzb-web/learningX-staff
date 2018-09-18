@@ -254,7 +254,7 @@ class BuildSituation extends React.Component{
                                 <span style={item.answerFileStatus ? {color:'#49a9ee',marginLeft:20}:{color:'red',marginLeft:20}}>答案</span>
                             </div>,
                 trueNum :item.problems.totalNum,
-                selectDetail : <span style={{color:'#49a9ee'}} onClick={this.downloadDetail.bind(this,item.problems.wrongProblems)}>详情</span> ,
+                selectDetail : <span style={{color:'#49a9ee',cursor:'pointer'}} onClick={this.downloadDetail.bind(this,item.problems.wrongProblems)}>详情</span> ,
                 question : <div>
                                 <div>纠错本:{statusMsg}</div>
                                 <div>答案:{statusMsg2}</div>
