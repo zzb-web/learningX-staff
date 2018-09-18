@@ -99,6 +99,15 @@ const EPU2Component = Loadable({
     return <EPU2Component/>;
   }
 }
+const BuildSituationComponent = Loadable({
+  loader: () => import('../BuildSituation/index.js'),
+  loading: MyLoadingComponent,
+});
+ class BuildSituationLoadable extends React.Component {
+  render() {
+    return <BuildSituationComponent/>;
+  }
+}
 
 export {
         PassWordFormLoadable,
@@ -109,5 +118,6 @@ export {
         StudentInfoEntryLoadable,
         BatchInputLoadable,
         BatchDownloadLoadable,
-        EPU2Loadable
+        EPU2Loadable,
+        BuildSituationLoadable
       }

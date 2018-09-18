@@ -403,19 +403,19 @@ class EPU2 extends React.Component{
                                     if(addDataFlag){
                                     let status = resp.status;
                                     let statusMsg = ''
-                                    switch(status){
-                                        case 200 : statusMsg = '成功';
-                                        break;
-                                        case 403 : statusMsg = '纠错本未标记' ;                                 
-                                        break;
-                                        case 404 :  statusMsg = '题目或者答案文档缺失';                                 
-                                        break;
-                                        case 500 :  statusMsg = '内部未知错误';                                  
-                                        break;
-                                        case 504 : statusMsg = '超时需再生成';
-                                        break;
-                                        default :
-                                    }
+                                    // switch(status){
+                                    //     case 200 : statusMsg = '成功';
+                                    //     break;
+                                    //     case 403 : statusMsg = '纠错本未标记' ;                                 
+                                    //     break;
+                                    //     case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+                                    //     break;
+                                    //     case 500 :  statusMsg = '内部未知错误';                                  
+                                    //     break;
+                                    //     case 504 : statusMsg = '超时需再生成';
+                                    //     break;
+                                    //     default :
+                                    // }
                                     if(statusMsgObj[finalRequestArray[i].learnID] === undefined){
                                         statusMsgObj[finalRequestArray[i].learnID]=[];
                                         statusMsgObj[finalRequestArray[i].learnID].push(statusMsg)
@@ -427,9 +427,8 @@ class EPU2 extends React.Component{
                                     })
                                     let {haslearnIDs,fileSuccesNum,answerSuccessNum} = this.state;
                                         if(i%2 === 0){
-                                            allFileData[finalRequestArray[i].learnID] = resp.data.pdfurl;
-                                        
                                             if(status === 200){
+                                                allFileData[finalRequestArray[i].learnID] = 1;
                                                 fileSuccesNum = fileSuccesNum+1;
                                                 this.setState({
                                                     fileSuccesNum : fileSuccesNum
@@ -437,6 +436,8 @@ class EPU2 extends React.Component{
                                                 if(haslearnIDs.indexOf(Number(finalRequestArray[i].learnID)) ===-1){
                                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
                                                 }
+                                            }else{
+                                                allFileData[finalRequestArray[i].learnID] = 0;
                                             }
                                             // let showMsg = `${finalRequestArray[i].learnID}号 ${learnIDName[finalRequestArray[i].learnID]} 正在请求`
                                             this.setState({
@@ -445,13 +446,7 @@ class EPU2 extends React.Component{
                                             })
                                         }else{
                                             if(status === 200){
-                                                // for(var key in allFileData){
-                                                //     if(allFileData[key] !== undefined){
-                                                //         if(haslearnIDs.indexOf(Number(key))===-1){
-                                                //             haslearnIDs.push(Number(key))
-                                                //         }
-                                                //     }
-                                                // }
+                                                allAnswerData[finalRequestArray[i].learnID] = 1;
                                                 answerSuccessNum = answerSuccessNum +1
                                                 this.setState({
                                                     answerSuccessNum :answerSuccessNum
@@ -460,8 +455,10 @@ class EPU2 extends React.Component{
                                                     haslearnIDs.push(Number(finalRequestArray[i].learnID))
                                                 }
                                                 
+                                            }else{
+                                                allAnswerData[finalRequestArray[i].learnID] = 0;
                                             }
-                                            allAnswerData[finalRequestArray[i].learnID] = resp.data.pdfurl;
+                                            
                                             this.setState({
                                                 allAnswerData : allAnswerData,
                                             })
@@ -484,12 +481,12 @@ class EPU2 extends React.Component{
                                     const {addDataFlag} = this.state;
                                     if(addDataFlag){
                                         if(i%2 === 0){
-                                            allFileData[finalRequestArray[i].learnID] = '';
+                                            allFileData[finalRequestArray[i].learnID] = 0;
                                                 this.setState({
                                                     allFileData : allFileData,
                                                 })
                                         }else{
-                                            allAnswerData[finalRequestArray[i].learnID] = '';
+                                            allAnswerData[finalRequestArray[i].learnID] = 0;
                                                 this.setState({
                                                     allAnswerData : allAnswerData
                                                 })
@@ -506,8 +503,8 @@ class EPU2 extends React.Component{
                                 }
                                 })
                             }else{
-                                allAnswerData[finalRequestArray[i].learnID] = undefined;
-                                allFileData[finalRequestArray[i].learnID] = undefined;
+                                allAnswerData[finalRequestArray[i].learnID] = 0;
+                                allFileData[finalRequestArray[i].learnID] = 0;
                                 this.setState({
                                     allFileData,
                                     allAnswerData
@@ -693,28 +690,30 @@ class EPU2 extends React.Component{
         Post(`/api/v3/staffs/students/${currentId}/getProblemsFile/`,data).then(resp=>{
             let status = resp.status;
             let statusMsg = ''
-            switch(status){
-                case 200 : statusMsg = '成功';
-                break;
-                case 403 : statusMsg = '纠错本未标记' ;                                 
-                break;
-                case 404 :  statusMsg = '题目或者答案文档缺失';                                 
-                break;
-                case 500 :  statusMsg = '内部未知错误';                                  
-                break;
-                case 504 : statusMsg = '超时需再生成';
-                break;
-                default :
-            }
+            // switch(status){
+            //     case 200 : statusMsg = '成功';
+            //     break;
+            //     case 403 : statusMsg = '纠错本未标记' ;                                 
+            //     break;
+            //     case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+            //     break;
+            //     case 500 :  statusMsg = '内部未知错误';                                  
+            //     break;
+            //     case 504 : statusMsg = '超时需再生成';
+            //     break;
+            //     default :
+            // }
             
             statusMsgObj[currentId][0] = statusMsg;
-            allFileData[currentId] = resp.data.pdfurl;
             let {fileSuccesNum} = this.state;
             if(status === 200){
+                allFileData[currentId] = 1;
                 if(haslearnIDs.indexOf(Number(currentId)) === -1){
                     haslearnIDs.push(Number(currentId))
                 }
                 fileSuccesNum = fileSuccesNum+1
+            }else{
+                allFileData[currentId] = 0;
             }
             this.setState({
                 statusMsgObj : statusMsgObj,
@@ -741,28 +740,30 @@ class EPU2 extends React.Component{
         Post(`/api/v3/staffs/students/${currentId}/getAnswersFile/`,data).then(resp=>{
             let status = resp.status;
             let statusMsg = ''
-            switch(status){
-                case 200 : statusMsg = '成功';
-                break;
-                case 403 : statusMsg = '纠错本未标记' ;                                 
-                break;
-                case 404 :  statusMsg = '题目或者答案文档缺失';                                 
-                break;
-                case 500 :  statusMsg = '内部未知错误';                                  
-                break;
-                case 504 : statusMsg = '超时需再生成';
-                break;
-                default :
-            }
+            // switch(status){
+            //     case 200 : statusMsg = '成功';
+            //     break;
+            //     case 403 : statusMsg = '纠错本未标记' ;                                 
+            //     break;
+            //     case 404 :  statusMsg = '题目或者答案文档缺失';                                 
+            //     break;
+            //     case 500 :  statusMsg = '内部未知错误';                                  
+            //     break;
+            //     case 504 : statusMsg = '超时需再生成';
+            //     break;
+            //     default :
+            // }
             
             statusMsgObj[currentId][1] = statusMsg;
-            allAnswerData[currentId] = resp.data.pdfurl;
             let {answerSuccessNum} = this.state;
             if(status === 200){
+                allAnswerData[currentId] = 1;
                 if(haslearnIDs.indexOf(Number(currentId)) === -1){
                     haslearnIDs.push(Number(currentId))
                 }
                 answerSuccessNum = answerSuccessNum +1
+            }else{
+                allAnswerData[currentId] = 0;
             }
             this.setState({
                 statusMsgObj : statusMsgObj,
@@ -931,14 +932,14 @@ class EPU2 extends React.Component{
             var fileDownload;
             var answerDownload;
             console.log(key)
-            if(allFileData[key] === undefined){
+            if(allFileData[key] === 0){
                 fileDownload = <span className='downBtn' style={{border:'none',color:'red'}} onClick={this.getFileAgain.bind(this,key)}>纠错本</span>
             }else{
                 fileDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee'}}>
                                     纠错本
                                 </span>
             }
-            if(allAnswerData[key] === undefined){
+            if(allAnswerData[key] === 0){
                 answerDownload = <span className='downBtn' style={{border:'none',color:'red',marginLeft:30}} onClick={this.getAnswerAgain.bind(this,key)}>答案</span>
             }else{
                 answerDownload = <span className='downBtn' style={{border:'none',color:'#49a9ee',marginLeft:30}}>

@@ -12,7 +12,8 @@ import {
             StudentInfoEntryLoadable,
             BatchInputLoadable,
             BatchDownloadLoadable,
-            EPU2Loadable
+            EPU2Loadable,
+            BuildSituationLoadable
       } from '../Loadable/homepageaComponent.js';
 import axios from 'axios';
 import './style.css';
@@ -162,6 +163,9 @@ class Navigation extends Component {
                 <Menu.Item key="10">
                   <span>分化EPU3</span>
                 </Menu.Item>
+                <Menu.Item key="11">
+                  <span>生成列表</span>
+                </Menu.Item>
               </SubMenu>
               <SubMenu key="sub5" title={<span><Icon type="user"/><span>用户信息</span></span>}>
                 <Menu.Item key="">
@@ -231,6 +235,9 @@ class Navigation extends Component {
             }
             {
               this.state.key === '9' ? <EPU2Loadable/> : null
+            }
+            {
+              this.state.key === '11' ? <BuildSituationLoadable/> : null
             }
             {/*
               this.state.key === '10' ? <TestErrorDetectionLoadable/> : null
