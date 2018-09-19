@@ -1,6 +1,6 @@
 import React from 'react';
-import {Row,Col,Table, Button,Modal} from 'antd';
-import {Get} from '../../fetch/data.js';
+import {Row,Col,Table, Button,Modal,Popconfirm,Checkbox} from 'antd';
+import {Get,Post,Delete} from '../../fetch/data.js';
 class BuildSituation extends React.Component{
     constructor(){
         super();
@@ -11,7 +11,10 @@ class BuildSituation extends React.Component{
             showSecond : false,
             detailData : [],
             detailData_2 : [],
-            showDetailTable : false
+            showDetailTable : false,
+            markFlag : false,
+            grade : '',
+            classNum : ''
         }
     }
     componentWillMount(){
@@ -28,10 +31,25 @@ class BuildSituation extends React.Component{
         }).catch(err=>{
 
         })
+        this.initial()
+    }
+    initial(){
         Get('/api/v3/staffs/batchDownloads/').then(resp=>{
             if(resp.status === 200){
+                let timeArr = [];
+                let dataObj = {};
+                resp.data.map((item,index)=>{
+                    timeArr.push(item.createTime);
+                    dataObj[item.createTime] = item;
+                })
+                timeArr = timeArr.sort();
+
+                let data = [];
+                timeArr.map((item,index)=>{
+                    data.push(dataObj[item])
+                })
                 this.setState({
-                    data : resp.data
+                    data : data
                 })
             }
         }).catch(err=>{
@@ -63,7 +81,19 @@ class BuildSituation extends React.Component{
         this.setState({
             showFirst : false,
             showSecond : true,
-            detailData : data
+            grade : data.grade,
+            classNum : data.class,
+            detailData : data.students
+        })
+    }
+    deleteHandle(batchID){
+        console.log(batchID)
+        Delete(`/api/v3/staffs/batchDownloads/${batchID}/`).then(resp=>{
+            if(resp.status === 200){
+                this.initial();
+            }
+        }).catch(err=>{
+
         })
     }
     downloadDetail(data){
@@ -99,6 +129,54 @@ class BuildSituation extends React.Component{
             showSecond : false
         })
       }
+    markChange(e){
+        this.setState({
+            markFlag : e.target.checked
+        })
+    }
+    pickDown(){
+        const {markFlag,grade,classNum,detailData} = this.state;
+        let haslearnIDs = [];
+        detailData.map((item,index)=>{
+            haslearnIDs.push(item.learnID)
+        })
+        if(markFlag){
+            let allReturnData = {}
+            detailData.map((item,index)=>{
+                allReturnData[item.learnID] = item.problems
+            })
+            let postData = [];
+            var timestamp = Date.parse(new Date())/1000
+            haslearnIDs.map((item,index)=>{
+                postData.push({
+                    time: timestamp,
+                    type: 1,
+                    learnID: item,
+                    detail: JSON.stringify(allReturnData[item])
+                })
+            })
+            Post('/api/v3/staffs/students/uploadTasks/',postData)
+            }
+            let postMsg_ = {
+                grade: grade,	
+                class: classNum,
+                learnIDs: haslearnIDs
+            }
+        Post('/api/v3/staffs/students/getProbsAnsFilesZip/',postMsg_)
+                                .then(resp=>{                                    
+                                    var eleLink = document.createElement('a');
+                                    eleLink.download = resp.data.URL;
+                                    eleLink.href = resp.data.URL;
+                                    eleLink.style.display = 'none';  
+                                    document.body.appendChild(eleLink);
+
+                                    eleLink.click();
+                                    
+                                    document.body.removeChild(eleLink);
+                                }).catch(err=>{
+                                   
+                                })
+    }
     render(){
         const {data,schoolIdName,showFirst,showSecond,detailData,detailData_2,showDetailTable} = this.state;
         const columns = [
@@ -148,7 +226,13 @@ class BuildSituation extends React.Component{
                 title : '文档批量处理',
                 dataIndex : 'docHandle',
                 key : 'docHandle',
-                width:'20%',
+                width:'10%',
+            },
+            {
+                title : '操作',
+                dataIndex : 'operation',
+                key : 'operation',
+                width:'10%'
             }
         ];
         let dataSource = [];
@@ -167,8 +251,10 @@ class BuildSituation extends React.Component{
                             <div>题目:{this.getRate(item.students.length,item.problemFilesFinished)}</div>
                             <div>答案:{this.getRate(item.students.length,item.answerFilesFinished)}</div>
                         </div>,
-                docHandle : status ? <span style={{color:'#49a9ee',cursor:'pointer'}} onClick={this.detailHandle.bind(this,item.students)}>详情</span> :
-                                    <span>详情</span>
+                docHandle : status ? <span style={{color:'#49a9ee',cursor:'pointer'}} onClick={this.detailHandle.bind(this,item)}>详情</span> :
+                                    <span>详情</span>,
+                operation : <span style={{color:'#49a9ee',cursor:'pointer'}} 
+                                  onClick={this.deleteHandle.bind(this,item.batchID)}>删除记录</span>
             })
         })
         const columns_download = [
@@ -276,13 +362,20 @@ class BuildSituation extends React.Component{
                                             bordered={true}
                                             pagination={false}
                                             dataSource={dataSource_download}
-                                            style={{height:400}}
+                                            style={{height:390}}
                                             scroll={{x:false,y:300}}/>
                                     <Button onClick={this.goBack.bind(this)}
                                             type='primary'
-                                            style={{marginLeft:'45%',width:'10%'}}>
+                                            size='large'
+                                            style={{width:120,position:'relative',left:'30%',top:60}}>
                                             返回
                                     </Button>
+                                    <div style={{marginLeft:'45%'}}><Checkbox onChange={this.markChange.bind(this)}>生成标记</Checkbox></div>
+                                    <Popconfirm title="你确定吗？" onConfirm={this.pickDown.bind(this)} okText="确认" cancelText="取消">
+                                        <Button type='primary' size='large' style={{width:230,marginLeft:'45%',marginTop:10}}>
+                                            合并下载
+                                        </Button>
+                                    </Popconfirm>
                                  <Modal
                                         title='选题详情'
                                         wrapClassName="vertical-center-modal"
