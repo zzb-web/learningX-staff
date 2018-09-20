@@ -42,7 +42,7 @@ class BuildSituation extends React.Component{
                     timeArr.push(item.createTime);
                     dataObj[item.createTime] = item;
                 })
-                timeArr = timeArr.sort();
+                timeArr = timeArr.sort((a,b)=>b-a);
 
                 let data = [];
                 timeArr.map((item,index)=>{
@@ -253,8 +253,10 @@ class BuildSituation extends React.Component{
                         </div>,
                 docHandle : status ? <span style={{color:'#49a9ee',cursor:'pointer'}} onClick={this.detailHandle.bind(this,item)}>详情</span> :
                                     <span>详情</span>,
-                operation : <span style={{color:'#49a9ee',cursor:'pointer'}} 
-                                  onClick={this.deleteHandle.bind(this,item.batchID)}>删除记录</span>
+                operation : <Popconfirm title="你确定吗?" onConfirm={this.deleteHandle.bind(this,item.batchID)} okText="确认" cancelText="取消">
+                                <span style={{color:'#49a9ee',cursor:'pointer'}} 
+                                  >删除记录</span>
+                                  </Popconfirm>
             })
         })
         const columns_download = [
