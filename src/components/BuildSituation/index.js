@@ -184,19 +184,19 @@ class BuildSituation extends React.Component{
                 title : '发起日期',
                 dataIndex : 'date',
                 key : 'date',
-                width:'10%',
+                width:'8%',
             },
             {
                 title : '发起时间',
                 dataIndex : 'time',
                 key : 'time',
-                width:'10%',
+                width:'8%',
             },
             {
                 title : '班级',
                 dataIndex : 'class',
                 key : 'class',
-                width:'20%',
+                width:'15%',
             },
             {
                 title : '人数',
@@ -217,7 +217,13 @@ class BuildSituation extends React.Component{
                 width:'13%',
             },
             {
-                title : '完成率',
+                title : '处理率',
+                dataIndex : 'handle',
+                key : 'handle',
+                width : '9%'
+            },
+            {
+                title : '成功率',
                 dataIndex : 'rate',
                 key : 'rate',
                 width:'10%',
@@ -247,9 +253,13 @@ class BuildSituation extends React.Component{
                 status : status ? 
                             <span style={{color:'#49a9ee'}}>已完成</span> : <span style={{color:'red'}}>未完成</span>,
                 endTime : `${this.timestampToTime(item.finishTime)[0]} ${this.timestampToTime(item.finishTime)[1]}`,
-                rate : <div>
+                handle : <div>
                             <div>题目:{this.getRate(item.students.length,item.problemFilesFinished)}</div>
                             <div>答案:{this.getRate(item.students.length,item.answerFilesFinished)}</div>
+                        </div>,
+                rate : <div>
+                            <div>题目:{this.getRate(item.students.length,item.problemFilesSuccessful)}</div>
+                            <div>答案:{this.getRate(item.students.length,item.answerFilesSuccessful)}</div>
                         </div>,
                 docHandle : status ? <span style={{color:'#49a9ee',cursor:'pointer'}} onClick={this.detailHandle.bind(this,item)}>详情</span> :
                                     <span>详情</span>,
@@ -332,6 +342,12 @@ class BuildSituation extends React.Component{
                 break;
                 default :
             }
+            var isCorrect;
+            if(item.answerStatusCode !== 200 && item.problemStatusCode !==200){
+                isCorrect = false
+            }else{
+                isCorrect = true
+            }
 
             dataSource_download.push({
                 key : index,
@@ -341,6 +357,7 @@ class BuildSituation extends React.Component{
                                 <span style={item.problemFileStatus ? {color:'#49a9ee'}:{color:'red'}}>纠错本</span>
                                 <span style={item.answerFileStatus ? {color:'#49a9ee',marginLeft:20}:{color:'red',marginLeft:20}}>答案</span>
                             </div>,
+                isCorrect : isCorrect,
                 trueNum :item.problems.totalNum,
                 selectDetail : <span style={{color:'#49a9ee',cursor:'pointer'}} onClick={this.downloadDetail.bind(this,item.problems.wrongProblems)}>详情</span> ,
                 question : <div>
@@ -365,7 +382,14 @@ class BuildSituation extends React.Component{
                                             pagination={false}
                                             dataSource={dataSource_download}
                                             style={{height:390}}
-                                            scroll={{x:false,y:300}}/>
+                                            scroll={{x:false,y:300}}
+                                            rowClassName={(record, index)=>{
+                                                if(record.isCorrect){
+                                                  return ''
+                                                }else{
+                                                  return 'wrong-row'
+                                                }  
+                                            }}/>
                                     <Button onClick={this.goBack.bind(this)}
                                             type='primary'
                                             size='large'
