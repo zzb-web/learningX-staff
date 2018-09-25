@@ -57,7 +57,8 @@ class BatchDownload extends React.Component{
         selectSchoolValue : '',
         allDetailData:{},
         showTipMsg : false,
-        batchID : ''
+        batchID : '',
+        postStudents : []
     }
     componentWillMount(){
         Get('/api/v3/staffs/schools/')
@@ -284,101 +285,120 @@ class BatchDownload extends React.Component{
             setTimeout(()=>{
                 this.setState({showSure:true})
         },500)
-      const {category,sort,batchID,requestData,selectedLearnIDs, allStudentNum,paperData} = this.state;
-      var thisRequestData = [];
-      requestData.map((item,index)=>{
-        if(item.bookID !== ''){
-            thisRequestData.push(item)
+        const {schoolID, grade, classNum,postStudents} = this.state;
+        let postMsg_1 = {
+            school: schoolID,
+            grade: grade,
+            class: classNum,
+            students : postStudents
         }
-      })
-      let hasSelectPaperIds = [];
-      paperData.map((item,index)=>{
-          if(item.paperID !== ''){
-              hasSelectPaperIds.push(item.paperID)
-          }
-      })
-      var postMsg = {
-        sort : sort,
-        bookPage:thisRequestData,
-        paperIDs : hasSelectPaperIds,
-        batchID : batchID
-        }
-
-        var allReturnData = {};
-        (async () => {
-            for(let k=0;k<selectedLearnIDs.length;k++){
-                    var url = `/api/v3/staffs/students/${selectedLearnIDs[k].learnID}/${category}/`;
-                    await Post(url,postMsg)
-                    .then((response)=>{
-                        let {allDetailData} = this.state;
-                    if(response.status === 200){
-                        var data1 = {};
-                        var detailData = [];
-                        var wrongProblems = response.data.wrongProblems;
-                        var questionNumber = response.data.totalNum;
-                        if(sort === 1){
-                            wrongProblems.map((item,index)=>{
-                                item.problems.map((item2,index2)=>{
-                                    item2.type = `${item2.book}/P${item2.page}/${item2.idx}`
-                                })
-                            })
-                        }
-                        wrongProblems.map((item,index)=>{
-                            item.problems.map((item2,index2)=>{
-                                if(data1[item2.problemId+'_']===undefined){
-                                    data1[item2.problemId+'_']=[];
-                                    data1[item2.problemId+'_'].push(item2)
-                                }else{
-                                    data1[item2.problemId+'_'].push(item2)
-                                }
-                            })
-                        })
-                        for(var key in data1){
-                            detailData.push(data1[key])
-                        }
-                    
-                        allDetailData[selectedLearnIDs[k].learnID] = {
-                            data : detailData,
-                            questionNum : questionNumber,
-                            status : ''
-                        };
-                        allReturnData[selectedLearnIDs[k].learnID] = response.data
-                        this.setState({
-                            allReturnData : allReturnData,
-                        })
-                    }else if(response.status === 404){
-                        allDetailData[selectedLearnIDs[k].learnID] = {
-                            data : [],
-                            questionNum : 0,
-                            status : ''
-                        };
+        Post(`/api/v3/staffs/batchDownloads/`,postMsg_1).then(resp=>{
+            if(resp.status === 200){
+                this.setState({
+                    batchID : resp.data.batchID
+                })
+                let batchID = resp.data.batchID;
+                const {category,sort,requestData,selectedLearnIDs, allStudentNum,paperData} = this.state;
+                var thisRequestData = [];
+                requestData.map((item,index)=>{
+                  if(item.bookID !== ''){
+                      thisRequestData.push(item)
+                  }
+                })
+                let hasSelectPaperIds = [];
+                paperData.map((item,index)=>{
+                    if(item.paperID !== ''){
+                        hasSelectPaperIds.push(item.paperID)
                     }
-                    this.setState({
-                        allDetailData : allDetailData
-                    })
-                    })
-                    .catch(function (error) {
-                    });
-                    if(k >= (selectedLearnIDs.length-1)){
-                        this._getPDF()
-                    }
+                })
+                var postMsg = {
+                  sort : sort,
+                  bookPage:thisRequestData,
+                  paperIDs : hasSelectPaperIds,
+                  batchID : batchID
+                  }
+          
+                  var allReturnData = {};
+                  (async () => {
+                      for(let k=0;k<selectedLearnIDs.length;k++){
+                              var url = `/api/v3/staffs/students/${selectedLearnIDs[k].learnID}/${category}/`;
+                              await Post(url,postMsg)
+                              .then((response)=>{
+                                  let {allDetailData} = this.state;
+                              if(response.status === 200){
+                                  var data1 = {};
+                                  var detailData = [];
+                                  var wrongProblems = response.data.wrongProblems;
+                                  var questionNumber = response.data.totalNum;
+                                  if(sort === 1){
+                                      wrongProblems.map((item,index)=>{
+                                          item.problems.map((item2,index2)=>{
+                                              item2.type = `${item2.book}/P${item2.page}/${item2.idx}`
+                                          })
+                                      })
+                                  }
+                                  wrongProblems.map((item,index)=>{
+                                      item.problems.map((item2,index2)=>{
+                                          if(data1[item2.problemId+'_']===undefined){
+                                              data1[item2.problemId+'_']=[];
+                                              data1[item2.problemId+'_'].push(item2)
+                                          }else{
+                                              data1[item2.problemId+'_'].push(item2)
+                                          }
+                                      })
+                                  })
+                                  for(var key in data1){
+                                      detailData.push(data1[key])
+                                  }
+                              
+                                  allDetailData[selectedLearnIDs[k].learnID] = {
+                                      data : detailData,
+                                      questionNum : questionNumber,
+                                      status : ''
+                                  };
+                                  allReturnData[selectedLearnIDs[k].learnID] = response.data
+                                  this.setState({
+                                      allReturnData : allReturnData,
+                                  })
+                              }else if(response.status === 404){
+                                  allDetailData[selectedLearnIDs[k].learnID] = {
+                                      data : [],
+                                      questionNum : 0,
+                                      status : ''
+                                  };
+                              }
+                              this.setState({
+                                  allDetailData : allDetailData
+                              })
+                              })
+                              .catch(function (error) {
+                              });
+                              if(k >= (selectedLearnIDs.length-1)){
+                                  this._getPDF()
+                              }
+                      }
+                     
+                  })();
+                      this.setState({
+                                showMaterials : false,
+                                chooseAgain : true,
+                                showDownContent : true,
+                                showDetail : true,
+                                allAnswerData : {},
+                                 allFileData : {},
+                                 generateFlag: true,
+                                 addDataFlag : true,
+                                 pickDownFlag : true,
+                              //    allDetailData : allDetailData,
+                                 fileFlag : true
+                            })
+                          //   const {allStudentNum} = this.state;
             }
-           
-        })();
-            this.setState({
-                      showMaterials : false,
-                      chooseAgain : true,
-                      showDownContent : true,
-                      showDetail : true,
-                      allAnswerData : {},
-                       allFileData : {},
-                       generateFlag: true,
-                       addDataFlag : true,
-                       pickDownFlag : true,
-                    //    allDetailData : allDetailData,
-                       fileFlag : true
-                  })
-                //   const {allStudentNum} = this.state;
+        }).catch(err=>{
+
+        })
+
+
     }
     _getPDF(){
         const {requestData, maxNum,paper , selectedLearnIDs, allStudentNum,paperData,allDetailData} = this.state;
@@ -782,26 +802,12 @@ class BatchDownload extends React.Component{
             showSelectStudent : false,
             showStudentDetail : false,
             showSelectContent : true,
-            showTipMsg : false
+            showTipMsg : false,
+            postStudents : postStudents
         })
 
         //获取批量生成纠错本的任务ID
-        const {schoolID, grade, classNum} = this.state;
-        let postMsg = {
-            school: schoolID,
-            grade: grade,
-            class: classNum,
-            students : postStudents
-        }
-        Post(`/api/v3/staffs/batchDownloads/`,postMsg).then(resp=>{
-            if(resp.status === 200){
-                this.setState({
-                    batchID : resp.data.batchID
-                })
-            }
-        }).catch(err=>{
-
-        })
+      
 
     }
     getFileAgain(key){
@@ -1235,24 +1241,21 @@ class BatchDownload extends React.Component{
                                                                 />
                                                     </div>
 
-                                                    <div style={{textAlign:'center',marginTop:50}}>
-                                                        
+                                                    {/* <div style={{textAlign:'center',marginTop:50}}>  
                                                     <span style={{position:'relative',display:'inline-block'}}>
                                                         <div className='mark-position'><Checkbox onChange={this.markChange.bind(this)}>生成标记</Checkbox></div>
-                                                        {/* <a download={pickDownURL} href={pickDownURL} target="blank"> */}
                                                             <Popconfirm title="你确定吗？" onConfirm={this.pickDown.bind(this)} okText="确认" cancelText="取消">
                                                                 <Button type='primary' size='large' style={{width:230,marginRight:10}}
                                                                     disabled={pickDownFlag}>
                                                                     合并下载
                                                                 </Button>
                                                             </Popconfirm>
-                                                            {/* </a> */}
                                                         </span>
                                                         <Popconfirm title="你确定吗？" onConfirm={this.stopGenerate.bind(this)} okText="确认" cancelText="取消">
                                                             <Button size='large'
                                                                 style={{width:230,marginLeft:10,background:'#FF0000',color:'#fff'}}>停止</Button>
                                                         </Popconfirm>
-                                                    </div>
+                                                    </div> */}
                                                 
                                               </div> : null
                         }

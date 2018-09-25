@@ -1149,7 +1149,7 @@ class EPU2 extends React.Component{
                                                             }}
                                                             />
                                                     </div>
-                                                    <div style={{textAlign:'center',marginTop:50}}>
+                                                    {/* <div style={{textAlign:'center',marginTop:50}}>
                                                     <span style={{position:'relative',display:'inline-block'}}>
                                                         <div className='mark-position'><Checkbox onChange={this.markChange.bind(this)}>生成标记</Checkbox></div>
                                                             <Popconfirm title="你确定吗？" onConfirm={this.pickDown.bind(this)} okText="确认" cancelText="取消">
@@ -1163,7 +1163,7 @@ class EPU2 extends React.Component{
                                                             <Button size='large'
                                                                 style={{width:230,marginLeft:10,background:'#FF0000',color:'#fff'}}>停止</Button>
                                                         </Popconfirm>
-                                                    </div>
+                                                    </div> */}
                                 <div className='save-success detail-content'>
                                      <div>
                                          学生：<span style={{color:'#108ee9'}}>
