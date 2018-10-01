@@ -75,7 +75,7 @@ class HomeworkTable extends React.Component{
                 }
             })
         })
-        let timestamp = Date.parse(new Date());
+        let timestamp = Date.parse(new Date())/1000;
         let saveMsg = {
             time : timestamp,
             type: bookType,
