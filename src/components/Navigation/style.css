@@ -14,8 +14,9 @@
     margin: 16px;
     font-size: 29px;
     line-height: 32px;
-    width: 200px;
-    color: #3B7FD4;
+    width: 300px;
+    /* color: #3B7FD4; */
+    color: #fff;
   }
   .trigger-icon {
       width: 100%;

@@ -110,7 +110,7 @@ class Navigation extends Component {
           width={150}
         >
           <div className='head-font'>
-            工作人员
+            先进技术试点平台
             <span className='pushin' 
                   onClick={this.menuHandle.bind(this)} 
                   style={!hideMenu?{display:'none'}:{display:'none'}
