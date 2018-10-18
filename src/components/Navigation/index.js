@@ -13,7 +13,8 @@ import {
             BatchInputLoadable,
             BatchDownloadLoadable,
             EPU2Loadable,
-            BuildSituationLoadable
+            BuildSituationLoadable,
+            MarkSituationLoadable
       } from '../Loadable/homepageaComponent.js';
 import axios from 'axios';
 import './style.css';
@@ -239,9 +240,9 @@ class Navigation extends Component {
             {
               this.state.key === '11' ? <BuildSituationLoadable/> : null
             }
-            {/*
-              this.state.key === '10' ? <TestErrorDetectionLoadable/> : null
-            }  */}
+            {
+              this.state.key === '8' ? <MarkSituationLoadable/> : null
+            } 
           </Content>
           {/* <Footer style={{ textAlign: 'center' }}>
             Ant Design ©2016 Created by Ant UED

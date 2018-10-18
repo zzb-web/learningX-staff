@@ -109,6 +109,17 @@ const BuildSituationComponent = Loadable({
   }
 }
 
+
+const MarkSituationComponent = Loadable({
+  loader: () => import('../MarkSituation/index.js'),
+  loading: MyLoadingComponent,
+});
+ class MarkSituationLoadable extends React.Component {
+  render() {
+    return <MarkSituationComponent/>;
+  }
+}
+
 export {
         PassWordFormLoadable,
         ClassErrorTestLoadable,
@@ -119,5 +130,6 @@ export {
         BatchInputLoadable,
         BatchDownloadLoadable,
         EPU2Loadable,
-        BuildSituationLoadable
+        BuildSituationLoadable,
+        MarkSituationLoadable
       }
