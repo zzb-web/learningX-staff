@@ -118,7 +118,7 @@ class MarkSituation extends React.Component{
                 failMsg : '请选择班级'
             })
         }else if(schoolID !=='' && grade !=='' && classNum !==''){
-            const msg = `schoolID=${schoolID}&grade=${grade}&class=${classNum}&epu=2&serviceType=全包`;
+            const msg = `schoolID=${schoolID}&grade=${grade}&class=${classNum}`;
         Get(`/api/v3/staffs/classes/students/?${msg}`)
         .then(resp=>{
             if(resp.status === 200){
