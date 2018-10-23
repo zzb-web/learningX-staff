@@ -154,7 +154,7 @@ class Navigation extends Component {
                     <span>标记情况查看</span>
                   </Menu.Item>
               </SubMenu>
-              <SubMenu key="sub4" title={<span><Icon type="file-add"/><span>生成纠错本</span></span>}>
+              <SubMenu key="sub4" title={<span><Icon type="file-add"/><span>个性内容生成</span></span>}>
                 <Menu.Item key="7">
                   <span>人工EPU1</span>
                 </Menu.Item>
