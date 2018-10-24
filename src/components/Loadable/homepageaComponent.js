@@ -120,6 +120,16 @@ const MarkSituationComponent = Loadable({
   }
 }
 
+const WrongAnalysComponent = Loadable({
+  loader: () => import('../WrongAnalys/index.js'),
+  loading: MyLoadingComponent,
+});
+ class WrongAnalysLoadable extends React.Component {
+  render() {
+    return <WrongAnalysComponent/>;
+  }
+}
+
 export {
         PassWordFormLoadable,
         ClassErrorTestLoadable,
@@ -131,5 +141,6 @@ export {
         BatchDownloadLoadable,
         EPU2Loadable,
         BuildSituationLoadable,
-        MarkSituationLoadable
+        MarkSituationLoadable,
+        WrongAnalysLoadable
       }

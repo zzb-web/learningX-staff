@@ -82,12 +82,7 @@ class BatchDownload extends React.Component{
                 bookID : '',
                 startPage: 0,
                  endPage: 0
-            },
-            // {
-            //     bookID : '',
-            //     startPage: 0,
-            //     endPage: 0
-            // }
+            }
         ]
         var paperData = [{
             paperID : ''

@@ -14,7 +14,8 @@ import {
             BatchDownloadLoadable,
             EPU2Loadable,
             BuildSituationLoadable,
-            MarkSituationLoadable
+            MarkSituationLoadable,
+            WrongAnalysLoadable
       } from '../Loadable/homepageaComponent.js';
 import axios from 'axios';
 import './style.css';
@@ -24,7 +25,7 @@ const {SubMenu} = Menu;
 class Navigation extends Component {
   state = {
     collapsed: false,
-    key: '2',
+    key: '12',
     subKey : ['sub1'],
     showUser : 'none',
     contentHeight :　0,
@@ -154,6 +155,11 @@ class Navigation extends Component {
                     <span>标记情况查看</span>
                   </Menu.Item>
               </SubMenu>
+              <SubMenu key="sub6" title={<span><Icon type="pushpin"/><span>错误分析</span></span>}>
+                  <Menu.Item key="12">
+                    <span>班级错误分析</span>
+                  </Menu.Item>
+              </SubMenu>
               <SubMenu key="sub4" title={<span><Icon type="file-add"/><span>个性内容生成</span></span>}>
                 <Menu.Item key="7">
                   <span>人工EPU1</span>
@@ -242,6 +248,9 @@ class Navigation extends Component {
             }
             {
               this.state.key === '8' ? <MarkSituationLoadable/> : null
+            } 
+            {
+              this.state.key === '12' ? <WrongAnalysLoadable/> : null
             } 
           </Content>
           {/* <Footer style={{ textAlign: 'center' }}>
