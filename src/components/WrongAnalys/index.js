@@ -6,12 +6,15 @@ class WrongAnalys extends React.Component{
     state={
         showFirst : true,
         showSecond : false,
+        cityMsg : '',
         schoolID : '',
         grade : '',
         classNum : '',
-        allStudentNum : 0
+        allStudentNum : 0,
+        bookIdName : {},
+        paperIdName: {}
     }
-    firstPageDone(schoolID,schoolMsg,grade,msgClass,allStudentNum){
+    firstPageDone(schoolID,schoolMsg,grade,msgClass,allStudentNum,cityMsg){
         this.setState({
             showFirst : false,
             showSecond : true,
@@ -19,20 +22,24 @@ class WrongAnalys extends React.Component{
             schoolMsg : schoolMsg,
             grade : grade,
             classNum : msgClass,
-            allStudentNum : allStudentNum
+            allStudentNum : allStudentNum,
+            cityMsg : cityMsg
         })
     }
-    secondPageDone(categoryType,requestData,paperData){
+    secondPageDone(categoryType,requestData,paperData,bookIdName,paperIdName){
         this.setState({
             categoryType : categoryType,
             requestData : requestData,
             paperData : paperData,
+            bookIdName : bookIdName,
+            paperIdName : paperIdName,
             showThird : true,
             showSecond : false
         })
     }
     render(){
-        const {showFirst,showSecond,schoolID,schoolMsg,grade,classNum,showThird,categoryType,requestData,paperData,allStudentNum} = this.state;
+        const {showFirst,showSecond,schoolID,schoolMsg,grade,classNum,showThird,cityMsg,
+                categoryType,requestData,paperData,allStudentNum,bookIdName,paperIdName} = this.state;
         return(
             <div>
                 {
@@ -46,10 +53,13 @@ class WrongAnalys extends React.Component{
                 }
                 {
                     showThird ? <Step3 schoolMsg={schoolMsg}
+                                        cityMsg={cityMsg}
                                         grade={grade}
                                         classNum={classNum}
                                         requestData={requestData}
+                                        bookIdName={bookIdName}
                                         paperData={paperData}
+                                        paperIdName={paperIdName}
                                         allStudentNum={allStudentNum}/> : null
                 }
             </div>

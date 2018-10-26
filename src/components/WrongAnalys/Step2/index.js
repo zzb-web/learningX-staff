@@ -11,6 +11,8 @@ export default class Step2 extends React.Component{
         papers : [],
         showSure: true,
         category : 'newestWrongProblems',
+        bookIdName : {},
+        paperIdName : {}
     }
     componentWillMount(){
         // Get('/api/v3/staffs/schools/')
@@ -39,8 +41,13 @@ export default class Step2 extends React.Component{
         Get(`/api/v3/staffs/classes/books/?${msg}`)
         .then(resp=>{
             if(resp.status === 200){
+                let bookIdName = {};
+                resp.data.map((item,index)=>{
+                    bookIdName[item.bookID] = item.name
+                })
                 this.setState({
                     materials:resp.data,
+                    bookIdName : bookIdName
                 })
             }
         }).catch(err=>{
@@ -50,8 +57,13 @@ export default class Step2 extends React.Component{
         Get(`/api/v3/staffs/classes/papers/?${msg}`)
         .then(resp=>{
             if(resp.status === 200){
+                let paperIdName = {}
+                resp.data.map((item,index)=>{
+                    paperIdName[item.paperID] = item.name
+                })
                 this.setState({
                     papers:resp.data,
+                    paperIdName : paperIdName
                 })
             }
         }).catch(err=>{
@@ -103,14 +115,14 @@ export default class Step2 extends React.Component{
             setTimeout(()=>{
                 this.setState({showSure:true})
         },500)
-        const {category,requestData,paperData} = this.state;
+        const {category,requestData,paperData,bookIdName,paperIdName} = this.state;
         let categoryType;
         if(category === 'newestWrongProblems'){
             categoryType = 1;
         }else if(category === 'onceWrongProblems'){
             categoryType = 2;
         }
-        this.props.secondPageDone(categoryType,requestData,paperData)
+        this.props.secondPageDone(categoryType,requestData,paperData,bookIdName,paperIdName)
     }
     addMaterials(){
         var {requestData} = this.state;

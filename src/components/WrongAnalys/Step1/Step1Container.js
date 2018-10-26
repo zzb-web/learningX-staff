@@ -64,7 +64,6 @@ export default class Step1 extends React.Component{
     }
     classSure(){
         const {cityMsg,schoolMsg,classMsg,name_schoolID} = this.state;
-        console.log(cityMsg,schoolMsg,classMsg)
         let flag = true;
        if(cityMsg[1] === ''){
            this.setState({
@@ -97,7 +96,7 @@ export default class Step1 extends React.Component{
         let msg = `schoolID=${schoolID}&grade=${grade}&class=${msgClass}`
         Get(`/api/v3/staffs/classes/students/?${msg}`).then(resp=>{
             if(resp.status === 200){
-                this.props.classSureHandle(resp.data,schoolID,schoolMsg,grade,msgClass)
+                this.props.classSureHandle(resp.data,schoolID,schoolMsg,grade,msgClass,cityMsg[1])
             }
         }).catch(err=>{
 

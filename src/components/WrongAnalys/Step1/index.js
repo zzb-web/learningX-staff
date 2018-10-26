@@ -15,10 +15,11 @@ class Step1Final extends React.Component{
             msgClass : '',
             students : {
                 learnIDs : []
-            }
+            },
+            cityMsg : ''
         }
     }
-    classSureHandle(data,schoolID,schoolMsg,grade,msgClass){
+    classSureHandle(data,schoolID,schoolMsg,grade,msgClass,cityMsg){
         this.setState({
             showStep1 : false,
             showStep2 : true,
@@ -29,12 +30,13 @@ class Step1Final extends React.Component{
             msgClass : msgClass,
             showTipMsg : true,
             showTable : true,
-            schoolMsg : schoolMsg
+            schoolMsg : schoolMsg,
+            cityMsg : cityMsg
         })
     }
     nextStep(){
-        const{schoolID,schoolMsg,grade,msgClass,allStudentNum} = this.state;
-        this.props.firstPageDone(schoolID,schoolMsg,grade,msgClass,allStudentNum)
+        const{schoolID,schoolMsg,grade,msgClass,allStudentNum,cityMsg} = this.state;
+        this.props.firstPageDone(schoolID,schoolMsg,grade,msgClass,allStudentNum,cityMsg)
     }
     render(){
         const {allStudentNum,showTipMsg,students,showTable} = this.state;
