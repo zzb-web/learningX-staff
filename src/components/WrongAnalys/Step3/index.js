@@ -1,5 +1,6 @@
 import React from 'react';
 import {Row,Col,DatePicker, Select} from 'antd';
+const {Option} = Select;
 export default class Step3 extends React.Component{
     constructor(props){
         super();
@@ -43,6 +44,8 @@ export default class Step3 extends React.Component{
                 <span style={{marginLeft:10}}>{paperIdName[item.paperID]}</span>
             )
         })
+
+        const tests =['单元考试','期中考试','期末考试']
         return(
             <Row>
                 <Col span={1}></Col>
@@ -61,13 +64,15 @@ export default class Step3 extends React.Component{
 
                         <span style={{marginLeft:50}}>层级:</span>
                         <Select style={{width:240,marginLeft:20}} placeholder='请选择层级'>
-
+                            
                         </Select>
                     </div>
                     <div style={{marginTop:30}}>
-                        <span style={{marginLeft:50}}>考试:</span>
+                        <span>考试:</span>
                         <Select style={{width:240,marginLeft:20}} placeholder='请选择考试类型'>
-
+                            {
+                                tests.map((item,index)=><Option key={index} value={item}>{item}</Option>)
+                            }
                         </Select>
                     </div>
                 </Col>
