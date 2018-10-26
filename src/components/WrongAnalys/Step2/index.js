@@ -122,7 +122,13 @@ export default class Step2 extends React.Component{
         }else if(category === 'onceWrongProblems'){
             categoryType = 2;
         }
-        this.props.secondPageDone(categoryType,requestData,paperData,bookIdName,paperIdName)
+        let bookData = [];
+        requestData.map((item,index)=>{
+            if(item.bookID !== ''){
+                bookData.push(item)
+            }
+        })
+        this.props.secondPageDone(categoryType,bookData,paperData,bookIdName,paperIdName)
     }
     addMaterials(){
         var {requestData} = this.state;

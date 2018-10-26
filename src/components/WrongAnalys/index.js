@@ -12,7 +12,8 @@ class WrongAnalys extends React.Component{
         classNum : '',
         allStudentNum : 0,
         bookIdName : {},
-        paperIdName: {}
+        paperIdName: {},
+        categoryType : ''
     }
     firstPageDone(schoolID,schoolMsg,grade,msgClass,allStudentNum,cityMsg){
         this.setState({
@@ -53,6 +54,7 @@ class WrongAnalys extends React.Component{
                 }
                 {
                     showThird ? <Step3 schoolMsg={schoolMsg}
+                                        schoolID={schoolID}
                                         cityMsg={cityMsg}
                                         grade={grade}
                                         classNum={classNum}
@@ -60,6 +62,7 @@ class WrongAnalys extends React.Component{
                                         bookIdName={bookIdName}
                                         paperData={paperData}
                                         paperIdName={paperIdName}
+                                        categoryType={categoryType}
                                         allStudentNum={allStudentNum}/> : null
                 }
             </div>
