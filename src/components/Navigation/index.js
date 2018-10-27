@@ -155,9 +155,9 @@ class Navigation extends Component {
                     <span>标记情况查看</span>
                   </Menu.Item>
               </SubMenu>
-              <SubMenu key="sub6" title={<span><Icon type="pushpin"/><span>错误分析</span></span>}>
+              <SubMenu key="sub6" title={<span><Icon type="pushpin"/><span>错误率分析</span></span>}>
                   <Menu.Item key="12">
-                    <span>班级错误分析</span>
+                    <span>班级错误率分析</span>
                   </Menu.Item>
               </SubMenu>
               <SubMenu key="sub4" title={<span><Icon type="file-add"/><span>个性内容生成</span></span>}>

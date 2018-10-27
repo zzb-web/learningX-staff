@@ -19,12 +19,12 @@ export default class Step3 extends React.Component{
             cityMsg : props.cityMsg,
             categoryType : props.categoryType,
             totalLevel : 0,
-            time : 0,
+            // time :Date.parse(new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1))/1000,
+            time : (moment(new Date().toLocaleDateString(),'YYYY-MM-DD').valueOf())/1000,
             level : -1,
             test : '',
             showTable : false,
-            allData : [],
-            date : new Date().toLocaleDateString() 
+            allData : []
         }
     }
     componentWillMount(){
@@ -56,10 +56,8 @@ export default class Step3 extends React.Component{
         })
     }
     chooseDate(date, dateString){
-        let time = Date.parse(date._d)/1000;
         this.setState({
-            time : time,
-            date : dateString
+            time : date.valueOf()/1000
         })
     }
     chooseLevel(value){
@@ -75,9 +73,9 @@ export default class Step3 extends React.Component{
     analysHandle(){
         const {categoryType,schoolID,grade,classNum,requestData,paperData,level,test,time} = this.state;
         let paperIDs = [];
-        paperData.map((item,index)=>{
-            paperIDs.push(item.paperID)
-        })
+        // paperData.map((item,index)=>{
+        //     paperIDs.push(item.paperID)
+        // })
         let postMsg = {
             wrongProblemStatus : categoryType,
             bookPage : requestData,
@@ -87,7 +85,7 @@ export default class Step3 extends React.Component{
             class : classNum,
             level: level,
             exam: test,
-            dateBefore: time
+            dateBefore: time+ 24*60*60
         }
         Post(`/api/v3/staffs/classes/getErrorRateAnalysis/`,postMsg).then(resp=>{
             if(resp.status === 200){
@@ -112,7 +110,7 @@ export default class Step3 extends React.Component{
         })
     }
     render(){
-        const {allStudentNum,schoolMsg,grade,classNum,cityMsg,showTable,allData,date,
+        const {allStudentNum,schoolMsg,grade,classNum,cityMsg,showTable,allData,time,
                 requestData,paperData,bookIdName,paperIdName,totalLevel,level,test} = this.state;
         let bookMsg = []
         requestData.map((item,index)=>{
@@ -132,54 +130,62 @@ export default class Step3 extends React.Component{
             )
         }
         levelChildren.unshift(<Option key={0} value={-1}>全部</Option>)
-        const tests =['单元考试','期中考试','期末考试']
+        const tests =['单元考试','期中考试','期末考试','中考']
 
         let columns = [
             {
                 title : '题目',
                 dataIndex : 'topic',
                 key : 'topic',
-                width : '20%'
+                width : '15%',
             },
             {
                 title : '错误率',
                 dataIndex : 'wrong',
                 key : 'wrong',
-                width : '10%'
-            },,
+                width : '10%',
+            },
+            {
+                title : '分析总数',
+                dataIndex : 'all',
+                key : 'all',
+                width : '10%',
+            },
             {
                 title : '错误学生数',
                 dataIndex : 'wrongStudentNum',
                 key : 'wrongStudentNum',
-                width : '10%'
+                width : '10%',
             },
             {
                 title : '题目和答案',
                 dataIndex : 'topicAnswer',
                 key : 'topicAnswer',
-                width : '25%'
+                width : '25%',
             },
             {
                 title : `${test}概率`,
                 dataIndex : 'test',
                 key : 'test',
-                width : '15%'
+                width : '15%',
             },
             {
                 title : '操作',
                 dataIndex : 'operation',
                 key : 'operation',
-                width : '20%'
+                width : '15%',
             },
         ]
 
         let dataSource = [];
+        allData.sort((a,b)=>a.errorRate - b.errorRate);
         allData.map((item,index)=>{
             dataSource.push({
                 key : index,
                 topic : item.subIdx === -1 ? `${item.source}/P${item.page}/${item.column}/${item.idx}` : `${item.source}/P${item.page}/${item.column}/${item.idx}(${item.subIdx})`,
-                wrong : item.errorRate,
-                wrongStudentNum : item.totalStudents,
+                wrong : `${(item.errorRate*100).toFixed(1)}%`,
+                all : item.totalStudents,
+                wrongStudentNum : item.wrongStudents.length,
                 topicAnswer : '',
                 test : '',
                 operation : <Switch style={{width:100}} 
@@ -188,10 +194,12 @@ export default class Step3 extends React.Component{
                                     onChange={this.operaHandle.bind(this,index)} 
                                     checked={item.train}
                                 />,
-                wrongStudents : item.wrongStudents,
+                wrongStudents : `${item.wrongStudents}`,
                 train : item.train
             })
         })
+
+        let date = new Date(time * 1000).toLocaleDateString();
         return(
             <Row>
                 <Col span={1}></Col>
@@ -241,7 +249,7 @@ export default class Step3 extends React.Component{
                                                 bordered={true}
                                                 pagination={false}
                                                 dataSource={dataSource}
-                                                expandedRowRender={record => <p>{record.wrongStudents}</p>}
+                                                expandedRowRender={record => <span>{record.wrongStudents}</span>}
                                                 rowClassName={(record, index)=>{
                                                     if(record.train){
                                                     return 'wrong-row'
