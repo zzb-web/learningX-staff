@@ -228,3 +228,10 @@ body {
   display: inline-block;
   width: 70px;
 }
+
+.topic_font{
+  width: 500px;
+  text-align: center;
+  height:50px;
+  line-height: 50px;
+}

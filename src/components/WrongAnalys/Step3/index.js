@@ -1,5 +1,5 @@
 import React from 'react';
-import {Row,Col,DatePicker, Select, Button,Table,Switch} from 'antd';
+import {Row,Col,DatePicker, Select, Button,Table,Switch,Modal} from 'antd';
 import {Get,Post} from '../../../fetch/data.js';
 import moment from 'moment';
 const {Option} = Select;
@@ -24,7 +24,12 @@ export default class Step3 extends React.Component{
             level : -1,
             test : '',
             showTable : false,
-            allData : []
+            allData : [],
+            visible :false,
+            visible_1 : false,
+            visible_2 : false,
+            problemFlag : true,
+            answerFlag : true
         }
     }
     componentWillMount(){
@@ -73,9 +78,9 @@ export default class Step3 extends React.Component{
     analysHandle(){
         const {categoryType,schoolID,grade,classNum,requestData,paperData,level,test,time} = this.state;
         let paperIDs = [];
-        // paperData.map((item,index)=>{
-        //     paperIDs.push(item.paperID)
-        // })
+        paperData.map((item,index)=>{
+            paperIDs.push(item.paperID)
+        })
         let postMsg = {
             wrongProblemStatus : categoryType,
             bookPage : requestData,
@@ -102,15 +107,178 @@ export default class Step3 extends React.Component{
         })
     }
     operaHandle(index,value){
-        console.log(index,value)
         const {allData} = this.state;
         allData[index].train = value;
         this.setState({
             allData : allData
         })
     }
+    trainHandle(){
+        this.setState({
+            visible_1 : false,
+            visible_2 : false
+        })
+        const {allData, requestData,paperData} = this.state;
+        let problems = [];
+        allData.map((item,index)=>{
+            if(item.train){
+                problems.push({
+                    problemID: item.problemID,
+                    subIdx: item.subIdx
+                })
+            }
+        })
+        let paperIDs = [];
+        paperData.map((item,index)=>{
+            paperIDs.push(item.paperID)
+        })
+
+        let postMsg = {
+            bookPage:requestData,
+            paperIDs: paperIDs,
+            problems: problems
+        }
+        Post(`/api/v3/staffs/classes/getPracticeProblems/`,postMsg).then(resp=>{
+            if(resp.status === 200){
+
+                this.setState({
+                    visible : true,
+                })
+
+                const wrongProblems = resp.data.wrongProblems;
+                    const {schoolID,grade,classNum} = this.state;
+                    wrongProblems.map((item,index)=>{
+                        item.problems.map((item2,index2)=>{
+                            item.type = `${item2.book}/P${item2.page}/${item2.idx}`
+                            item2.type = `${item2.book}/P${item2.page}/${item2.idx}`
+                        })
+                    })
+                    let wrongProblems_2 = JSON.parse(JSON.stringify(wrongProblems));
+                    
+
+                   wrongProblems.map((item,index)=>{
+                       if(item.problems[0].full){
+                           item.problems = [
+                               item.problems[0]
+                           ]
+                       }
+                   })
+
+                   wrongProblems.map((item,index)=>{
+                    item.problems.map((item2,index2)=>{
+                        delete item2.book;
+                        delete item2.column;
+                        delete item2.idx;
+                        delete item2.page;
+                        delete item2.reason;
+                        delete item2.type;
+                    })
+                   })
+
+                   let postMsg_1 = {
+                        schoolID: schoolID,
+                        grade:grade,
+                        class: classNum,
+                        problems : wrongProblems
+                     }
+                     
+                     Post(`/api/v3/staffs/classes/practiceProblems/getProblemsFile/`,postMsg_1).then(resp=>{
+                        if(resp.status === 200){
+                            this.setState({
+                                visible_1 : true
+                            })
+                        }else{
+                           this.setState({
+                               problemFlag : false,
+                               visible_1 : true
+                           })
+                        }
+                     }).catch(err=>{
+
+                     })
+                     let answer = [] ,obj = {}
+                     wrongProblems_2.map((item,index)=>{
+                         item.problems.map((item2,index2)=>{
+                            obj[item2.type] = {
+                                problemId: item2.problemId,
+                                location: item2.type,
+                                index: item2.index,
+                            }
+                         })
+                     })
+
+                     for(var key in obj){
+                         answer.push(obj[key])
+                     }
+
+                     let postMsg_2 = {
+                        schoolID: schoolID,
+                        grade:grade,
+                        class: classNum,
+                        problems : answer
+                     }
+
+                     Post(`/api/v3/staffs/classes/practiceProblems/getAnswersFile/`,postMsg_2).then(resp=>{
+                        if(resp.status === 200){
+                            this.setState({
+                                visible_2 : true
+                            })
+                        }else{
+                            this.setState({
+                                answerFlag : false,
+                                visible_2 : true
+                            })
+                        }
+                    }).catch(err=>{
+
+                    })
+            }
+        }).catch(err=>{
+
+        })
+    }
+    downLoad(){
+        const {schoolID,grade,classNum} = this.state;
+        let postMsg = {
+            schoolID : schoolID,
+            grade : grade,
+            class : classNum
+        }
+        Post('/api/v3/staffs/classes/practiceProblems/getProbsAnsFilesZip/',postMsg)
+        .then(resp=>{                                    
+            var eleLink = document.createElement('a');
+            eleLink.download = resp.data.URL;
+            eleLink.href = resp.data.URL;
+            eleLink.style.display = 'none';  
+            document.body.appendChild(eleLink);
+
+            eleLink.click();
+            
+            document.body.removeChild(eleLink);
+
+            this.setState({
+                visible : false,
+                visible_1 : false,
+                visible_2 : false,
+                problemFlag : true,
+                answerFlag : true
+            })
+        }).catch(err=>{
+           
+        })
+    }
+    cancelHandle(){
+        this.setState({
+            visible : false,
+            visible_1 : false,
+            visible_2 : false,
+            problemFlag : true,
+            answerFlag : true
+        })
+    }
     render(){
-        const {allStudentNum,schoolMsg,grade,classNum,cityMsg,showTable,allData,time,
+        const {allStudentNum,schoolMsg,grade,classNum,cityMsg,showTable,allData,time,visible,visible_1,visible_2,
+                problemFlag,answerFlag,
                 requestData,paperData,bookIdName,paperIdName,totalLevel,level,test} = this.state;
         let bookMsg = []
         requestData.map((item,index)=>{
@@ -260,9 +428,43 @@ export default class Step3 extends React.Component{
                                                 scroll={{x:false,y:200}}/>
                                         <Button type='primary'
                                                 style={{width:240,marginTop:20}}
+                                                onClick={this.trainHandle.bind(this)}
                                                 size='large'>生成统一训练文档</Button>
                                     </div> : null
                     }
+                     <Modal
+                        title={null}
+                        visible={visible}
+                        footer={null}
+                        closable={false}
+                        >
+                            <div style={{height:200,width:500,textAlign:'center'}}>
+                                {problemFlag ? <div className='topic_font'>
+                                                    {
+                                                        visible_1 ? null : <div>正在生成错题文档...</div>
+                                                    }
+                                                </div> : 
+                                                <div className='topic_font'>没有错题文档</div>
+                                }
+                                {answerFlag ? <div className='topic_font'>
+                                                    {
+                                                        visible_2 ? null : <div>正在生成答案文档...</div>
+                                                    }
+                                             </div> : <div className='topic_font'>没有答案文档</div>
+                                }
+                                {
+                                    answerFlag || answerFlag ? <Button disabled={!visible_1 || !visible_2} 
+                                                                        type='primary'
+                                                                        size='large'
+                                                                        style={{width:200}}
+                                                                        onClick={this.downLoad.bind(this)}>合并下载</Button> : 
+                                                                <Button type='primary'
+                                                                        size='large'
+                                                                        style={{width:200}}
+                                                                        onClick={this.cancelHandle.bind(this)}>取消</Button>
+                                }
+                            </div>
+                        </Modal>
                 </Col>
                 <Col span={1}></Col>
             </Row>
