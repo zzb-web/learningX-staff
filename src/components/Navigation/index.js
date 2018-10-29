@@ -24,8 +24,8 @@ const { Header, Sider, Content} = Layout;
 const {SubMenu} = Menu;
 class Navigation extends Component {
   state = {
-    collapsed: false,
-    key: '12',
+    collapsed: true,
+    key: '2',
     subKey : ['sub1'],
     showUser : 'none',
     contentHeight :　0,
@@ -155,7 +155,7 @@ class Navigation extends Component {
                     <span>标记情况查看</span>
                   </Menu.Item>
               </SubMenu>
-              <SubMenu key="sub6" title={<span><Icon type="pushpin"/><span>错误率分析</span></span>}>
+              <SubMenu key="sub6" title={<span><Icon type="appstore-o"/><span>错误率分析</span></span>}>
                   <Menu.Item key="12">
                     <span>班级错误率分析</span>
                   </Menu.Item>
