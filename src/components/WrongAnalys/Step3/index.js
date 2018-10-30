@@ -345,7 +345,6 @@ export default class Step3 extends React.Component{
                 width : '15%',
             },
         ]
-
         let dataSource = [];
         allData.sort((a,b)=>b.errorRate -a.errorRate);
         allData.map((item,index)=>{
@@ -442,10 +441,10 @@ export default class Step3 extends React.Component{
                             <div style={{height:200,width:500,textAlign:'center'}}>
                                 {problemFlag ? <div className='topic_font'>
                                                     {
-                                                        visible_1 ? null : <div>正在生成错题文档...</div>
+                                                        visible_1 ? null : <div>正在生成题目文档...</div>
                                                     }
                                                 </div> : 
-                                                <div className='topic_font'>没有错题文档</div>
+                                                <div className='topic_font'>没有题目文档</div>
                                 }
                                 {answerFlag ? <div className='topic_font'>
                                                     {
