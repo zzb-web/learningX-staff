@@ -312,6 +312,7 @@ export default class Step3 extends React.Component{
                 dataIndex : 'wrong',
                 key : 'wrong',
                 width : '10%',
+                sorter: (a, b) => a.wrong.props.children - b.wrong.props.children
             },
             {
                 title : '分析总数',
@@ -346,12 +347,12 @@ export default class Step3 extends React.Component{
         ]
 
         let dataSource = [];
-        allData.sort((a,b)=>a.errorRate - b.errorRate);
+        allData.sort((a,b)=>b.errorRate -a.errorRate);
         allData.map((item,index)=>{
             dataSource.push({
                 key : index,
                 topic : item.subIdx === -1 ? `${item.source}/P${item.page}/${item.column}/${item.idx}` : `${item.source}/P${item.page}/${item.column}/${item.idx}(${item.subIdx})`,
-                wrong : `${(item.errorRate*100).toFixed(1)}%`,
+                wrong : <span className='wrongRate'>{(item.errorRate*100).toFixed(1)}</span>,
                 all : item.totalStudents,
                 wrongStudentNum : item.wrongStudents.length,
                 topicAnswer : '',
