@@ -374,7 +374,7 @@ export default class Step3 extends React.Component{
                 <Col span={22}>
                     <div style={{color:'#49a9ee'}}>
                         <span>{cityMsg}市</span>
-                        <span>{schoolMsg}学校</span>
+                        <span>{schoolMsg}</span>
                         <span>{grade}（{classNum}）班，</span>
                         <span>{allStudentNum}人</span>
                         <span style={{marginLeft:30}}>分析内容:{bookMsg}</span>
