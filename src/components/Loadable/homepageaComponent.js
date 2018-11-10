@@ -130,6 +130,16 @@ const WrongAnalysComponent = Loadable({
   }
 }
 
+const PPUCreateComponent = Loadable({
+  loader: () => import('../PPUCreate/index.js'),
+  loading: MyLoadingComponent,
+});
+ class PPUCreateLoadable extends React.Component {
+  render() {
+    return <PPUCreateComponent/>;
+  }
+}
+
 export {
         PassWordFormLoadable,
         ClassErrorTestLoadable,
@@ -142,5 +152,6 @@ export {
         EPU2Loadable,
         BuildSituationLoadable,
         MarkSituationLoadable,
-        WrongAnalysLoadable
+        WrongAnalysLoadable,
+        PPUCreateLoadable
       }

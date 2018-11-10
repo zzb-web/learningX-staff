@@ -15,7 +15,8 @@ import {
             EPU2Loadable,
             BuildSituationLoadable,
             MarkSituationLoadable,
-            WrongAnalysLoadable
+            WrongAnalysLoadable,
+            PPUCreateLoadable
       } from '../Loadable/homepageaComponent.js';
 import axios from 'axios';
 import './style.css';
@@ -170,6 +171,9 @@ class Navigation extends Component {
                 <Menu.Item key="10">
                   <span>分化EPU3</span>
                 </Menu.Item>
+                <Menu.Item key="13">
+                  <span>PPU统一生成</span>
+                </Menu.Item>
                 <Menu.Item key="11">
                   <span>生成列表</span>
                 </Menu.Item>
@@ -252,6 +256,9 @@ class Navigation extends Component {
             {
               this.state.key === '12' ? <WrongAnalysLoadable/> : null
             } 
+            {
+              this.state.key === '13' ? <PPUCreateLoadable/> : null
+            }
           </Content>
           {/* <Footer style={{ textAlign: 'center' }}>
             Ant Design ©2016 Created by Ant UED
