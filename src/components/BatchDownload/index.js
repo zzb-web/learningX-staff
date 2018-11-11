@@ -164,7 +164,6 @@ class BatchDownload extends React.Component{
         Get(`/api/v3/staffs/classes/books/?${msg}`)
         .then(resp=>{
             if(resp.status === 200){
-                // console.log(resp.data)
                 this.setState({
                     materials:resp.data,
                 })
@@ -176,7 +175,6 @@ class BatchDownload extends React.Component{
         Get(`/api/v3/staffs/classes/papers/?${msg}`)
         .then(resp=>{
             if(resp.status === 200){
-                // console.log(resp.data)
                 this.setState({
                     papers:resp.data,
                 })

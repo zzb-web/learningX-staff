@@ -903,7 +903,6 @@ class EPU2 extends React.Component{
 
 
         dataSource_mark.sort(this._sortBy('markingEvaluation'));
-        // dataSource_mark.sort((a,b)=>{a.dataSource_mark-b.dataSource_mark})
         const columns_download = [
             {
                 title : '学习号',
@@ -947,7 +946,6 @@ class EPU2 extends React.Component{
         for(var key in allFileData){
             var fileDownload;
             var answerDownload;
-            console.log(key)
             if(allFileData[key] === 0){
                 fileDownload = <span className='downBtn' style={{border:'none',color:'red'}} onClick={this.getFileAgain.bind(this,key)}>纠错本</span>
             }else{

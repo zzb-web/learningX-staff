@@ -9,12 +9,12 @@ export default class MarkSituation extends React.Component{
             studentMarks : [],
             showMarkDetail : false,
             markName : '',
+            postStudents :[]
         }
     }
 
     componentWillMount(){
         const {selectedLearnIDs} = this.props;
-        console.log('ooooooooooooo',selectedLearnIDs)
         let selectIdArr = [],postStudents=[];
         for(var k=0;k<selectedLearnIDs.length;k++){
             if(selectedLearnIDs[k].status){
@@ -25,6 +25,9 @@ export default class MarkSituation extends React.Component{
                 })
             }
         }
+        this.setState({
+            postStudents : postStudents
+        })
 
         Post(`/api/v3/staffs/students/getProblemRecords/`,selectIdArr).then(resp=>{
             let data = resp.data;
@@ -72,118 +75,8 @@ export default class MarkSituation extends React.Component{
     }
 
     sureParam(){
-        /*let batchID = '';
-         //获取批量生成纠错本的任务ID
-         const {schoolID, grade, classNum,postStudents} = this.state;
-         let postMsg = {
-             school: schoolID,
-             grade: grade,
-             class: classNum,
-             students : postStudents
-         }
-         Post(`/api/v3/staffs/batchDownloads/`,postMsg).then(resp=>{
-             if(resp.status === 200){
-                 batchID = resp.data.batchID;
-                 this.setState({
-                    showFourthPage : true,
-                    // showThirdPage : false,
-                    showSecondPage : false
-                })
-                this.setState({showSure : false})
-                    setTimeout(()=>{
-                        this.setState({showSure:true})
-                },500)
-                const {requestData, maxNum,paper , selectedLearnIDs, allStudentNum,paperData} = this.state;
-                var requestFlag = true;
-                if(requestFlag){
-                    var allReturnData = {};
-                    var sort = 1;
-                    (async () => {
-                        for(let k =0;k<selectedLearnIDs.length;k++){
-                            var url = `/api/v3/staffs/students/${selectedLearnIDs[k].learnID}/wrongProblems/?sort=1&batchID=${batchID}`;
-                        await Get(url)
-                            .then((response)=>{
-                                let {allDetailData} = this.state;
-                            if(response.status === 200){
-                                var data1 = {};
-                                var detailData = [];
-                                var wrongProblems = response.data.wrongProblems;
-                                var questionNumber = response.data.totalNum;
-                                if(sort === 1){
-                                    wrongProblems.map((item,index)=>{
-                                        item.problems.map((item2,index2)=>{
-                                            item2.type = `${item2.book}/P${item2.page}/${item2.idx}`
-                                        })
-                                    })
-                                }
-                                wrongProblems.map((item,index)=>{
-                                    item.problems.map((item2,index2)=>{
-                                        if(data1[item2.problemId+'_']===undefined){
-                                            data1[item2.problemId+'_']=[];
-                                            data1[item2.problemId+'_'].push(item2)
-                                        }else{
-                                            data1[item2.problemId+'_'].push(item2)
-                                        }
-                                    })
-                                })
-                                for(var key in data1){
-                                    detailData.push(data1[key])
-                                }
-                            
-                                allDetailData[selectedLearnIDs[k].learnID] = {
-                                    data : detailData,
-                                    questionNum : questionNumber,
-                                    status : ''
-                                };
-                                allReturnData[selectedLearnIDs[k].learnID] = response.data
-                                this.setState({
-                                    allReturnData : allReturnData,
-                                })
-                            }else if(response.status === 404){
-                                allDetailData[selectedLearnIDs[k].learnID] = {
-                                    data : [],
-                                    questionNum : 0,
-                                    status : ''
-                                };
-                                
-                            }
-                            this.setState({
-                                allDetailData : allDetailData,
-                            })
-                            })
-                            .catch(function (error) {
-                            });
-                            if(k >= (selectedLearnIDs.length-1)){
-                                this._getPDF()
-                            }
-                        }
-                    })();
-                    
-                        this.setState({
-                        
-                                allAnswerData : {},
-                                allFileData : {},
-                                generateFlag: true,
-                                addDataFlag : true,
-                                pickDownFlag : true,
-                                // allDetailData : allDetailData,
-                                fileFlag : true
-                            })
-                }else{
-                    this.setState({
-                        showFail : true,
-                        showDetail : false,
-                        failMsg : '页码不正常'
-                    })
-                }
-                 this.setState({
-                     batchID : resp.data.batchID
-                 })
-             }
-         }).catch(err=>{
- 
-         }) */
-         this.props.nextStep()
+        const {postStudents} = this.state;
+         this.props.nextStep(postStudents)
     }
 
     render(){
